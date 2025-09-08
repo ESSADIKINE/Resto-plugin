@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant Details Preview - Le Bon Resto</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .gallery-item {
+            cursor: pointer;
+        }
+        .gallery-item:hover img {
+            transform: scale(1.05);
+        }
+        .gallery-item:hover .overlay {
+            background-color: rgba(0, 0, 0, 0.2);
+        }
+        .overlay {
+            transition: background-color 0.3s ease;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="lebonresto-detail-layout min-h-screen bg-gray-50">
+        
+        <!-- Hero Section with Restaurant Info -->
+        <div class="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 overflow-hidden">
+            <!-- Background Image -->
+            <div class="absolute inset-0 z-0">
+                <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80" 
+                     alt="Restaurant Preview" 
+                     class="w-full h-full object-cover opacity-40">
+                <div class="absolute inset-0 bg-gradient-to-br from-black/60 via-black/40 to-black/60"></div>
+            </div>
+            
+            <!-- Content -->
+            <div class="relative z-10 container mx-auto px-4 py-16 lg:py-24">
+                <div class="max-w-4xl mx-auto text-center">
+                    <!-- Featured Badge -->
+                    <div class="inline-flex items-center px-4 py-2 rounded-full bg-yellow-400 text-yellow-900 text-sm font-semibold mb-6">
+                        <i class="fas fa-star mr-2"></i>
+                        Featured Restaurant
+                    </div>
+                    
+                    <!-- Restaurant Title -->
+                    <h1 class="text-4xl lg:text-6xl font-bold text-white mb-6">
+                        Le Bon Resto
+                    </h1>
+                    
+                    <!-- Restaurant Meta Info -->
+                    <div class="flex flex-wrap justify-center items-center gap-6 text-gray-300 mb-8">
+                        <div class="flex items-center">
+                            <i class="fas fa-map-marker-alt text-yellow-400 mr-2"></i>
+                            <span>Paris, France</span>
+                        </div>
+                        
+                        <div class="flex items-center">
+                            <i class="fas fa-utensils text-yellow-400 mr-2"></i>
+                            <span>French</span>
+                        </div>
+                        
+                        <div class="flex items-center">
+                            <i class="fas fa-phone text-yellow-400 mr-2"></i>
+                            <a href="tel:+33123456789" class="hover:text-yellow-400 transition-colors">
+                                +33 1 23 45 67 89
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="flex flex-wrap justify-center gap-4">
+                        <a href="tel:+33123456789" 
+                           class="inline-flex items-center px-6 py-3 bg-yellow-400 text-yellow-900 font-semibold rounded-lg hover:bg-yellow-500 transition-colors">
+                            <i class="fas fa-phone mr-2"></i>
+                            Call Now
+                        </a>
+                        
+                        <a href="mailto:contact@lebonresto.com" 
+                           class="inline-flex items-center px-6 py-3 bg-white/20 text-white font-semibold rounded-lg hover:bg-white/30 transition-colors backdrop-blur-sm">
+                            <i class="fas fa-envelope mr-2"></i>
+                            Send Email
+                        </a>
+                        
+                        <a href="#" 
+                           target="_blank"
+                           class="inline-flex items-center px-6 py-3 bg-white/20 text-white font-semibold rounded-lg hover:bg-white/30 transition-colors backdrop-blur-sm">
+                            <i class="fas fa-vr-cardboard mr-2"></i>
+                            Virtual Tour
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="container mx-auto px-4 py-12">
+            <div class="max-w-6xl mx-auto">
+                
+                <!-- Restaurant Description -->
+                <div class="bg-white rounded-2xl shadow-xl p-8 mb-12">
+                    <h2 class="text-3xl font-bold text-gray-900 mb-6">
+                        <i class="fas fa-info-circle text-yellow-400 mr-3"></i>
+                        About This Restaurant
+                    </h2>
+                    <div class="prose prose-lg max-w-none text-gray-700">
+                        <p>Welcome to Le Bon Resto, where culinary excellence meets French tradition. Our restaurant has been serving authentic French cuisine for over 20 years, creating memorable dining experiences in the heart of Paris.</p>
+                        <p>Our talented chefs use only the finest ingredients, sourced locally and from across France, to create dishes that celebrate the rich heritage of French gastronomy. From classic coq au vin to innovative modern interpretations, every dish tells a story.</p>
+                        <p>Whether you're celebrating a special occasion or simply enjoying a casual meal, our warm and inviting atmosphere, combined with exceptional service, ensures an unforgettable dining experience.</p>
+                    </div>
+                </div>
+                
+                <!-- Gallery Section -->
+                <div class="bg-white rounded-2xl shadow-xl p-8 mb-12">
+                    <h2 class="text-3xl font-bold text-gray-900 mb-8">
+                        <i class="fas fa-images text-yellow-400 mr-3"></i>
+                        Gallery & Media
+                    </h2>
+                    
+                    <!-- Video Section -->
+                    <div class="mb-8">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-4">Restaurant Video</h3>
+                        <div class="relative aspect-video rounded-xl overflow-hidden shadow-lg">
+                            <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" 
+                                    class="w-full h-full" 
+                                    frameborder="0" 
+                                    allowfullscreen
+                                    loading="lazy">
+                            </iframe>
+                        </div>
+                    </div>
+                    
+                    <!-- Image Gallery Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="gallery-grid">
+                        <div class="group relative overflow-hidden rounded-xl shadow-lg cursor-pointer gallery-item">
+                            <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" 
+                                 alt="Restaurant Interior" 
+                                 class="w-full h-64 object-cover transition-transform duration-300">
+                            <div class="absolute inset-0 bg-black/0 overlay flex items-center justify-center">
+                                <i class="fas fa-search-plus text-white text-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="group relative overflow-hidden rounded-xl shadow-lg cursor-pointer gallery-item">
+                            <img src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" 
+                                 alt="Delicious Food" 
+                                 class="w-full h-64 object-cover transition-transform duration-300">
+                            <div class="absolute inset-0 bg-black/0 overlay flex items-center justify-center">
+                                <i class="fas fa-search-plus text-white text-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="group relative overflow-hidden rounded-xl shadow-lg cursor-pointer gallery-item">
+                            <img src="https://images.unsplash.com/photo-1571091718767-18b5b1457add?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" 
+                                 alt="Chef Cooking" 
+                                 class="w-full h-64 object-cover transition-transform duration-300">
+                            <div class="absolute inset-0 bg-black/0 overlay flex items-center justify-center">
+                                <i class="fas fa-search-plus text-white text-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="group relative overflow-hidden rounded-xl shadow-lg cursor-pointer gallery-item">
+                            <img src="https://images.unsplash.com/photo-1551218808-94e220e084d2?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" 
+                                 alt="Wine Selection" 
+                                 class="w-full h-64 object-cover transition-transform duration-300">
+                            <div class="absolute inset-0 bg-black/0 overlay flex items-center justify-center">
+                                <i class="fas fa-search-plus text-white text-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="group relative overflow-hidden rounded-xl shadow-lg cursor-pointer gallery-item">
+                            <img src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" 
+                                 alt="Dining Area" 
+                                 class="w-full h-64 object-cover transition-transform duration-300">
+                            <div class="absolute inset-0 bg-black/0 overlay flex items-center justify-center">
+                                <i class="fas fa-search-plus text-white text-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="group relative overflow-hidden rounded-xl shadow-lg cursor-pointer gallery-item">
+                            <img src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" 
+                                 alt="Dessert" 
+                                 class="w-full h-64 object-cover transition-transform duration-300">
+                            <div class="absolute inset-0 bg-black/0 overlay flex items-center justify-center">
+                                <i class="fas fa-search-plus text-white text-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Restaurant Details -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+                    <!-- Contact Information -->
+                    <div class="bg-white rounded-2xl shadow-xl p-8">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-6">
+                            <i class="fas fa-address-book text-yellow-400 mr-3"></i>
+                            Contact Information
+                        </h3>
+                        
+                        <div class="space-y-4">
+                            <div class="flex items-start">
+                                <i class="fas fa-map-marker-alt text-yellow-400 mt-1 mr-3"></i>
+                                <div>
+                                    <p class="font-semibold text-gray-900">Address</p>
+                                    <p class="text-gray-700">123 Rue de la Paix, 75001 Paris, France</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center">
+                                <i class="fas fa-phone text-yellow-400 mr-3"></i>
+                                <div>
+                                    <p class="font-semibold text-gray-900">Phone</p>
+                                    <a href="tel:+33123456789" class="text-yellow-600 hover:text-yellow-700">
+                                        +33 1 23 45 67 89
+                                    </a>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center">
+                                <i class="fas fa-envelope text-yellow-400 mr-3"></i>
+                                <div>
+                                    <p class="font-semibold text-gray-900">Email</p>
+                                    <a href="mailto:contact@lebonresto.com" class="text-yellow-600 hover:text-yellow-700">
+                                        contact@lebonresto.com
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Restaurant Features -->
+                    <div class="bg-white rounded-2xl shadow-xl p-8">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-6">
+                            <i class="fas fa-star text-yellow-400 mr-3"></i>
+                            Restaurant Features
+                        </h3>
+                        
+                        <div class="space-y-4">
+                            <div class="flex items-center">
+                                <i class="fas fa-utensils text-yellow-400 mr-3"></i>
+                                <span class="text-gray-700">
+                                    <strong>Cuisine Type:</strong> French
+                                </span>
+                            </div>
+                            
+                            <div class="flex items-center">
+                                <i class="fas fa-star text-yellow-400 mr-3"></i>
+                                <span class="text-gray-700">
+                                    <strong>Featured Restaurant</strong>
+                                </span>
+                            </div>
+                            
+                            <div class="flex items-center">
+                                <i class="fas fa-vr-cardboard text-yellow-400 mr-3"></i>
+                                <span class="text-gray-700">
+                                    <strong>Virtual Tour Available</strong>
+                                </span>
+                            </div>
+                            
+                            <div class="flex items-center">
+                                <i class="fas fa-video text-yellow-400 mr-3"></i>
+                                <span class="text-gray-700">
+                                    <strong>Restaurant Video Available</strong>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Back to Restaurants -->
+                <div class="text-center">
+                    <a href="#" 
+                       class="inline-flex items-center px-8 py-4 bg-yellow-400 text-yellow-900 font-semibold rounded-lg hover:bg-yellow-500 transition-colors">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        Back to All Restaurants
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gallery Lightbox Modal -->
+    <div id="gallery-lightbox" class="fixed inset-0 bg-black/90 z-50 hidden items-center justify-center p-4">
+        <div class="relative max-w-4xl max-h-full">
+            <button id="close-lightbox" class="absolute top-4 right-4 text-white text-2xl hover:text-yellow-400 z-10">
+                <i class="fas fa-times"></i>
+            </button>
+            <button id="prev-image" class="absolute left-4 top-1/2 transform -translate-y-1/2 text-white text-2xl hover:text-yellow-400 z-10">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <button id="next-image" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-white text-2xl hover:text-yellow-400 z-10">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+            <img id="lightbox-image" src="" alt="" class="max-w-full max-h-full object-contain rounded-lg">
+            <div id="image-counter" class="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-white text-sm bg-black/50 px-3 py-1 rounded-full"></div>
+        </div>
+    </div>
+
+    <script>
+        // Simple gallery lightbox functionality
+        const galleryItems = document.querySelectorAll('.gallery-item');
+        const lightbox = document.getElementById('gallery-lightbox');
+        const lightboxImage = document.getElementById('lightbox-image');
+        const closeLightbox = document.getElementById('close-lightbox');
+        const prevImage = document.getElementById('prev-image');
+        const nextImage = document.getElementById('next-image');
+        const imageCounter = document.getElementById('image-counter');
+        
+        let currentImageIndex = 0;
+        const images = Array.from(galleryItems).map(item => ({
+            src: item.querySelector('img').src,
+            alt: item.querySelector('img').alt
+        }));
+
+        galleryItems.forEach((item, index) => {
+            item.addEventListener('click', () => {
+                currentImageIndex = index;
+                showLightbox();
+            });
+        });
+
+        function showLightbox() {
+            lightbox.classList.remove('hidden');
+            lightbox.classList.add('flex');
+            updateLightboxImage();
+        }
+
+        function hideLightbox() {
+            lightbox.classList.add('hidden');
+            lightbox.classList.remove('flex');
+        }
+
+        function updateLightboxImage() {
+            lightboxImage.src = images[currentImageIndex].src;
+            lightboxImage.alt = images[currentImageIndex].alt;
+            imageCounter.textContent = `${currentImageIndex + 1} / ${images.length}`;
+        }
+
+        closeLightbox.addEventListener('click', hideLightbox);
+        
+        prevImage.addEventListener('click', () => {
+            currentImageIndex = (currentImageIndex - 1 + images.length) % images.length;
+            updateLightboxImage();
+        });
+        
+        nextImage.addEventListener('click', () => {
+            currentImageIndex = (currentImageIndex + 1) % images.length;
+            updateLightboxImage();
+        });
+
+        // Close lightbox when clicking outside
+        lightbox.addEventListener('click', (e) => {
+            if (e.target === lightbox) {
+                hideLightbox();
+            }
+        });
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (!lightbox.classList.contains('hidden')) {
+                if (e.key === 'Escape') {
+                    hideLightbox();
+                } else if (e.key === 'ArrowLeft') {
+                    currentImageIndex = (currentImageIndex - 1 + images.length) % images.length;
+                    updateLightboxImage();
+                } else if (e.key === 'ArrowRight') {
+                    currentImageIndex = (currentImageIndex + 1) % images.length;
+                    updateLightboxImage();
+                }
+            }
+        });
+    </script>
+</body>
+</html>
