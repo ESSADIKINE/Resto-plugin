@@ -366,8 +366,11 @@
             // Create popup content
             const popupContent = createMarkerPopup(restaurant, isCurrentRestaurant);
             marker.bindPopup(popupContent, {
-                maxWidth: 300,
-                className: `restaurant-popup ${isCurrentRestaurant ? 'current-popup' : ''}`
+                maxWidth: window.innerWidth <= 768 ? 250 : 300,
+                className: `restaurant-popup ${isCurrentRestaurant ? 'current-popup' : ''}`,
+                closeButton: true,
+                autoClose: false,
+                keepInView: true
             });
 
             // Add click handler
@@ -424,12 +427,23 @@
         console.log('Principal image data:', principalImage);
         console.log('Meta data:', meta);
 
-        let content = `<div class="restaurant-popup-content" style="padding: 0; margin: 0;">`;
+        // Create restaurant slug for URL
+        const restaurantSlug = title.toLowerCase()
+            .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
+            .replace(/\s+/g, '-') // Replace spaces with hyphens
+            .replace(/-+/g, '-') // Replace multiple hyphens with single
+            .trim();
         
-        // Two-column layout: Image on left, Info on right
+        // Get current domain dynamically
+        const currentDomain = window.location.origin;
+        const restaurantUrl = `${currentDomain}/details/${restaurantSlug}`;
+        
+        let content = `<div class="restaurant-popup-content" style="padding: 0; margin: 0; cursor: pointer;" onclick="window.open('${restaurantUrl}', '_blank')">`;
+        
+        // Mobile responsive layout
         content += `<div style="display: flex; gap: 8px; align-items: flex-start; padding: 0; margin: 0;">`;
         
-        // Left column: Principal image (bigger size)
+        // Left column: Principal image (responsive size)
         content += `<div style="flex-shrink: 0; padding: 0; margin: 0;">`;
         
         // Try different possible image sources
@@ -444,12 +458,12 @@
             imageUrl = principalImage;
         }
         
-        // Show image or placeholder
+        // Show image or placeholder (smaller on mobile)
         if (imageUrl) {
-            content += `<img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(title)}" style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); padding: 0; margin: 0;" />`;
+            content += `<img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(title)}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); padding: 0; margin: 0;" class="popup-image" />`;
         } else {
-            content += `<div style="width: 100px; height: 100px; background-color: #e5e7eb; border-radius: 8px; display: flex; align-items: center; justify-content: center; border: 2px solid #d1d5db; padding: 0; margin: 0;">`;
-            content += `<svg style="width: 32px; height: 32px; color: #9ca3af;" fill="currentColor" viewBox="0 0 24 24">`;
+            content += `<div style="width: 80px; height: 80px; background-color: #e5e7eb; border-radius: 8px; display: flex; align-items: center; justify-content: center; border: 2px solid #d1d5db; padding: 0; margin: 0;" class="popup-placeholder">`;
+            content += `<svg style="width: 24px; height: 24px; color: #9ca3af;" fill="currentColor" viewBox="0 0 24 24">`;
             content += `<path d="M8.1 13.34l2.83-2.83L3.91 3.5c-1.56 1.56-1.56 4.09 0 5.66l4.19 4.18zm6.78-1.81c1.53.71 3.68.21 5.27-1.38 1.91-1.91 2.28-4.65.81-6.12-1.46-1.46-4.2-1.1-6.12.81-1.59 1.59-2.09 3.74-1.38 5.27L3.7 19.87l1.41 1.41L12 14.41l6.88 6.88 1.41-1.41L13.41 12l1.47-1.47z"/>`;
             content += `</svg>`;
             content += `</div>`;
@@ -460,28 +474,34 @@
         // Right column: Restaurant information
         content += `<div style="flex: 1; min-width: 0; padding: 0; margin: 0;">`;
         
-        // Restaurant name
-        content += `<h3 style="font-size: 16px; font-weight: 600; color: #1f2937; margin: 0 0 8px 0; padding: 0;">${escapeHtml(title)}</h3>`;
+        // Restaurant name with click indicator
+        content += `<h3 style="font-size: 14px; font-weight: 600; color: #1f2937; margin: 0 0 6px 0; padding: 0; line-height: 1.3;">${escapeHtml(title)}</h3>`;
         
-        // Restaurant details as cards
-        if (meta.city) {
-            content += `<div style="display: flex; align-items: center; background-color: #f9fafb; border-radius: 6px; padding: 6px 8px; margin-bottom: 4px; font-size: 12px;">`;
-            content += `<i class="fas fa-map-marker-alt" style="margin-right: 6px; color: #f59e0b; font-size: 10px;"></i>`;
-            content += `<span style="color: #374151; font-weight: 500;">${escapeHtml(meta.city)}</span>`;
+        // Click to view details indicator
+        content += `<div style="display: flex; align-items: center; background-color: #fef3c7; border-radius: 4px; padding: 4px 6px; margin-bottom: 6px; font-size: 10px; color: #92400e;">`;
+        content += `<i class="fas fa-external-link-alt" style="margin-right: 4px; font-size: 8px;"></i>`;
+        content += `<span style="font-weight: 500;">Cliquez pour voir les détails</span>`;
         content += `</div>`;
+        
+        // Restaurant details as cards (smaller on mobile)
+        if (meta.city) {
+            content += `<div style="display: flex; align-items: center; background-color: #f9fafb; border-radius: 4px; padding: 4px 6px; margin-bottom: 3px; font-size: 10px;">`;
+            content += `<i class="fas fa-map-marker-alt" style="margin-right: 4px; color: #f59e0b; font-size: 8px;"></i>`;
+            content += `<span style="color: #374151; font-weight: 500;">${escapeHtml(meta.city)}</span>`;
+            content += `</div>`;
         }
         
         if (meta.cuisine_type) {
-            content += `<div style="display: flex; align-items: center; background-color: #f9fafb; border-radius: 6px; padding: 6px 8px; margin-bottom: 4px; font-size: 12px;">`;
-            content += `<i class="fas fa-utensils" style="margin-right: 6px; color: #f59e0b; font-size: 10px;"></i>`;
+            content += `<div style="display: flex; align-items: center; background-color: #f9fafb; border-radius: 4px; padding: 4px 6px; margin-bottom: 3px; font-size: 10px;">`;
+            content += `<i class="fas fa-utensils" style="margin-right: 4px; color: #f59e0b; font-size: 8px;"></i>`;
             content += `<span style="color: #374151; font-weight: 500;">${escapeHtml(meta.cuisine_type.charAt(0).toUpperCase() + meta.cuisine_type.slice(1))}</span>`;
             content += `</div>`;
         }
         
         if (restaurant.distance) {
-            content += `<div style="display: flex; align-items: center; background-color: #f0fdf4; border-radius: 6px; padding: 6px 8px; margin-bottom: 4px; font-size: 12px;">`;
-            content += `<i class="fas fa-route" style="margin-right: 6px; color: #10b981; font-size: 10px;"></i>`;
-            content += `<span style="color: #065f46; font-weight: 500;">${restaurant.distance} km de distance</span>`;
+            content += `<div style="display: flex; align-items: center; background-color: #f0fdf4; border-radius: 4px; padding: 4px 6px; margin-bottom: 3px; font-size: 10px;">`;
+            content += `<i class="fas fa-route" style="margin-right: 4px; color: #10b981; font-size: 8px;"></i>`;
+            content += `<span style="color: #065f46; font-weight: 500;">${restaurant.distance} km</span>`;
             content += `</div>`;
         }
         
@@ -603,23 +623,30 @@
                                     </div>
                                 ` : ''}
                             </div>
+                            
+                            <!-- Restaurant Description -->
+                            ${meta.description ? `
+                                <div class="mt-3">
+                                    <p class="description text-xs text-gray-500 leading-relaxed">${escapeHtml(meta.description)}</p>
+                                </div>
+                            ` : ''}
                         </div>
                     </div>
                 </div>
                 
                 <!-- Action Icons - Bottom Right -->
-                <div class="action-icons-container" style="position: absolute; bottom: 10px; right: 15px; display: flex; gap: 4px; z-index: 1000;">
+                <div class="action-icons-container" style="position: absolute; bottom: 10px; right: 15px; display: flex; gap: 6px; z-index: 1000;">
                     <!-- View Details Icon -->
-                    <a href="${restaurant.link}" class="action-icon" title="Voir détails" style="width: 25px; height: 25px; background: #f59e0b; border-radius: 12.5px; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(0,0,0,0.2);">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <a href="${restaurant.link}" class="action-icon" title="Voir détails" style="width: 35px; height: 35px; background: #f59e0b; border-radius: 17.5px; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(0,0,0,0.2);">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" fill="white"/>
                         </svg>
                     </a>
                     
                     <!-- Phone Icon -->
                     ${meta.phone ? `
-                    <a href="tel:${meta.phone}" class="action-icon" title="Téléphone" style="width: 25px; height: 25px; background: #f59e0b; border-radius: 12.5px; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(0,0,0,0.2);">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <a href="tel:${meta.phone}" class="action-icon" title="Téléphone" style="width: 35px; height: 35px; background: #f59e0b; border-radius: 17.5px; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(0,0,0,0.2);">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" fill="white"/>
                         </svg>
                     </a>
@@ -627,8 +654,8 @@
                     
                     <!-- Email Icon -->
                     ${meta.email ? `
-                    <a href="mailto:${meta.email}" class="action-icon" title="Email" style="width: 25px; height: 25px; background: #f59e0b; border-radius: 12.5px; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(0,0,0,0.2);">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <a href="mailto:${meta.email}" class="action-icon" title="Email" style="width: 35px; height: 35px; background: #f59e0b; border-radius: 17.5px; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(0,0,0,0.2);">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
                         </svg>
                     </a>
@@ -636,8 +663,8 @@
                     
                     <!-- WhatsApp Icon -->
                     ${meta.phone ? `
-                    <a href="https://wa.me/${meta.phone.replace(/[^0-9]/g, '')}" class="action-icon" title="WhatsApp" style="width: 25px; height: 25px; background: #f59e0b; border-radius: 12.5px; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(0,0,0,0.2);">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <a href="https://wa.me/${meta.phone.replace(/[^0-9]/g, '')}" class="action-icon" title="WhatsApp" style="width: 35px; height: 35px; background: #f59e0b; border-radius: 17.5px; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(0,0,0,0.2);">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488" fill="white"/>
                         </svg>
                     </a>

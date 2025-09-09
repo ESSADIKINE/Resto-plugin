@@ -158,8 +158,6 @@ wp_add_inline_style('lebonresto-debug-css', '
 
 @media (max-width: 1023px) {
     #restaurants-map {
-        height: 40vh !important;
-        min-height: 40vh !important;
         border-right: none !important;
         border-bottom: 3px solid rgb(255, 255, 255) !important;
     }
@@ -175,8 +173,8 @@ wp_add_inline_style('lebonresto-debug-css', '
 
 @media (max-width: 1023px) {
     .virtual-tour-section {
-        height: 40vh !important;
-        min-height: 40vh !important;
+        height: 50vh !important;
+        min-height: 50vh !important;
     }
 }
 
@@ -188,7 +186,7 @@ wp_add_inline_style('lebonresto-debug-css', '
 .mobile-filter-toggle {
     position: fixed !important;
     top: 20px !important;
-    left: 20px !important;
+    right: 20px !important;
     z-index: 50 !important;
     display: block !important;
     transition: all 0.3s ease !important;
@@ -588,10 +586,6 @@ wp_add_inline_style('lebonresto-debug-css', '
         min-height: 52px !important;
         font-size: 16px !important;
     }
-    
-    .virtual-tour-section {
-        height: 350px !important;
-    }
 }
 ');
 
@@ -748,8 +742,8 @@ wp_add_inline_style('lebonresto-debug-css', '
             </div>
         </div>
 
-        <!-- Desktop Filter Header (Hidden on Mobile) -->
-        <div class="filter-header w-full bg-gray-100 border-b border-gray-200 sticky top-0 z-50 hidden lg:block">
+        <!-- Desktop Filter Header (Hidden on Mobile, Tablet, and iPad) -->
+        <div class="filter-header w-full bg-gray-100 border-b border-gray-200 sticky top-0 z-50">
             <div class="filter-container container mx-auto px-4 py-4">
                 <div class="filter-form bg-white rounded-lg shadow-md p-2">
                     <div class="flex flex-col lg:flex-row items-center gap-4">
@@ -840,6 +834,28 @@ wp_add_inline_style('lebonresto-debug-css', '
                         </div>
                 </div>
 
+        <!-- Mobile Tab Navigation (Hidden on Desktop) -->
+        <div class="mobile-tab-navigation lg:hidden fixed bottom-0 left-0 right-0 z-100 bg-white border-t border-gray-200 shadow-lg">
+            <div class="flex">
+                <button 
+                    id="mobile-tab-vr" 
+                    class="mobile-tab-btn"
+                    data-tab="vr"
+                >
+                    <i class="fas fa-vr-cardboard"></i>
+                    <span class="tab-text"><?php _e('Virtual Tour', 'le-bon-resto'); ?></span>
+                </button>
+                <button 
+                    id="mobile-tab-map" 
+                    class="mobile-tab-btn active"
+                    data-tab="map"
+                >
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span class="tab-text"><?php _e('Map', 'le-bon-resto'); ?></span>
+                </button>
+            </div>
+        </div>
+
         <!-- Line 2: Two Column Layout (50% each) -->
         <div class="two-column-layout flex-1 grid grid-cols-1 lg:grid-cols-2 min-h-screen">
             
@@ -895,43 +911,7 @@ wp_add_inline_style('lebonresto-debug-css', '
                     <?php endif; ?>
                 </div>
                 
-                <!-- Filter Section -->
-                <div class="filter-section p-4 bg-gradient-to-r border-b border-gray-200">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="flex items-center space-x-2">
-                            <select 
-                                id="sort-restaurants"
-                                class="px-2 py-1 border border-gray-300 rounded-md text-xs focus:outline-none focus:ring-1 focus:ring-yellow-400 bg-white shadow-sm" style="width: 100%;"
-                            >
-                                <option value="featured"><?php _e('Featured First', 'le-bon-resto'); ?></option>
-                                <option value="newest"><?php _e('Newest', 'le-bon-resto'); ?></option>
-                                <option value="distance"><?php _e('Distance', 'le-bon-resto'); ?></option>
-                                <option value="name"><?php _e('Name A-Z', 'le-bon-resto'); ?></option>
-                            </select>
-                        </div>
-                        </div>
-                    </div>
-                    
-                <!-- Restaurant Cards Container -->
-                <div id="restaurants-container" class="flex-1 p-4 overflow-y-auto align-items-center">
-                        <!-- Restaurant cards will be loaded here via JavaScript -->
-                        <div class="text-center py-8">
-                            <div class="loading-spinner mx-auto mb-3"></div>
-                            <p class="text-gray-500"><?php _e('Loading restaurants...', 'le-bon-resto'); ?></p>
-                        </div>
-                    </div>
-                
-                <!-- Pagination -->
-                <div id="pagination-container" class="p-4 border-t border-gray-200 bg-gray-50">
-                    <div class="flex items-center justify-between">
-                        <div class="text-sm text-gray-600">
-                            <span id="pagination-info"><?php _e('Loading...', 'le-bon-resto'); ?></span>
-                        </div>
-                        <div id="pagination-controls" class="flex items-center space-x-2">
-                            <!-- Pagination buttons will be generated here by JavaScript -->
-                        </div>
-                </div>
-                        </div>
+
                 </div>
                 
         <!-- Current Restaurant Info (Hidden, used by JS) -->
@@ -958,7 +938,45 @@ wp_add_inline_style('lebonresto-debug-css', '
 
     <?php endwhile; ?>
 </div>
-
+<div>
+                                 <!-- Filter Section -->
+                <div class="filter-section p-4 bg-gradient-to-r border-b border-gray-200">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-2">
+                            <select 
+                                id="sort-restaurants"
+                                class="px-2 py-1 border border-gray-300 rounded-md text-xs focus:outline-none focus:ring-1 focus:ring-yellow-400 bg-white shadow-sm" style="width: 100%;"
+                            >
+                                <option value="featured"><?php _e('Featured First', 'le-bon-resto'); ?></option>
+                                <option value="newest"><?php _e('Newest', 'le-bon-resto'); ?></option>
+                                <option value="distance"><?php _e('Distance', 'le-bon-resto'); ?></option>
+                                <option value="name"><?php _e('Name A-Z', 'le-bon-resto'); ?></option>
+                            </select>
+                        </div>
+                        </div>
+                    </div>
+                    
+                <!-- Restaurant Cards Container -->
+                <div id="restaurants-container" class="flex-1 p-4 overflow-y-auto align-items-center mobile-cards-section">
+                        <!-- Restaurant cards will be loaded here via JavaScript -->
+                        <div class="text-center py-8">
+                            <div class="loading-spinner mx-auto mb-3"></div>
+                            <p class="text-gray-500"><?php _e('Loading restaurants...', 'le-bon-resto'); ?></p>
+                        </div>
+                    </div>
+                
+                <!-- Pagination -->
+                <div id="pagination-container" class="p-4 border-t border-gray-200 bg-gray-50">
+                    <div class="flex items-center justify-between">
+                        <div class="text-sm text-gray-600">
+                            <span id="pagination-info"><?php _e('Loading...', 'le-bon-resto'); ?></span>
+                        </div>
+                        <div id="pagination-controls" class="flex items-center space-x-2">
+                            <!-- Pagination buttons will be generated here by JavaScript -->
+                        </div>
+                    </div>
+                </div>   
+                    </div>
 
 
 
@@ -1258,9 +1276,290 @@ function setupMobileFilterListeners() {
     console.log('🔧 [MOBILE DEBUG] Mobile filter event listeners setup complete!');
 }
 
+// Handle tab click
+function handleTabClick(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    console.log('🔧 [MOBILE TABS] Tab clicked!', this.id);
+    console.log('🔧 [MOBILE TABS] Event type:', e.type);
+    console.log('🔧 [MOBILE TABS] Current target:', e.currentTarget);
+    
+    // Only work on mobile devices
+    if (window.innerWidth > 1023) {
+        console.log('🔧 [MOBILE TABS] Desktop detected - tab switching disabled');
+        return;
+    }
+    
+    // Add loading state
+    this.classList.add('loading');
+    
+    // Remove loading state after animation
+    setTimeout(() => {
+        this.classList.remove('loading');
+    }, 800);
+    
+    const tabType = this.getAttribute('data-tab');
+    const vrContent = document.querySelector('.virtual-tour-section');
+    const mapContent = document.querySelector('#restaurants-map');
+    const leftColumn = document.querySelector('.left-column');
+    const rightColumn = document.querySelector('.right-column');
+    const tabButtons = document.querySelectorAll('.mobile-tab-btn');
+    
+    console.log('🔧 [MOBILE TABS] Tab type:', tabType);
+    console.log('🔧 [MOBILE TABS] VR content:', vrContent);
+    console.log('🔧 [MOBILE TABS] Map content:', mapContent);
+    console.log('🔧 [MOBILE TABS] Left column:', leftColumn);
+    console.log('🔧 [MOBILE TABS] Right column:', rightColumn);
+    
+    // Update button states
+    tabButtons.forEach(btn => {
+        btn.classList.remove('active', 'border-yellow-400', 'bg-yellow-50');
+        btn.classList.add('border-transparent');
+    });
+    
+    this.classList.add('active', 'border-yellow-400', 'bg-yellow-50');
+    this.classList.remove('border-transparent');
+    
+    // Show/hide entire columns based on tab (mobile only)
+    if (tabType === 'vr') {
+        console.log('🔧 [MOBILE TABS] Showing VR - hiding left column, showing right column');
+        
+        // Hide left column (map)
+        if (leftColumn) {
+            leftColumn.style.setProperty('display', 'none', 'important');
+            console.log('🔧 [MOBILE TABS] Left column hidden');
+        } else {
+            console.log('🔧 [MOBILE TABS] Left column not found!');
+        }
+        
+        // Show right column (VR)
+        if (rightColumn) {
+            rightColumn.style.setProperty('display', 'flex', 'important');
+            rightColumn.style.setProperty('visibility', 'visible', 'important');
+            rightColumn.style.setProperty('opacity', '1', 'important');
+            rightColumn.style.setProperty('width', '100%', 'important');
+            rightColumn.style.setProperty('flex', '1', 'important');
+            console.log('🔧 [MOBILE TABS] Right column shown');
+        } else {
+            console.log('🔧 [MOBILE TABS] Right column not found!');
+        }
+        
+        // Also show the VR content specifically
+        if (vrContent) {
+            vrContent.style.setProperty('display', 'block', 'important');
+            vrContent.style.setProperty('visibility', 'visible', 'important');
+            vrContent.style.setProperty('opacity', '1', 'important');
+            vrContent.style.setProperty('position', 'relative', 'important');
+            vrContent.style.setProperty('z-index', '10', 'important');
+            console.log('🔧 [MOBILE TABS] VR content shown');
+        } else {
+            console.log('🔧 [MOBILE TABS] VR content not found!');
+        }
+        
+    } else if (tabType === 'map') {
+        console.log('🔧 [MOBILE TABS] Showing Map - showing left column, hiding right column');
+        
+        // Show left column (map)
+        if (leftColumn) {
+            leftColumn.style.setProperty('display', 'flex', 'important');
+            leftColumn.style.setProperty('visibility', 'visible', 'important');
+            leftColumn.style.setProperty('opacity', '1', 'important');
+            leftColumn.style.setProperty('width', '100%', 'important');
+            leftColumn.style.setProperty('flex', '1', 'important');
+            console.log('🔧 [MOBILE TABS] Left column shown');
+        } else {
+            console.log('🔧 [MOBILE TABS] Left column not found!');
+        }
+        
+        // Hide right column (VR)
+        if (rightColumn) {
+            rightColumn.style.setProperty('display', 'none', 'important');
+            console.log('🔧 [MOBILE TABS] Right column hidden');
+        } else {
+            console.log('🔧 [MOBILE TABS] Right column not found!');
+        }
+        
+        // Also hide the VR content specifically
+        if (vrContent) {
+            vrContent.style.setProperty('display', 'none', 'important');
+            vrContent.style.setProperty('visibility', 'hidden', 'important');
+            vrContent.style.setProperty('opacity', '0', 'important');
+            console.log('🔧 [MOBILE TABS] VR content hidden');
+        } else {
+            console.log('🔧 [MOBILE TABS] VR content not found!');
+        }
+    }
+}
+
+// Initialize mobile tab system
+function initializeMobileTabs() {
+    console.log('🔧 [MOBILE TABS] Initializing mobile tab system...');
+    
+    // Wait a bit for DOM to be ready
+    setTimeout(() => {
+        const tabButtons = document.querySelectorAll('.mobile-tab-btn');
+        const vrContent = document.querySelector('.virtual-tour-section');
+        const mapContent = document.querySelector('#restaurants-map');
+        const leftColumn = document.querySelector('.left-column');
+        const rightColumn = document.querySelector('.right-column');
+        
+        console.log('🔧 [MOBILE TABS] Elements found:');
+        console.log('  - tabButtons:', tabButtons.length);
+        console.log('  - vrContent:', vrContent);
+        console.log('  - mapContent:', mapContent);
+        console.log('  - leftColumn:', leftColumn);
+        console.log('  - rightColumn:', rightColumn);
+        
+        if (tabButtons.length === 0) {
+            console.error('🔧 [MOBILE TABS] No tab buttons found!');
+            return;
+        }
+    
+        // Set default view to Map on mobile only
+        if (window.innerWidth <= 1023) {
+            console.log('🔧 [MOBILE TABS] Setting default Map view on mobile');
+            
+            // Show left column (map), hide right column (VR) on mobile
+            if (leftColumn) {
+                leftColumn.style.setProperty('display', 'flex', 'important');
+                leftColumn.style.setProperty('visibility', 'visible', 'important');
+                leftColumn.style.setProperty('opacity', '1', 'important');
+                leftColumn.style.setProperty('width', '100%', 'important');
+                leftColumn.style.setProperty('flex', '1', 'important');
+            }
+            if (rightColumn) {
+                rightColumn.style.setProperty('display', 'none', 'important');
+            }
+            if (vrContent) {
+                vrContent.style.setProperty('display', 'none', 'important');
+                vrContent.style.setProperty('visibility', 'hidden', 'important');
+                vrContent.style.setProperty('opacity', '0', 'important');
+            }
+        } else {
+            // On desktop, ensure both columns are visible
+            console.log('🔧 [MOBILE TABS] Desktop detected - showing both columns');
+            if (leftColumn) {
+                leftColumn.style.setProperty('display', 'flex', 'important');
+                leftColumn.style.setProperty('visibility', 'visible', 'important');
+                leftColumn.style.setProperty('opacity', '1', 'important');
+                leftColumn.style.setProperty('width', '100%', 'important');
+                leftColumn.style.setProperty('flex', '1', 'important');
+            }
+            if (rightColumn) {
+                rightColumn.style.setProperty('display', 'flex', 'important');
+                rightColumn.style.setProperty('visibility', 'visible', 'important');
+                rightColumn.style.setProperty('opacity', '1', 'important');
+                rightColumn.style.setProperty('width', '100%', 'important');
+                rightColumn.style.setProperty('flex', '1', 'important');
+            }
+            if (vrContent) {
+                vrContent.style.setProperty('display', 'block', 'important');
+                vrContent.style.setProperty('visibility', 'visible', 'important');
+                vrContent.style.setProperty('opacity', '1', 'important');
+            }
+        }
+            
+            // Update tab button states - Map is default active
+            const vrTab = document.getElementById('mobile-tab-vr');
+            const mapTab = document.getElementById('mobile-tab-map');
+            
+            if (mapTab) {
+                mapTab.classList.add('active');
+                mapTab.classList.add('border-yellow-400', 'bg-yellow-50');
+                mapTab.classList.remove('border-transparent');
+            }
+            
+            if (vrTab) {
+                vrTab.classList.remove('active');
+                vrTab.classList.remove('border-yellow-400', 'bg-yellow-50');
+                vrTab.classList.add('border-transparent');
+            }
+        
+        // Add click event listeners to tab buttons
+        console.log('🔧 [MOBILE TABS] Found', tabButtons.length, 'tab buttons');
+        
+        // Test direct button access
+        const vrButton = document.getElementById('mobile-tab-vr');
+        const mapButton = document.getElementById('mobile-tab-map');
+        console.log('🔧 [MOBILE TABS] Direct button access:');
+        console.log('  - VR button:', vrButton);
+        console.log('  - Map button:', mapButton);
+        
+        tabButtons.forEach((button, index) => {
+            console.log(`🔧 [MOBILE TABS] Button ${index}:`, button.id, button);
+            
+            // Test if button is clickable
+            button.style.pointerEvents = 'auto';
+            button.style.cursor = 'pointer';
+            button.style.zIndex = '10000';
+            button.style.position = 'relative';
+            
+            // Add multiple event listeners to ensure it works
+            button.addEventListener('click', handleTabClick);
+            button.addEventListener('touchstart', handleTabClick);
+            button.addEventListener('touchend', handleTabClick);
+        });
+        
+        // Also add direct event listeners as backup
+        if (vrButton) {
+            console.log('🔧 [MOBILE TABS] Adding direct event listener to VR button');
+            vrButton.addEventListener('click', function(e) {
+                console.log('🔧 [MOBILE TABS] Direct VR button clicked!');
+                e.preventDefault();
+                e.stopPropagation();
+                handleTabClick.call(this, e);
+            });
+        }
+        
+        if (mapButton) {
+            console.log('🔧 [MOBILE TABS] Adding direct event listener to Map button');
+            mapButton.addEventListener('click', function(e) {
+                console.log('🔧 [MOBILE TABS] Direct Map button clicked!');
+                e.preventDefault();
+                e.stopPropagation();
+                handleTabClick.call(this, e);
+            });
+        }
+        
+        // Test if buttons are clickable by adding a simple test
+        console.log('🔧 [MOBILE TABS] Testing button clickability...');
+        if (vrButton) {
+            vrButton.onclick = function() {
+                console.log('🔧 [MOBILE TABS] VR button onclick triggered!');
+            };
+        }
+        if (mapButton) {
+            mapButton.onclick = function() {
+                console.log('🔧 [MOBILE TABS] Map button onclick triggered!');
+            };
+        }
+        
+        console.log('🔧 [MOBILE TABS] Mobile tab system initialized!');
+        
+        // Test if buttons are clickable
+        setTimeout(() => {
+            console.log('🔧 [MOBILE TABS] Testing button clickability...');
+            tabButtons.forEach((button, index) => {
+                console.log(`🔧 [MOBILE TABS] Button ${index} (${button.id}):`, {
+                    element: button,
+                    classes: button.className,
+                    style: button.style.cssText,
+                    computedStyle: window.getComputedStyle(button)
+                });
+            });
+        }, 1000);
+    }, 500); // Wait 500ms for DOM to be ready
+}
+
 // Initialize location detection for distance filtering
 document.addEventListener('DOMContentLoaded', function() {
     const distanceFilter = document.getElementById('distance-filter');
+    
+    // Initialize mobile tab system with a small delay to ensure DOM is ready
+    setTimeout(() => {
+        initializeMobileTabs();
+    }, 100);
     
     // Apply essential styles
     const rightColumn = document.querySelector('.right-column');
@@ -1314,10 +1613,12 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('🔧 [MOBILE DEBUG] Calling initializeMobileFilters...');
     initializeMobileFilters();
     
-    // Handle window resize to update scroll behavior
+    // Handle window resize to update scroll behavior and tab visibility
     window.addEventListener('resize', function() {
         const rightColumn = document.querySelector('.right-column');
         const restaurantsContainer = document.querySelector('#restaurants-container');
+        const vrContent = document.querySelector('.virtual-tour-section');
+        const mapContent = document.querySelector('#restaurants-map');
         
         if (rightColumn) {
             if (window.innerWidth <= 1023) {
@@ -1332,6 +1633,15 @@ document.addEventListener('DOMContentLoaded', function() {
                     restaurantsContainer.style.overflowX = 'visible';
                     restaurantsContainer.style.maxHeight = 'none';
                 }
+                
+                // Ensure mobile tab behavior - Map is default
+                if (leftColumn) {
+                    leftColumn.style.setProperty('display', 'flex', 'important');
+                    leftColumn.style.setProperty('width', '100%', 'important');
+                }
+                if (rightColumn) {
+                    rightColumn.style.setProperty('display', 'none', 'important');
+                }
             } else {
                 // Enable scroll on desktop
                 rightColumn.style.overflowY = 'auto';
@@ -1343,6 +1653,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (restaurantsContainer) {
                     restaurantsContainer.style.overflowY = 'auto';
                     restaurantsContainer.style.maxHeight = '100%';
+                }
+                
+                // Ensure both columns are visible on desktop
+                if (leftColumn) {
+                    leftColumn.style.setProperty('display', 'flex', 'important');
+                    leftColumn.style.setProperty('width', '50%', 'important');
+                }
+                if (rightColumn) {
+                    rightColumn.style.setProperty('display', 'flex', 'important');
+                    rightColumn.style.setProperty('width', '50%', 'important');
                 }
             }
         }
@@ -1364,6 +1684,14 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         );
     }
+});
+
+// Also initialize on window load as backup
+window.addEventListener('load', function() {
+    console.log('🔧 [MOBILE TABS] Window loaded, re-initializing mobile tabs...');
+    setTimeout(() => {
+        initializeMobileTabs();
+    }, 200);
 });
 
 // Localize script data
@@ -1408,8 +1736,6 @@ wp_localize_script(
 .two-column-layout {
     display: grid !important;
     grid-template-columns: 4fr 5fr !important;
-    min-height: 65vh !important;
-    max-height: 65vh !important;
     gap: 0 !important;
 }
 
@@ -1431,8 +1757,6 @@ wp_localize_script(
 
 @media (max-width: 1023px) {
     #restaurants-map {
-        height: 6vh !important;
-        min-height: 400px !important;
         border-right: none !important;
         border-bottom: 3px solid rgb(255, 255, 255) !important;
     }
@@ -1696,11 +2020,398 @@ button:focus {
 
 
 
+/* Mobile Tab Navigation Styles */
+.mobile-tab-navigation {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 9999 !important;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%) !important;
+    border-top: 3px solid #e5e7eb !important;
+    box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.12) !important;
+    backdrop-filter: blur(20px) !important;
+    pointer-events: auto !important;
+    animation: slideUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* Slide up animation for tab bar */
+@keyframes slideUp {
+    from {
+        transform: translateY(100%) !important;
+        opacity: 0 !important;
+    }
+    to {
+        transform: translateY(0) !important;
+        opacity: 1 !important;
+    }
+}
+
+.mobile-tab-navigation .flex {
+    display: flex !important;
+    width: 100% !important;
+    height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.mobile-tab-btn {
+    position: relative !important;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    border: none !important;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%) !important;
+    cursor: pointer !important;
+    color: #6b7280 !important;
+    font-weight: 600 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 10px !important;
+    pointer-events: auto !important;
+    z-index: 101 !important;
+    user-select: none !important;
+    -webkit-tap-highlight-color: transparent !important;
+    flex: 1 !important;
+    width: 50% !important;
+    min-width: 0 !important;
+    height: 100% !important;
+    padding: 18px 16px !important;
+    margin: 0 !important;
+    text-align: center !important;
+    font-size: 14px !important;
+    line-height: 1.4 !important;
+    border-radius: 0 !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05) !important;
+    overflow: hidden !important;
+    animation: buttonPulse 3s ease-in-out infinite, colorShift 4s ease-in-out infinite !important;
+}
+
+/* Color shifting animation */
+@keyframes colorShift {
+    0%, 100% {
+        color: #6b7280 !important;
+    }
+    25% {
+        color: #3b82f6 !important;
+    }
+    50% {
+        color: #8b5cf6 !important;
+    }
+    75% {
+        color: #06b6d4 !important;
+    }
+}
+
+/* Continuous shimmer effect */
+.mobile-tab-btn::before {
+    content: '' !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: -100% !important;
+    width: 100% !important;
+    height: 100% !important;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent) !important;
+    animation: shimmer 2s ease-in-out infinite !important;
+    z-index: 1 !important;
+}
+
+/* Button pulse animation */
+@keyframes buttonPulse {
+    0%, 100% {
+        transform: scale(1) !important;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05) !important;
+    }
+    50% {
+        transform: scale(1.02) !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+    }
+}
+
+/* Shimmer animation */
+@keyframes shimmer {
+    0% {
+        left: -100% !important;
+    }
+    100% {
+        left: 100% !important;
+    }
+}
+
+.mobile-tab-btn.active {
+    color: #1f2937 !important;
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%) !important;
+    border-bottom: 4px solid #f59e0b !important;
+    font-weight: 700 !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 25px rgba(245, 158, 11, 0.3) !important;
+    animation: activePulse 2s ease-in-out infinite !important;
+}
+
+.mobile-tab-btn:hover:not(.active) {
+    background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%) !important;
+    color: #374151 !important;
+    transform: translateY(-3px) !important;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15) !important;
+}
+
+.mobile-tab-btn:active {
+    transform: translateY(-1px) !important;
+    transition: transform 0.1s ease !important;
+}
+
+/* Active button pulse animation */
+@keyframes activePulse {
+    0%, 100% {
+        box-shadow: 0 8px 25px rgba(245, 158, 11, 0.3) !important;
+    }
+    50% {
+        box-shadow: 0 8px 25px rgba(245, 158, 11, 0.5) !important;
+    }
+}
+
+.mobile-tab-btn i {
+    font-size: 18px !important;
+    flex-shrink: 0 !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    position: relative !important;
+    z-index: 2 !important;
+    animation: iconFloat 2.5s ease-in-out infinite !important;
+}
+
+/* Icon floating animation */
+@keyframes iconFloat {
+    0%, 100% {
+        transform: translateY(0px) !important;
+    }
+    50% {
+        transform: translateY(-2px) !important;
+    }
+}
+
+.mobile-tab-btn:hover i {
+    transform: scale(1.1) !important;
+    color: #3b82f6 !important;
+}
+
+.mobile-tab-btn.active i {
+    transform: scale(1.15) !important;
+    color: #d97706 !important;
+    animation: iconBounce 1.5s ease-in-out infinite !important;
+}
+
+/* Icon bounce animation for active button */
+@keyframes iconBounce {
+    0%, 100% {
+        transform: scale(1.15) !important;
+    }
+    50% {
+        transform: scale(1.25) !important;
+    }
+}
+
+/* Ensure text doesn't wrap and buttons stay equal width */
+.mobile-tab-btn span,
+.mobile-tab-btn .tab-text {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 100% !important;
+    position: relative !important;
+    z-index: 2 !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.mobile-tab-btn:hover .tab-text {
+    color: #1e40af !important;
+    font-weight: 700 !important;
+}
+
+.mobile-tab-btn.active .tab-text {
+    color: #92400e !important;
+    font-weight: 800 !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Force equal width distribution */
+.mobile-tab-navigation .flex > * {
+    flex: 1 1 0% !important;
+    min-width: 0 !important;
+    max-width: 50% !important;
+}
+
+/* Ensure buttons are perfectly aligned */
+.mobile-tab-btn {
+    box-sizing: border-box !important;
+    border-radius: 0 !important;
+    outline: none !important;
+}
+
+/* Remove any default button styles that might interfere */
+.mobile-tab-btn:focus {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+.mobile-tab-btn:focus-visible {
+    outline: 2px solid #fbbf24 !important;
+    outline-offset: -2px !important;
+}
+
+/* Loading state animation */
+.mobile-tab-btn.loading {
+    pointer-events: none !important;
+    opacity: 0.7 !important;
+}
+
+.mobile-tab-btn.loading::after {
+    content: '' !important;
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    width: 20px !important;
+    height: 20px !important;
+    margin: -10px 0 0 -10px !important;
+    border: 2px solid #f3f3f3 !important;
+    border-top: 2px solid #fbbf24 !important;
+    border-radius: 50% !important;
+    animation: spin 1s linear infinite !important;
+    z-index: 3 !important;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg) !important; }
+    100% { transform: rotate(360deg) !important; }
+}
+
+/* Ripple effect on click */
+.mobile-tab-btn::after {
+    content: '' !important;
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    width: 0 !important;
+    height: 0 !important;
+    border-radius: 50% !important;
+    background: rgba(251, 191, 36, 0.3) !important;
+    transform: translate(-50%, -50%) !important;
+    transition: width 0.6s, height 0.6s !important;
+    z-index: 1 !important;
+}
+
+.mobile-tab-btn:active::after {
+    width: 300px !important;
+    height: 300px !important;
+}
+
+/* Hide filter on mobile, tablet, and iPad - Show only on desktop */
+.filter-header {
+    display: none !important;
+}
+
+@media (min-width: 1280px) {
+    .filter-header {
+        display: block !important;
+    }
+}
+
+/* Mobile Content Visibility */
+@media (max-width: 1023px) {
+    /* Default: Show Map, Hide VR on mobile */
+    .virtual-tour-section {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        transition: all 0.3s ease !important;
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        z-index: 1 !important;
+    }
+    
+    #restaurants-map {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        transition: all 0.3s ease !important;
+        position: relative !important;
+        z-index: 2 !important;
+    }
+    
+    /* Make sure both containers are in the same area on mobile */
+    .left-column {
+        position: relative !important;
+    }
+    
+    .right-column {
+        position: relative !important;
+    }
+    
+    /* Allow JavaScript to override these styles */
+    .virtual-tour-section[style*="display: block"] {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+    
+    .virtual-tour-section[style*="display: none"] {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+    }
+    
+    #restaurants-map[style*="display: block"] {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+    
+    #restaurants-map[style*="display: none"] {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+    }
+
+    
+    /* Ensure cards section is always visible on mobile */
+    .mobile-cards-section {
+        position: relative !important;
+        z-index: 1 !important;
+        background: white !important;
+        border-top: 2px solid #e5e7eb !important;
+        margin-top: 0 !important;
+    }
+}
+
+/* Desktop: Show both VR and Map */
+@media (min-width: 1024px) {
+    .mobile-tab-navigation {
+        display: none !important;
+    }
+    
+    .virtual-tour-section {
+        display: block !important;
+    }
+    
+    #restaurants-map {
+        display: block !important;
+    }
+    
+    /* Reset any mobile overrides on desktop */
+    .virtual-tour-section[style*="display: none"] {
+        display: block !important;
+    }
+    
+    #restaurants-map[style*="display: none"] {
+        display: block !important;
+    }
+}
+
 /* Mobile Filter Styles */
 .mobile-filter-toggle {
     position: fixed;
     top: 16px;
-    left: 16px;
+    right: 16px;
     z-index: 50;
 }
 
@@ -1855,14 +2566,14 @@ button:focus {
     
     /* Mobile map height - 40vh */
     #restaurants-map {
-        height: 40vh !important;
-        min-height: 40vh !important;
+        height: 50vh !important;
+        min-height: 50vh !important;
     }
     
     /* Mobile virtual tour height - 40vh */
     .virtual-tour-section {
-        height: 40vh !important;
-        min-height: 40vh !important;
+        height: 50vh !important;
+        min-height: 50vh !important;
     }
     
     /* Disable scroll in right column on mobile - AGGRESSIVE APPROACH */
@@ -1928,12 +2639,50 @@ button:focus {
     border-radius: 12px !important;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15) !important;
     border: 2px solid #f3f4f6 !important;
+    transition: all 0.3s ease !important;
 }
 
 .restaurant-popup-content {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-    min-width: 280px !important;
-    max-width: 320px !important;
+    min-width: 200px !important;
+    max-width: 280px !important;
+    transition: all 0.3s ease !important;
+}
+
+/* Mobile popup styles */
+@media (max-width: 768px) {
+    .leaflet-popup-content-wrapper {
+        border-radius: 8px !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+        border: 1px solid #e5e7eb !important;
+    }
+    
+    .restaurant-popup-content {
+        min-width: 180px !important;
+        max-width: 220px !important;
+        font-size: 12px !important;
+    }
+    
+    .popup-image {
+        width: 60px !important;
+        height: 60px !important;
+    }
+    
+    .popup-placeholder {
+        width: 60px !important;
+        height: 60px !important;
+    }
+}
+
+/* Popup hover effects */
+.restaurant-popup-content:hover {
+    transform: scale(1.02) !important;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2) !important;
+}
+
+.leaflet-popup-content-wrapper:hover {
+    border-color: #fbbf24 !important;
+    box-shadow: 0 12px 32px rgba(251, 191, 36, 0.3) !important;
 }
 
 .restaurant-popup-content .flex {
@@ -1992,12 +2741,7 @@ button:focus {
     50% { transform: scale(1.1); }
 }
 
-/* Featured marker glow */
-.featured-restaurant-marker div {
-    box-shadow: 0 0 8px rgba(251, 191, 36, 0.5) !important;
-}
-
-/* Horizontal Restaurant Cards Layout */
+/* Restaurant Cards Layout */
 #restaurants-list {
     overflow-x: auto !important;
     overflow-y: hidden !important;
@@ -2005,21 +2749,23 @@ button:focus {
     height: auto !important;
     flex-wrap: nowrap !important;
     flex-direction: row !important;
-    gap: 8px !important;
-    padding: 8px !important;
+    gap: 12px !important;
+    padding: 12px !important;
     justify-content: center !important;
 }
 
+/* Desktop Layout: Image left, content right */
 .restaurant-card {
-    height: 120px !important;
-    min-width: 300px !important;
+    height: 240px !important;
+    min-width: 600px !important;
     flex-shrink: 0 !important;
-    padding: 12px !important;
-    border-radius: 8px !important;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
-    transition: all 0.2s ease !important;
+    padding: 16px !important;
+    border-radius: 12px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+    transition: all 0.3s ease !important;
     display: flex !important;
     align-items: center !important;
+    flex-direction: row !important;
 }
 
 .restaurant-card:hover {
@@ -2032,11 +2778,12 @@ button:focus {
 }
 
 .restaurant-card img {
-    width: 200px !important;
-    height: 120px !important;
+    width: 350px !important;
+    height: 200px !important;
     object-fit: cover !important;
-    border-radius: 8px !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+    flex-shrink: 0 !important;
 }
 
 .restaurant-card .flex-shrink-0 {
@@ -2045,32 +2792,48 @@ button:focus {
 
 .restaurant-card .flex-1 {
     padding-left: 20px;
+    padding-top: 50px;
     min-width: 0 !important;
     height: 100% !important;
     flex-direction: column !important;
-    justify-content: center !important;
+    justify-content: flex-start !important;
+    flex: 1 !important;
 }
 
 .restaurant-card h4 {
-    font-size: 18px !important;
-    font-weight: 600 !important;
-    margin: 0 !important;
-    line-height: 1.2 !important;
+    font-size: 20px !important;
+    font-weight: 700 !important;
+    margin: 0 0 8px 0 !important;
+    line-height: 1.3 !important;
+    color: #1f2937 !important;
 }
 
 .restaurant-card .space-y-0\.5 > * + * {
-    margin-top: 2px !important;
+    margin-top: 4px !important;
 }
 
 .restaurant-card p {
-    font-size: 11px !important;
-    margin: 0 !important;
-    line-height: 1.3 !important;
+    font-size: 13px !important;
+    margin: 0 0 6px 0 !important;
+    line-height: 1.4 !important;
     color: #6b7280 !important;
 }
 
+/* Description styling */
+.restaurant-card .description {
+    font-size: 12px !important;
+    color: #9ca3af !important;
+    line-height: 1.4 !important;
+    margin: 8px 0 0 0 !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 3 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
 .restaurant-card .text-xs {
-    font-size: 10px !important;
+    font-size: 12px !important;
 }
 
 .restaurant-card .px-1 {
@@ -2136,75 +2899,102 @@ button:focus {
 /* Mobile Responsive Fixes */
 @media (max-width: 768px) {
     #restaurants-list {
-        padding: 4px !important;
-        gap: 6px !important;
+        padding: 8px !important;
+        gap: 10px !important;
+        flex-direction: column !important;
+        overflow-x: hidden !important;
+        overflow-y: auto !important;
     }
     
     .restaurant-card {
-        height: 100px !important;
-        min-width: 90% !important;
-        padding: 8px !important;
+        height: 350px !important;
+        min-height: 350px !important;
+        min-width: 95% !important;
+        width: 95% !important;
+        padding: 12px !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
     }
     
     .restaurant-card img {
-        width: 80px !important;
-        height: 80px !important;
+        width: 100% !important;
+        height: 180px !important;
+        margin-bottom: 12px !important;
     }
     
     .restaurant-card .flex-1 {
-        padding-left: 12px !important;
+        padding-left: 0 !important;
+        padding-top: 16px !important;
     }
     
     .restaurant-card h4 {
-        font-size: 12px !important;
+        font-size: 18px !important;
+        margin-bottom: 8px !important;
     }
     
     .restaurant-card p {
-        font-size: 10px !important;
+        font-size: 13px !important;
+        margin-bottom: 6px !important;
+    }
+    
+    .restaurant-card .description {
+        font-size: 12px !important;
+        margin-top: 8px !important;
+        -webkit-line-clamp: 2 !important;
     }
     
     .restaurant-card .space-y-2 > * + * {
-        margin-top: 4px !important;
+        margin-top: 6px !important;
     }
     
     .restaurant-card .bg-gray-50 {
-        padding: 0px 8px !important;
+        padding: 0px 10px !important;
     }
     
     .restaurant-card .fas {
-        font-size: 10px !important;
+        font-size: 12px !important;
     }
 }
 
 @media (max-width: 480px) {
     .restaurant-card {
-        height: 100px !important;
-        min-width: 90% !important;
-        padding: 6px !important;
-        width: 90% !important;
-
-
+        height: 350px !important;
+        min-height: 350px !important;
+        min-width: 95% !important;
+        padding: 10px !important;
+        width: 95% !important;
+        flex-direction: column !important;
     }
     
     .restaurant-card img {
-        width: 120px !important;
-        height: 100px !important;
+        width: 100% !important;
+        height: 150px !important;
+        margin-bottom: 10px !important;
     }
     
     .restaurant-card .flex-1 {
-        padding-left: 14px !important;
+        padding-left: 0 !important;
+        padding-top: 12px !important;
     }
     
     .restaurant-card h4 {
-        font-size: 11px !important;
+        font-size: 16px !important;
+        margin-bottom: 6px !important;
     }
     
     .restaurant-card p {
-        font-size: 9px !important;
+        font-size: 11px !important;
+        margin-bottom: 4px !important;
+    }
+    
+    .restaurant-card .description {
+        font-size: 11px !important;
+        margin-top: 6px !important;
+        -webkit-line-clamp: 2 !important;
     }
     
     .restaurant-card .bg-gray-50 {
-        padding: 0px 6px !important;
+        padding: 0px 8px !important;
     }
 }
 

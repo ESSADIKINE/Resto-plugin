@@ -1194,22 +1194,22 @@
                     <!-- Left Column - Image Slider -->
                     <div class="image-slider">
                         ${sliderHtml}
-                    </div>
-                    
+                </div>
+                
                     <!-- Middle Column - Restaurant Info -->
                     <div class="restaurant-info">
-                        <!-- Restaurant Name -->
+                    <!-- Restaurant Name -->
                         <h3 class="restaurant-name">
-                            ${escapeHtml(title)}
+                        ${escapeHtml(title)}
                             ${isFeatured ? `<span class="featured-badge">★</span>` : ''}
-                        </h3>
-                        
+                    </h3>
+                    
                         <!-- Category -->
                         ${meta.cuisine_type ? `<div class="restaurant-category">
-                            ${escapeHtml(meta.cuisine_type.charAt(0).toUpperCase() + meta.cuisine_type.slice(1))}
+                        ${escapeHtml(meta.cuisine_type.charAt(0).toUpperCase() + meta.cuisine_type.slice(1))}
                         </div>` : ''}
-                        
-                        <!-- Description -->
+                    
+                    <!-- Description -->
                         ${description ? `<div class="restaurant-description">
                             ${escapeHtml(description.substring(0, 200))}${description.length > 200 ? '...' : ''}
                         </div>` : ''}
