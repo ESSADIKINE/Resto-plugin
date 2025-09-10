@@ -26,6 +26,9 @@ class LeBonResto_Admin {
         add_action('wp_head', array($this, 'frontend_custom_css'));
         add_action('admin_notices', array($this, 'admin_notices'));
         
+        // Import/Export functionality
+        add_action('admin_init', array($this, 'handle_import_export'));
+        
         // Custom post type admin enhancements
         add_filter('manage_restaurant_posts_columns', array($this, 'add_restaurant_columns'));
         add_action('manage_restaurant_posts_custom_column', array($this, 'restaurant_column_content'), 10, 2);
@@ -103,6 +106,16 @@ class LeBonResto_Admin {
         
         // Note: Restaurants submenu will be automatically added by WordPress
         // because we set 'show_in_menu' => 'lebonresto' in the CPT registration
+        
+        // Submenu - Import/Export
+        add_submenu_page(
+            'lebonresto',
+            __('Import/Export', 'le-bon-resto'),
+            __('Import/Export', 'le-bon-resto'),
+            'manage_options',
+            'lebonresto-import-export',
+            array($this, 'admin_page_import_export')
+        );
         
         // Submenu - Settings
         add_submenu_page(
@@ -392,6 +405,15 @@ class LeBonResto_Admin {
             'lebonresto_settings',
             'lebonresto_general'
         );
+        
+        // Restaurant Options Management
+        add_settings_field(
+            'restaurant_options',
+            __('Restaurant Options', 'le-bon-resto'),
+            array($this, 'setting_field_restaurant_options'),
+            'lebonresto_settings',
+            'lebonresto_general'
+        );
     }
     
     /**
@@ -414,7 +436,20 @@ class LeBonResto_Admin {
             'distance_filter_options' => '10,25,50,100',
             'enable_layer_switcher' => '1',
             'enable_fullscreen' => '1',
-            'primary_color' => '#FFC107'
+            'primary_color' => '#FFC107',
+            'restaurant_options' => array(
+                'Accès PMR (Personnes à Mobilité Réduite)',
+                'Chauffage',
+                'Climatisation',
+                'Équipements écologiques',
+                'Parking gratuit',
+                'Proximité avec les transports en commun',
+                'Salle à manger privée',
+                'Salle de réception privatisable',
+                'Salles insonorisées',
+                'Système de ventilation efficace',
+                'Wi-Fi gratuit'
+            )
         );
         
         $options = get_option('lebonresto_options', array());
@@ -477,6 +512,47 @@ class LeBonResto_Admin {
         echo '<input type="color" name="lebonresto_options[primary_color]" value="' . esc_attr($options['primary_color']) . '" />';
         echo '<span class="lebonresto-color-preview" style="background-color: ' . esc_attr($options['primary_color']) . ';"></span>';
         echo '<p class="description">' . __('Primary color used throughout the plugin interface and frontend', 'le-bon-resto') . '</p>';
+    }
+    
+    public function setting_field_restaurant_options() {
+        $options = $this->get_options();
+        $restaurant_options = isset($options['restaurant_options']) ? $options['restaurant_options'] : array();
+        
+        echo '<div id="restaurant-options-container">';
+        echo '<p class="description">' . __('Add or remove restaurant options that will be available for selection in the restaurant edit form.', 'le-bon-resto') . '</p>';
+        
+        if (!empty($restaurant_options)) {
+            foreach ($restaurant_options as $index => $option) {
+                echo '<div class="restaurant-option-row" style="margin-bottom: 10px; display: flex; align-items: center;">';
+                echo '<input type="text" name="lebonresto_options[restaurant_options][]" value="' . esc_attr($option) . '" class="regular-text" style="margin-right: 10px;" />';
+                echo '<button type="button" class="button remove-option" style="color: #d63638;">' . __('Remove', 'le-bon-resto') . '</button>';
+                echo '</div>';
+            }
+        }
+        
+        echo '<div class="restaurant-option-row" style="margin-bottom: 10px; display: flex; align-items: center;">';
+        echo '<input type="text" name="lebonresto_options[restaurant_options][]" value="" class="regular-text" style="margin-right: 10px;" placeholder="' . __('Enter new option...', 'le-bon-resto') . '" />';
+        echo '<button type="button" class="button remove-option" style="color: #d63638;">' . __('Remove', 'le-bon-resto') . '</button>';
+        echo '</div>';
+        
+        echo '<button type="button" id="add-restaurant-option" class="button button-secondary">' . __('Add New Option', 'le-bon-resto') . '</button>';
+        echo '</div>';
+        
+        echo '<script>
+        jQuery(document).ready(function($) {
+            $("#add-restaurant-option").click(function() {
+                var newRow = $("<div class=\"restaurant-option-row\" style=\"margin-bottom: 10px; display: flex; align-items: center;\">" +
+                    "<input type=\"text\" name=\"lebonresto_options[restaurant_options][]\" value=\"\" class=\"regular-text\" style=\"margin-right: 10px;\" placeholder=\"' . __('Enter new option...', 'le-bon-resto') . '\" />" +
+                    "<button type=\"button\" class=\"button remove-option\" style=\"color: #d63638;\">' . __('Remove', 'le-bon-resto') . '</button>" +
+                    "</div>");
+                $("#restaurant-options-container").append(newRow);
+            });
+            
+            $(document).on("click", ".remove-option", function() {
+                $(this).closest(".restaurant-option-row").remove();
+            });
+        });
+        </script>';
     }
     
     /**
@@ -556,6 +632,18 @@ class LeBonResto_Admin {
             }
         }
         
+        // Validate restaurant options
+        if (isset($input['restaurant_options']) && is_array($input['restaurant_options'])) {
+            $validated_options = array();
+            foreach ($input['restaurant_options'] as $option) {
+                $option = sanitize_text_field($option);
+                if (!empty($option)) {
+                    $validated_options[] = $option;
+                }
+            }
+            $validated['restaurant_options'] = $validated_options;
+        }
+        
         return $validated;
     }
     
@@ -587,6 +675,34 @@ class LeBonResto_Admin {
                 .button-primary:hover {
                     background: " . $this->darken_color($primary_color, 10) . " !important;
                     border-color: " . $this->darken_color($primary_color, 10) . " !important;
+                }
+                
+                .restaurant-options-container {
+                    max-height: 300px;
+                    overflow-y: auto;
+                    border: 1px solid #ddd;
+                    padding: 15px;
+                    border-radius: 4px;
+                    background: #f9f9f9;
+                }
+                .restaurant-options-container label {
+                    display: flex;
+                    align-items: center;
+                    padding: 8px 0;
+                    border-bottom: 1px solid #eee;
+                    margin-bottom: 0;
+                }
+                .restaurant-options-container label:last-child {
+                    border-bottom: none;
+                }
+                .restaurant-options-container input[type='checkbox'] {
+                    margin-right: 10px;
+                    transform: scale(1.2);
+                }
+                .restaurant-options-container label:hover {
+                    background: #f0f0f0;
+                    padding-left: 5px;
+                    border-radius: 3px;
                 }
             ");
         }
@@ -727,21 +843,46 @@ class LeBonResto_Admin {
                 $tour = get_post_meta($post_id, '_restaurant_virtual_tour_url', true);
                 
                 $media_items = array();
+                
+                // Principal Image
                 if ($principal_image) {
-                    $media_items[] = '🖼️';
-                }
-                if ($gallery) {
-                    $image_count = count(explode(',', $gallery));
-                    $media_items[] = '📷 ' . $image_count;
-                }
-                if ($video) {
-                    $media_items[] = '🎥';
-                }
-                if ($tour) {
-                    $media_items[] = '🏛️';
+                    $image_url = wp_get_attachment_image_url($principal_image, 'thumbnail');
+                    if ($image_url) {
+                        $media_items[] = '<img src="' . esc_url($image_url) . '" style="width: 30px; height: 30px; object-fit: cover; border-radius: 3px; border: 1px solid #ddd; margin-right: 5px;" title="Principal Image" />';
+                    } else {
+                        $media_items[] = '🖼️';
+                    }
                 }
                 
-                echo $media_items ? implode(' ', $media_items) : '—';
+                // Gallery Images
+                if ($gallery) {
+                    $image_ids = explode(',', $gallery);
+                    $valid_images = 0;
+                    foreach ($image_ids as $image_id) {
+                        if (wp_get_attachment_url($image_id)) {
+                            $valid_images++;
+                        }
+                    }
+                    if ($valid_images > 0) {
+                        $media_items[] = '<span title="Gallery Images">📷 ' . $valid_images . '</span>';
+                    }
+                }
+                
+                // Video
+                if ($video) {
+                    $media_items[] = '<span title="Video URL">🎥</span>';
+                }
+                
+                // Virtual Tour
+                if ($tour) {
+                    $media_items[] = '<span title="Virtual Tour">🏛️</span>';
+                }
+                
+                if (empty($media_items)) {
+                    echo '<span style="color: #d63638;">⚠ ' . __('No Media', 'le-bon-resto') . '</span>';
+                } else {
+                    echo '<div style="display: flex; align-items: center; gap: 5px; flex-wrap: wrap;">' . implode('', $media_items) . '</div>';
+                }
                 break;
         }
     }
@@ -796,6 +937,570 @@ class LeBonResto_Admin {
         }
         
         return $where;
+    }
+    
+    /**
+     * Admin page for import/export
+     */
+    public function admin_page_import_export() {
+        ?>
+        <div class="wrap">
+            <h1><?php _e('Import/Export Restaurant Data', 'le-bon-resto'); ?></h1>
+            
+            <div class="lebonresto-import-export-container">
+                
+                <!-- Export Section -->
+                <div class="postbox">
+                    <div class="postbox-header">
+                        <h2 class="hndle"><?php _e('Export Restaurant Data', 'le-bon-resto'); ?></h2>
+                    </div>
+                    <div class="inside">
+                        <p><?php _e('Export all restaurant data to a CSV or JSON file for backup or migration purposes.', 'le-bon-resto'); ?></p>
+                        
+                        <form method="post" action="">
+                            <?php wp_nonce_field('lebonresto_export', 'lebonresto_export_nonce'); ?>
+                            <input type="hidden" name="action" value="export_restaurants">
+                            
+                            <table class="form-table">
+                                <tr>
+                                    <th scope="row"><?php _e('Export Format', 'le-bon-resto'); ?></th>
+                                    <td>
+                                        <label>
+                                            <input type="radio" name="export_format" value="csv" checked>
+                                            <?php _e('CSV (Comma Separated Values)', 'le-bon-resto'); ?>
+                                        </label><br>
+                                        <label>
+                                            <input type="radio" name="export_format" value="json">
+                                            <?php _e('JSON (JavaScript Object Notation)', 'le-bon-resto'); ?>
+                                        </label>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><?php _e('Include Media URLs', 'le-bon-resto'); ?></th>
+                                    <td>
+                                        <label>
+                                            <input type="checkbox" name="include_media" value="1" checked>
+                                            <?php _e('Include image and media URLs in export', 'le-bon-resto'); ?>
+                                        </label>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><?php _e('Restaurant Status', 'le-bon-resto'); ?></th>
+                                    <td>
+                                        <label>
+                                            <input type="radio" name="restaurant_status" value="all" checked>
+                                            <?php _e('All restaurants', 'le-bon-resto'); ?>
+                                        </label><br>
+                                        <label>
+                                            <input type="radio" name="restaurant_status" value="published">
+                                            <?php _e('Published only', 'le-bon-resto'); ?>
+                                        </label><br>
+                                        <label>
+                                            <input type="radio" name="restaurant_status" value="draft">
+                                            <?php _e('Draft only', 'le-bon-resto'); ?>
+                                        </label>
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <p class="submit">
+                                <input type="submit" class="button-primary" value="<?php _e('Export Data', 'le-bon-resto'); ?>">
+                            </p>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Import Section -->
+                <div class="postbox">
+                    <div class="postbox-header">
+                        <h2 class="hndle"><?php _e('Import Restaurant Data', 'le-bon-resto'); ?></h2>
+                    </div>
+                    <div class="inside">
+                        <p><?php _e('Import restaurant data from a CSV or JSON file. Make sure the file format matches the export format.', 'le-bon-resto'); ?></p>
+                        
+                        <form method="post" enctype="multipart/form-data" action="">
+                            <?php wp_nonce_field('lebonresto_import', 'lebonresto_import_nonce'); ?>
+                            <input type="hidden" name="action" value="import_restaurants">
+                            
+                            <table class="form-table">
+                                <tr>
+                                    <th scope="row"><?php _e('Import File', 'le-bon-resto'); ?></th>
+                                    <td>
+                                        <input type="file" name="import_file" accept=".csv,.json" required>
+                                        <p class="description"><?php _e('Select a CSV or JSON file to import. Maximum file size: 10MB', 'le-bon-resto'); ?></p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><?php _e('Import Mode', 'le-bon-resto'); ?></th>
+                                    <td>
+                                        <label>
+                                            <input type="radio" name="import_mode" value="create" checked>
+                                            <?php _e('Create new restaurants only', 'le-bon-resto'); ?>
+                                        </label><br>
+                                        <label>
+                                            <input type="radio" name="import_mode" value="update">
+                                            <?php _e('Update existing restaurants (by title)', 'le-bon-resto'); ?>
+                                        </label><br>
+                                        <label>
+                                            <input type="radio" name="import_mode" value="replace">
+                                            <?php _e('Replace all restaurants (delete existing first)', 'le-bon-resto'); ?>
+                                        </label>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"><?php _e('Default Status', 'le-bon-resto'); ?></th>
+                                    <td>
+                                        <select name="default_status">
+                                            <option value="draft"><?php _e('Draft', 'le-bon-resto'); ?></option>
+                                            <option value="publish"><?php _e('Published', 'le-bon-resto'); ?></option>
+                                        </select>
+                                        <p class="description"><?php _e('Status for imported restaurants if not specified in file', 'le-bon-resto'); ?></p>
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <p class="submit">
+                                <input type="submit" class="button-primary" value="<?php _e('Import Data', 'le-bon-resto'); ?>">
+                            </p>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Sample Files Section -->
+                <div class="postbox">
+                    <div class="postbox-header">
+                        <h2 class="hndle"><?php _e('Sample Files', 'le-bon-resto'); ?></h2>
+                    </div>
+                    <div class="inside">
+                        <p><?php _e('Download sample files to understand the expected format for import:', 'le-bon-resto'); ?></p>
+                        
+                        <p>
+                            <a href="<?php echo admin_url('admin.php?page=lebonresto-import-export&action=download_sample&format=csv'); ?>" class="button">
+                                <?php _e('Download Sample CSV', 'le-bon-resto'); ?>
+                            </a>
+                            <a href="<?php echo admin_url('admin.php?page=lebonresto-import-export&action=download_sample&format=json'); ?>" class="button">
+                                <?php _e('Download Sample JSON', 'le-bon-resto'); ?>
+                            </a>
+                        </p>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+        
+        <style>
+        .lebonresto-import-export-container .postbox {
+            margin-bottom: 20px;
+        }
+        
+        .lebonresto-import-export-container .postbox-header h2 {
+            color: #FFC107;
+            font-weight: 600;
+        }
+        
+        .lebonresto-import-export-container .form-table th {
+            width: 200px;
+            padding: 20px 10px 20px 0;
+        }
+        
+        .lebonresto-import-export-container .form-table td {
+            padding: 20px 10px;
+        }
+        
+        .lebonresto-import-export-container input[type="file"] {
+            width: 100%;
+            max-width: 400px;
+        }
+        </style>
+        <?php
+    }
+    
+    /**
+     * Handle import/export actions
+     */
+    public function handle_import_export() {
+        // Handle export
+        if (isset($_POST['action']) && $_POST['action'] === 'export_restaurants' && 
+            wp_verify_nonce($_POST['lebonresto_export_nonce'], 'lebonresto_export')) {
+            $this->export_restaurants();
+        }
+        
+        // Handle import
+        if (isset($_POST['action']) && $_POST['action'] === 'import_restaurants' && 
+            wp_verify_nonce($_POST['lebonresto_import_nonce'], 'lebonresto_import')) {
+            $this->import_restaurants();
+        }
+        
+        // Handle sample file download
+        if (isset($_GET['action']) && $_GET['action'] === 'download_sample' && 
+            isset($_GET['format']) && in_array($_GET['format'], ['csv', 'json'])) {
+            $this->download_sample_file($_GET['format']);
+        }
+    }
+    
+    /**
+     * Export restaurants data
+     */
+    private function export_restaurants() {
+        $format = sanitize_text_field($_POST['export_format']);
+        $include_media = isset($_POST['include_media']);
+        $status = sanitize_text_field($_POST['restaurant_status']);
+        
+        // Build query args
+        $args = array(
+            'post_type' => 'restaurant',
+            'posts_per_page' => -1,
+            'post_status' => $status === 'all' ? ['publish', 'draft'] : $status
+        );
+        
+        $restaurants = get_posts($args);
+        $export_data = array();
+        
+        foreach ($restaurants as $restaurant) {
+            $data = array(
+                'title' => $restaurant->post_title,
+                'content' => $restaurant->post_content,
+                'status' => $restaurant->post_status,
+                'date' => $restaurant->post_date,
+                'address' => get_post_meta($restaurant->ID, '_restaurant_address', true),
+                'city' => get_post_meta($restaurant->ID, '_restaurant_city', true),
+                'cuisine_type' => get_post_meta($restaurant->ID, '_restaurant_cuisine_type', true),
+                'description' => get_post_meta($restaurant->ID, '_restaurant_description', true),
+                'phone' => get_post_meta($restaurant->ID, '_restaurant_phone', true),
+                'email' => get_post_meta($restaurant->ID, '_restaurant_email', true),
+                'latitude' => get_post_meta($restaurant->ID, '_restaurant_latitude', true),
+                'longitude' => get_post_meta($restaurant->ID, '_restaurant_longitude', true),
+                'is_featured' => get_post_meta($restaurant->ID, '_restaurant_is_featured', true),
+                'video_url' => get_post_meta($restaurant->ID, '_restaurant_video_url', true),
+                'virtual_tour_url' => get_post_meta($restaurant->ID, '_restaurant_virtual_tour_url', true),
+                'website_url' => get_post_meta($restaurant->ID, '_restaurant_website_url', true),
+                'price_range' => get_post_meta($restaurant->ID, '_restaurant_price_range', true),
+                'opening_hours' => get_post_meta($restaurant->ID, '_restaurant_opening_hours', true),
+                'restaurant_options' => get_post_meta($restaurant->ID, '_restaurant_options', true)
+            );
+            
+            if ($include_media) {
+                $principal_image = get_post_meta($restaurant->ID, '_restaurant_principal_image', true);
+                $gallery = get_post_meta($restaurant->ID, '_restaurant_gallery', true);
+                
+                if ($principal_image) {
+                    $data['principal_image_url'] = wp_get_attachment_url($principal_image);
+                }
+                
+                if ($gallery) {
+                    $gallery_urls = array();
+                    $image_ids = explode(',', $gallery);
+                    foreach ($image_ids as $image_id) {
+                        $url = wp_get_attachment_url($image_id);
+                        if ($url) {
+                            $gallery_urls[] = $url;
+                        }
+                    }
+                    $data['gallery_urls'] = implode(',', $gallery_urls);
+                }
+            }
+            
+            $export_data[] = $data;
+        }
+        
+        if ($format === 'csv') {
+            $this->export_csv($export_data);
+        } else {
+            $this->export_json($export_data);
+        }
+    }
+    
+    /**
+     * Export data as CSV
+     */
+    private function export_csv($data) {
+        $filename = 'restaurants_export_' . date('Y-m-d_H-i-s') . '.csv';
+        
+        header('Content-Type: text/csv');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        
+        $output = fopen('php://output', 'w');
+        
+        if (!empty($data)) {
+            // Write headers
+            fputcsv($output, array_keys($data[0]));
+            
+            // Write data
+            foreach ($data as $row) {
+                fputcsv($output, $row);
+            }
+        }
+        
+        fclose($output);
+        exit;
+    }
+    
+    /**
+     * Export data as JSON
+     */
+    private function export_json($data) {
+        $filename = 'restaurants_export_' . date('Y-m-d_H-i-s') . '.json';
+        
+        header('Content-Type: application/json');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        
+        echo json_encode($data, JSON_PRETTY_PRINT);
+        exit;
+    }
+    
+    /**
+     * Import restaurants data
+     */
+    private function import_restaurants() {
+        if (!isset($_FILES['import_file']) || $_FILES['import_file']['error'] !== UPLOAD_ERR_OK) {
+            add_action('admin_notices', function() {
+                echo '<div class="notice notice-error"><p>' . __('Error uploading file. Please try again.', 'le-bon-resto') . '</p></div>';
+            });
+            return;
+        }
+        
+        $file = $_FILES['import_file'];
+        $import_mode = sanitize_text_field($_POST['import_mode']);
+        $default_status = sanitize_text_field($_POST['default_status']);
+        
+        // Validate file type
+        $file_extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+        if (!in_array($file_extension, ['csv', 'json'])) {
+            add_action('admin_notices', function() {
+                echo '<div class="notice notice-error"><p>' . __('Invalid file type. Please upload a CSV or JSON file.', 'le-bon-resto') . '</p></div>';
+            });
+            return;
+        }
+        
+        // Read file content
+        $content = file_get_contents($file['tmp_name']);
+        if ($content === false) {
+            add_action('admin_notices', function() {
+                echo '<div class="notice notice-error"><p>' . __('Error reading file. Please try again.', 'le-bon-resto') . '</p></div>';
+            });
+            return;
+        }
+        
+        // Parse data based on format
+        if ($file_extension === 'csv') {
+            $data = $this->parse_csv($content);
+        } else {
+            $data = json_decode($content, true);
+        }
+        
+        if (!$data || !is_array($data)) {
+            add_action('admin_notices', function() {
+                echo '<div class="notice notice-error"><p>' . __('Invalid file format. Please check your file and try again.', 'le-bon-resto') . '</p></div>';
+            });
+            return;
+        }
+        
+        // Handle import mode
+        if ($import_mode === 'replace') {
+            // Delete all existing restaurants
+            $existing = get_posts(array(
+                'post_type' => 'restaurant',
+                'posts_per_page' => -1,
+                'post_status' => 'any'
+            ));
+            
+            foreach ($existing as $post) {
+                wp_delete_post($post->ID, true);
+            }
+        }
+        
+        // Import data
+        $imported = 0;
+        $updated = 0;
+        $errors = 0;
+        
+        foreach ($data as $row) {
+            $result = $this->import_restaurant($row, $import_mode, $default_status);
+            
+            if ($result === 'imported') {
+                $imported++;
+            } elseif ($result === 'updated') {
+                $updated++;
+            } else {
+                $errors++;
+            }
+        }
+        
+        // Show results
+        $message = sprintf(
+            __('Import completed: %d imported, %d updated, %d errors', 'le-bon-resto'),
+            $imported,
+            $updated,
+            $errors
+        );
+        
+        add_action('admin_notices', function() use ($message) {
+            echo '<div class="notice notice-success"><p>' . $message . '</p></div>';
+        });
+    }
+    
+    /**
+     * Parse CSV content
+     */
+    private function parse_csv($content) {
+        $lines = str_getcsv($content, "\n");
+        $data = array();
+        
+        if (empty($lines)) {
+            return $data;
+        }
+        
+        $headers = str_getcsv($lines[0]);
+        
+        for ($i = 1; $i < count($lines); $i++) {
+            $row = str_getcsv($lines[$i]);
+            if (count($row) === count($headers)) {
+                $data[] = array_combine($headers, $row);
+            }
+        }
+        
+        return $data;
+    }
+    
+    /**
+     * Import single restaurant
+     */
+    private function import_restaurant($data, $import_mode, $default_status) {
+        $title = sanitize_text_field($data['title'] ?? '');
+        if (empty($title)) {
+            return 'error';
+        }
+        
+        // Check if restaurant exists (for update mode)
+        $existing_post = null;
+        if ($import_mode === 'update') {
+            $existing = get_posts(array(
+                'post_type' => 'restaurant',
+                'name' => sanitize_title($title),
+                'posts_per_page' => 1,
+                'post_status' => 'any'
+            ));
+            
+            if (!empty($existing)) {
+                $existing_post = $existing[0];
+            }
+        }
+        
+        // Prepare post data
+        $post_data = array(
+            'post_title' => $title,
+            'post_content' => wp_kses_post($data['content'] ?? ''),
+            'post_status' => sanitize_text_field($data['status'] ?? $default_status),
+            'post_type' => 'restaurant'
+        );
+        
+        if ($existing_post) {
+            $post_data['ID'] = $existing_post->ID;
+            $post_id = wp_update_post($post_data);
+            $action = 'updated';
+        } else {
+            $post_id = wp_insert_post($post_data);
+            $action = 'imported';
+        }
+        
+        if (is_wp_error($post_id)) {
+            return 'error';
+        }
+        
+        // Update meta fields
+        $meta_fields = array(
+            '_restaurant_address' => 'address',
+            '_restaurant_city' => 'city',
+            '_restaurant_cuisine_type' => 'cuisine_type',
+            '_restaurant_description' => 'description',
+            '_restaurant_phone' => 'phone',
+            '_restaurant_email' => 'email',
+            '_restaurant_latitude' => 'latitude',
+            '_restaurant_longitude' => 'longitude',
+            '_restaurant_is_featured' => 'is_featured',
+            '_restaurant_video_url' => 'video_url',
+            '_restaurant_virtual_tour_url' => 'virtual_tour_url',
+            '_restaurant_website_url' => 'website_url',
+            '_restaurant_price_range' => 'price_range',
+            '_restaurant_opening_hours' => 'opening_hours',
+            '_restaurant_options' => 'restaurant_options'
+        );
+        
+        foreach ($meta_fields as $meta_key => $data_key) {
+            if (isset($data[$data_key]) && !empty($data[$data_key])) {
+                update_post_meta($post_id, $meta_key, sanitize_text_field($data[$data_key]));
+            }
+        }
+        
+        return $action;
+    }
+    
+    /**
+     * Download sample file
+     */
+    private function download_sample_file($format) {
+        $sample_data = array(
+            array(
+                'title' => 'Sample Restaurant 1',
+                'content' => 'This is a sample restaurant description.',
+                'status' => 'publish',
+                'address' => '123 Main Street',
+                'city' => 'Paris',
+                'cuisine_type' => 'french',
+                'description' => 'A wonderful French restaurant',
+                'phone' => '+33 1 23 45 67 89',
+                'email' => 'contact@samplerestaurant1.com',
+                'latitude' => '48.8566',
+                'longitude' => '2.3522',
+                'is_featured' => '1',
+                'video_url' => 'https://example.com/video1.mp4',
+                'virtual_tour_url' => 'https://example.com/tour1',
+                'website_url' => 'https://samplerestaurant1.com',
+                'price_range' => '€€',
+                'opening_hours' => 'Mon-Sun: 12:00-22:00',
+                'restaurant_options' => 'Wi-Fi gratuit,Parking gratuit'
+            ),
+            array(
+                'title' => 'Sample Restaurant 2',
+                'content' => 'Another sample restaurant description.',
+                'status' => 'draft',
+                'address' => '456 Oak Avenue',
+                'city' => 'Lyon',
+                'cuisine_type' => 'italian',
+                'description' => 'Authentic Italian cuisine',
+                'phone' => '+33 4 12 34 56 78',
+                'email' => 'info@samplerestaurant2.com',
+                'latitude' => '45.7640',
+                'longitude' => '4.8357',
+                'is_featured' => '0',
+                'video_url' => '',
+                'virtual_tour_url' => '',
+                'website_url' => 'https://samplerestaurant2.com',
+                'price_range' => '€€€',
+                'opening_hours' => 'Tue-Sat: 19:00-23:00',
+                'restaurant_options' => 'Salle à manger privée'
+            )
+        );
+        
+        if ($format === 'csv') {
+            $filename = 'sample_restaurants.csv';
+            header('Content-Type: text/csv');
+            header('Content-Disposition: attachment; filename="' . $filename . '"');
+            
+            $output = fopen('php://output', 'w');
+            fputcsv($output, array_keys($sample_data[0]));
+            foreach ($sample_data as $row) {
+                fputcsv($output, $row);
+            }
+            fclose($output);
+        } else {
+            $filename = 'sample_restaurants.json';
+            header('Content-Type: application/json');
+            header('Content-Disposition: attachment; filename="' . $filename . '"');
+            echo json_encode($sample_data, JSON_PRETTY_PRINT);
+        }
+        
+        exit;
     }
 }
 

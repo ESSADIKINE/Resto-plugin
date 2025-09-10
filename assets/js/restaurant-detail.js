@@ -176,12 +176,12 @@
             $('body').removeClass('modal-open');
         }
 
-        function showPreviousImage() {
-            currentImageIndex = (currentImageIndex - 1 + galleryImages.length) % galleryImages.length;
+    function showPreviousImage() {
+        currentImageIndex = (currentImageIndex - 1 + galleryImages.length) % galleryImages.length;
             showLightbox(galleryImages[currentImageIndex], currentImageIndex);
-        }
+    }
 
-        function showNextImage() {
+    function showNextImage() {
             currentImageIndex = (currentImageIndex + 1) % galleryImages.length;
             showLightbox(galleryImages[currentImageIndex], currentImageIndex);
         }

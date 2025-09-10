@@ -15,6 +15,14 @@ wp_enqueue_style(
     '3.4.0'
 );
 
+// Enqueue FontAwesome CSS
+wp_enqueue_style(
+    'font-awesome',
+    'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css',
+    array(),
+    '6.0.0'
+);
+
 // Add inline backup styles if Tailwind fails to load
 wp_add_inline_style('tailwind-css', '
 /* Tailwind Backup Styles */
@@ -23,7 +31,7 @@ wp_add_inline_style('tailwind-css', '
 .bg-gray-100 { background-color: #f3f4f6; }
 .bg-white { background-color: #ffffff; }
 .bg-yellow-400 { background-color: #fbbf24; }
-.bg-yellow-500 { background-color: #f59e0b; }
+.bg-yellow-500 { background-color: #FFC107; }
 .text-gray-700 { color: #374151; }
 .text-gray-800 { color: #1f2937; }
 .text-gray-600 { color: #4b5563; }
@@ -71,8 +79,9 @@ wp_add_inline_style('tailwind-css', '
         a[href^="tel:"]:hover, a[href^="mailto:"]:hover {
             text-decoration: none !important;
         }
+        
 .duration-200 { transition-duration: 200ms; }
-.hover\\:bg-yellow-500:hover { background-color: #f59e0b; }
+.hover\\:bg-yellow-500:hover { background-color: #FFC107; }
 .hover\\:bg-gray-300:hover { background-color: #d1d5db; }
 .focus\\:outline-none:focus { outline: 2px solid transparent; outline-offset: 2px; }
 .focus\\:ring-2:focus { box-shadow: 0 0 0 2px #fbbf24; }
@@ -151,6 +160,7 @@ wp_add_inline_style('lebonresto-debug-css', '
 }
 
 #restaurants-map {
+    border-radius: 0px !important;
     width: 100% !important;
     background-color:rgb(255, 255, 255) !important;
     border-right: 3px solid rgb(255, 255, 255) !important;
@@ -401,13 +411,13 @@ wp_add_inline_style('lebonresto-debug-css', '
 
 /* Search button styling - match desktop */
 .mobile-filter-panel #mobile-search-restaurants {
-    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%) !important;
+    background: linear-gradient(135deg, #FFC107 0%, #FF8F00 100%) !important;
     color: #1f2937 !important;
     font-weight: 700 !important;
 }
 
 .mobile-filter-panel #mobile-search-restaurants:hover {
-    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+    background: linear-gradient(135deg, #FF8F00 0%, #FF6F00 100%) !important;
     box-shadow: 0 6px 16px rgba(251, 191, 36, 0.4) !important;
 }
 
@@ -524,13 +534,13 @@ wp_add_inline_style('lebonresto-debug-css', '
 }
 
 #search-restaurants {
-    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%) !important;
+    background: linear-gradient(135deg, #FFC107 0%, #FF8F00 100%) !important;
     color: #1f2937 !important;
     font-weight: 700 !important;
 }
 
 #search-restaurants:hover {
-    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+    background: linear-gradient(135deg, #FF8F00 0%, #FF6F00 100%) !important;
     transform: translateY(-2px) !important;
     box-shadow: 0 6px 16px rgba(251, 191, 36, 0.4) !important;
 }
@@ -559,7 +569,7 @@ wp_add_inline_style('lebonresto-debug-css', '
 .loading-spinner {
     border: 4px solid rgb(255, 255, 255) !important;
     border-top: 4px solid #fbbf24 !important;
-    border-right: 4px solid #f59e0b !important;
+    border-right: 4px solid #FF8F00 !important;
     border-radius: 50% !important;
     width: 32px !important;
     height: 32px !important;
@@ -1827,13 +1837,13 @@ wp_localize_script(
 }
 
 #search-restaurants {
-    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%) !important;
+    background: linear-gradient(135deg, #FFC107 0%, #FF8F00 100%) !important;
     color: #1f2937 !important;
     font-weight: 700 !important;
 }
 
 #search-restaurants:hover {
-    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+    background: linear-gradient(135deg, #FF8F00 0%, #FF6F00 100%) !important;
     transform: translateY(-2px) !important;
     box-shadow: 0 6px 16px rgba(251, 191, 36, 0.4) !important;
 }
@@ -1880,7 +1890,7 @@ wp_localize_script(
 .loading-spinner {
     border: 4px solid #f3f4f6 !important;
     border-top: 4px solid #fbbf24 !important;
-    border-right: 4px solid #f59e0b !important;
+    border-right: 4px solid #FF8F00 !important;
     border-radius: 50% !important;
     width: 32px !important;
     height: 32px !important;
@@ -1897,7 +1907,7 @@ wp_localize_script(
 /* Map Controls */
 #center-current-restaurant {
     padding: 12px 18px !important;
-    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%) !important;
+    background: linear-gradient(135deg, #FFC107 0%, #FF8F00 100%) !important;
     color: #1f2937 !important;
     border: none !important;
     border-radius: 10px !important;
@@ -1913,7 +1923,7 @@ wp_localize_script(
 }
 
 #center-current-restaurant:hover {
-    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+    background: linear-gradient(135deg, #FF8F00 0%, #FF6F00 100%) !important;
     transform: translateY(-2px) !important;
     box-shadow: 0 4px 16px rgba(251, 191, 36, 0.4) !important;
 }
@@ -1959,6 +1969,23 @@ wp_localize_script(
 /* FontAwesome CDN */
 @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css');
 
+/* Fallback for FontAwesome icons */
+.fas, .fab {
+    font-family: "Font Awesome 6 Free", "Font Awesome 6 Brands", "FontAwesome", sans-serif !important;
+    font-weight: 900 !important;
+    font-style: normal !important;
+    font-variant: normal !important;
+    text-rendering: auto !important;
+    line-height: 1 !important;
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
+}
+
+.fab {
+    font-family: "Font Awesome 6 Brands", "FontAwesome", sans-serif !important;
+    font-weight: 400 !important;
+}
+
 /* Map marker custom styles */
 .current-restaurant-marker,
 .featured-restaurant-marker,
@@ -1994,7 +2021,7 @@ wp_localize_script(
 
 /* Button hover effects */
 .bg-yellow-400:hover {
-    background-color: #f59e0b !important;
+    background-color: #FFC107 !important;
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
 }
@@ -2140,7 +2167,7 @@ button:focus {
 .mobile-tab-btn.active {
     color: #1f2937 !important;
     background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%) !important;
-    border-bottom: 4px solid #f59e0b !important;
+    border-bottom: 4px solid #FF8F00 !important;
     font-weight: 700 !important;
     transform: translateY(-2px) !important;
     box-shadow: 0 8px 25px rgba(245, 158, 11, 0.3) !important;
@@ -2416,7 +2443,7 @@ button:focus {
 }
 
 .mobile-filter-toggle button {
-    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%) !important;
+    background: linear-gradient(135deg, #FFC107 0%, #FF8F00 100%) !important;
     color: #1f2937 !important;
     padding: 12px !important;
     border-radius: 50% !important;
@@ -2447,7 +2474,7 @@ button:focus {
 }
 
 .mobile-filter-toggle button:hover {
-    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+    background: linear-gradient(135deg, #FF8F00 0%, #FF6F00 100%) !important;
     transform: scale(1.05) !important;
     box-shadow: 0 6px 16px rgba(251, 191, 36, 0.6) !important;
 }
