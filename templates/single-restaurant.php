@@ -863,8 +863,8 @@ wp_add_inline_style('lebonresto-debug-css', '
                     <i class="fas fa-map-marker-alt"></i>
                     <span class="tab-text"><?php _e('Map', 'le-bon-resto'); ?></span>
                 </button>
-            </div>
-        </div>
+                        </div>
+                </div>
 
         <!-- Line 2: Two Column Layout (50% each) -->
         <div class="two-column-layout flex-1 grid grid-cols-1 lg:grid-cols-2 min-h-screen">
@@ -964,8 +964,8 @@ wp_add_inline_style('lebonresto-debug-css', '
                             </select>
                         </div>
                         </div>
-                    </div>
-                    
+</div>
+
                 <!-- Restaurant Cards Container -->
                 <div id="restaurants-container" class="flex-1 p-4 overflow-y-auto align-items-center mobile-cards-section">
                         <!-- Restaurant cards will be loaded here via JavaScript -->

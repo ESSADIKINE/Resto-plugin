@@ -30,7 +30,7 @@ function lebonresto_all_restaurants_page_shortcode($atts) {
     wp_enqueue_style('tailwind-css', 'https://cdn.tailwindcss.com', array(), '3.4.0');
 
     // Enqueue All Restaurants CSS
-    wp_enqueue_style(
+        wp_enqueue_style(
         'lebonresto-all-restaurants-css',
         LEBONRESTO_PLUGIN_URL . 'assets/css/all-restaurants.css',
         array('tailwind-css'),
@@ -38,13 +38,13 @@ function lebonresto_all_restaurants_page_shortcode($atts) {
     );
 
     // Enqueue All Restaurants JavaScript
-    wp_enqueue_script(
+        wp_enqueue_script(
         'lebonresto-all-restaurants-js',
         LEBONRESTO_PLUGIN_URL . 'assets/js/all-restaurants.js',
         array('jquery'),
-        LEBONRESTO_PLUGIN_VERSION,
-        true
-    );
+            LEBONRESTO_PLUGIN_VERSION,
+            true
+        );
 
     // Start output buffering
     ob_start();
@@ -123,54 +123,54 @@ function lebonresto_map_page_shortcode($atts) {
                 <div class="flex flex-col lg:flex-row items-center gap-4">
                     <!-- Restaurant Name Search -->
                     <div class="flex-1">
-                        <input 
-                            type="text" 
-                            id="restaurant-name-filter" 
+                            <input 
+                                type="text" 
+                                id="restaurant-name-filter" 
                             placeholder="<?php _e('Search restaurants...', 'le-bon-resto'); ?>"
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
-                        />
-                    </div>
-                    
+                            />
+                        </div>
+                        
                     <!-- City Filter -->
                     <div class="w-full lg:w-48">
-                        <input 
-                            type="text" 
-                            id="city-filter" 
+                            <input 
+                                type="text" 
+                                id="city-filter" 
                             placeholder="<?php _e('City...', 'le-bon-resto'); ?>"
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
-                        />
-                    </div>
-                    
+                            />
+                        </div>
+                        
                     <!-- Cuisine Filter -->
                     <div class="w-full lg:w-48">
-                        <select 
-                            id="cuisine-filter"
+                            <select 
+                                id="cuisine-filter" 
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
-                        >
-                            <option value=""><?php _e('All Cuisines', 'le-bon-resto'); ?></option>
+                            >
+                                <option value=""><?php _e('All Cuisines', 'le-bon-resto'); ?></option>
                             <option value="french"><?php _e('French', 'le-bon-resto'); ?></option>
                             <option value="italian"><?php _e('Italian', 'le-bon-resto'); ?></option>
                             <option value="mediterranean"><?php _e('Mediterranean', 'le-bon-resto'); ?></option>
-                        </select>
-                    </div>
-                    
+                            </select>
+                        </div>
+                        
                     <!-- Search Button -->
-                    <button 
+                            <button 
                         id="search-restaurants"
                         class="w-full lg:w-auto px-6 py-2 bg-yellow-400 hover:bg-yellow-500 text-gray-800 font-semibold rounded-lg transition duration-200"
                     >
                         <i class="fas fa-search mr-2"></i><?php _e('Search', 'le-bon-resto'); ?>
-                    </button>
+                            </button>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
-
+                
         <!-- Map Container -->
         <div class="p-4">
             <div class="bg-white rounded-lg shadow-lg p-4">
                 <div id="lebonresto-map-page" style="width: 100%; height: 75vh;"></div>
-            </div>
-
+                            </div>
+                            
             <!-- Results Info -->
             <div class="mt-6 flex justify-between items-center">
                 <div id="map-results-count" class="text-sm text-gray-600"></div>
@@ -320,7 +320,7 @@ function lebonresto_gallery_only_shortcode($atts) {
                     <?php if ($atts['show_captions'] === 'true' && !empty($image['alt'])): ?>
                         <div class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2 rounded-b-lg">
                             <p class="text-sm"><?php echo esc_html($image['alt']); ?></p>
-                        </div>
+                </div>
                     <?php endif; ?>
                 </div>
             <?php endforeach; ?>
@@ -396,7 +396,7 @@ function lebonresto_restaurant_detail_shortcode($atts) {
 
     // Get gallery images
     if (function_exists('lebonresto_get_gallery_images')) {
-        $gallery_images = lebonresto_get_gallery_images($restaurant_id);
+    $gallery_images = lebonresto_get_gallery_images($restaurant_id);
     } else {
         $gallery_ids = get_post_meta($restaurant_id, '_restaurant_gallery', true);
         $gallery_images = array();
@@ -440,29 +440,29 @@ function lebonresto_restaurant_detail_shortcode($atts) {
             <div class="relative z-10 container mx-auto px-4 py-16">
                 <div class="max-w-4xl">
                     <h1 class="text-5xl font-bold text-white mb-4">
-                        <?php echo esc_html($restaurant->post_title); ?>
-                    </h1>
+                            <?php echo esc_html($restaurant->post_title); ?>
+                        </h1>
                     
-                    <?php if ($is_featured === '1'): ?>
+                        <?php if ($is_featured === '1'): ?>
                         <div class="inline-block px-4 py-2 bg-yellow-400 text-gray-800 text-sm font-semibold rounded-full mb-6">
-                            <i class="fas fa-star mr-1"></i><?php _e('Featured Restaurant', 'le-bon-resto'); ?>
-                        </div>
-                    <?php endif; ?>
-                    
+                                <i class="fas fa-star mr-1"></i><?php _e('Featured Restaurant', 'le-bon-resto'); ?>
+                    </div>
+                        <?php endif; ?>
+                        
                     <div class="flex flex-wrap gap-4 mb-6">
-                        <?php if ($address || $city): ?>
+                    <?php if ($address || $city): ?>
                             <div class="flex items-center text-white">
                                 <i class="fas fa-map-marker-alt mr-2 text-yellow-400"></i>
                                 <span><?php echo esc_html($address); ?><?php if ($city): ?>, <?php echo esc_html($city); ?><?php endif; ?></span>
-                            </div>
-                        <?php endif; ?>
-                        
-                        <?php if ($cuisine_type): ?>
+                        </div>
+                    <?php endif; ?>
+
+                    <?php if ($cuisine_type): ?>
                             <div class="flex items-center text-white">
                                 <i class="fas fa-utensils mr-2 text-yellow-400"></i>
                                 <span><?php echo esc_html(ucfirst($cuisine_type)); ?></span>
-                            </div>
-                        <?php endif; ?>
+                        </div>
+                    <?php endif; ?>
                     </div>
                     
                     <?php if ($description): ?>
@@ -475,31 +475,31 @@ function lebonresto_restaurant_detail_shortcode($atts) {
         <!-- Restaurant Information Cards -->
         <div class="container mx-auto px-4 py-12">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-                <?php if ($phone): ?>
+                    <?php if ($phone): ?>
                     <div class="bg-white rounded-lg shadow-lg p-6 text-center">
                         <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                             <i class="fas fa-phone text-green-600 text-2xl"></i>
                         </div>
                         <h3 class="text-lg font-semibold text-gray-800 mb-2"><?php _e('Phone', 'le-bon-resto'); ?></h3>
-                        <p class="text-gray-600"><?php echo esc_html($phone); ?></p>
-                    </div>
-                <?php endif; ?>
-                
-                <?php if ($email): ?>
+                            <p class="text-gray-600"><?php echo esc_html($phone); ?></p>
+                        </div>
+                    <?php endif; ?>
+
+                    <?php if ($email): ?>
                     <div class="bg-white rounded-lg shadow-lg p-6 text-center">
                         <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
                             <i class="fas fa-envelope text-blue-600 text-2xl"></i>
                         </div>
                         <h3 class="text-lg font-semibold text-gray-800 mb-2"><?php _e('Email', 'le-bon-resto'); ?></h3>
-                        <p class="text-gray-600"><?php echo esc_html($email); ?></p>
-                    </div>
-                <?php endif; ?>
+                            <p class="text-gray-600"><?php echo esc_html($email); ?></p>
+                        </div>
+                    <?php endif; ?>
                 
                 <?php if ($video_url): ?>
                     <div class="bg-white rounded-lg shadow-lg p-6 text-center">
                         <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
                             <i class="fas fa-play-circle text-red-600 text-2xl"></i>
-                        </div>
+                </div>
                         <h3 class="text-lg font-semibold text-gray-800 mb-2"><?php _e('Video', 'le-bon-resto'); ?></h3>
                         <p class="text-gray-600"><?php _e('Available', 'le-bon-resto'); ?></p>
                     </div>
@@ -558,16 +558,16 @@ function lebonresto_restaurant_detail_shortcode($atts) {
                         <?php _e('Photo Gallery', 'le-bon-resto'); ?>
                     </h2>
                     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                        <?php foreach ($gallery_images as $image): ?>
+            <?php foreach ($gallery_images as $image): ?>
                             <div class="relative group cursor-pointer">
                                 <img src="<?php echo esc_url($image['url']); ?>" 
                                      alt="<?php echo esc_attr($image['alt'] ?: $restaurant->post_title); ?>" 
                                      class="w-full h-48 object-cover rounded-lg shadow-md transition duration-300 group-hover:shadow-lg group-hover:scale-105">
                                 <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition duration-300 rounded-lg flex items-center justify-center">
                                     <i class="fas fa-search-plus text-white text-2xl opacity-0 group-hover:opacity-100 transition duration-300"></i>
-                                </div>
-                            </div>
-                        <?php endforeach; ?>
+                        </div>
+                </div>
+            <?php endforeach; ?>
                     </div>
                 </div>
             <?php endif; ?>

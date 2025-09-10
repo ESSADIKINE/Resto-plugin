@@ -76,6 +76,7 @@ class LeBonResto {
         require_once LEBONRESTO_PLUGIN_PATH . 'includes/shortcodes.php';
         require_once LEBONRESTO_PLUGIN_PATH . 'includes/api.php';
         require_once LEBONRESTO_PLUGIN_PATH . 'includes/templates.php';
+        require_once LEBONRESTO_PLUGIN_PATH . 'includes/email-handler.php';
         
         // Load admin interface if in admin
         if (is_admin()) {

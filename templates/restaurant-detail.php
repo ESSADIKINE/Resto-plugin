@@ -530,7 +530,10 @@ if (!$principal_image && !empty($gallery_images)) {
                     <aside id="sidebar" class="sidebar-wrap">
                         <div class="property-form-wrap" id="contact-form-wrapper">
                             <div class="property-form clearfix">
-                                <form method="post" action="#">
+                                <form id="restaurant-contact-form" method="post" action="#">
+                                    <?php wp_nonce_field('lebonresto_contact_form', 'contact_nonce'); ?>
+                                    <input type="hidden" name="restaurant_id" value="<?php echo esc_attr($restaurant_id); ?>">
+                                    
                                     <div class="agent-details">
                                         <div class="d-flex align-items-center">
                                             <div class="agent-image">
@@ -555,7 +558,7 @@ if (!$principal_image && !empty($gallery_images)) {
                                     </div>
                                     
                                     <div class="form-group">
-                                        <input class="form-control" name="name" type="text" placeholder="Prénom">
+                                        <input class="form-control" name="name" type="text" placeholder="Prénom *" required>
                                     </div>
                                     
                                     <div class="form-group">
@@ -563,17 +566,23 @@ if (!$principal_image && !empty($gallery_images)) {
                                     </div>
                                     
                                     <div class="form-group">
-                                        <input class="form-control" name="email" type="email" placeholder="Email">
+                                        <input class="form-control" name="email" type="email" placeholder="Email *" required>
                                     </div>
                                     
                                     <div class="form-group form-group-textarea">
-                                        <textarea class="form-control hz-form-message" name="message" rows="4" placeholder="Message">Bonjour, [<?php the_title(); ?>]</textarea>
+                                        <textarea class="form-control hz-form-message" name="message" rows="4" placeholder="Message *" required>Bonjour, [<?php the_title(); ?>]</textarea>
                                     </div>
                                     
                                     <button type="submit" class="btn btn-primary btn-full-width">
                                         <i class="fas fa-paper-plane mr-1"></i>
-                                        Envoyer
+                                        <span class="btn-text">Envoyer</span>
+                                        <span class="btn-loading" style="display: none;">
+                                            <i class="fas fa-spinner fa-spin mr-1"></i>
+                                            Envoi en cours...
+                                        </span>
                                     </button>
+                                    
+                                    <div id="form-message" class="form-message" style="margin-top: 15px; padding: 10px; border-radius: 5px; display: none;"></div>
                                     
                                     <?php if ($phone): ?>
                                     <a href="tel:<?php echo esc_attr($phone); ?>" class="btn btn-success btn-full-width mt-2">
@@ -1316,7 +1325,87 @@ document.addEventListener('keydown', function(e) {
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Initializing clean sticky contact form...');
             setTimeout(initCleanStickyContact, 1000);
+            
+            // Initialize contact form
+            initContactForm();
         });
+        
+        // Contact form functionality
+        function initContactForm() {
+            const form = document.getElementById('restaurant-contact-form');
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const btnText = submitBtn.querySelector('.btn-text');
+            const btnLoading = submitBtn.querySelector('.btn-loading');
+            const formMessage = document.getElementById('form-message');
+            
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Show loading state
+                submitBtn.disabled = true;
+                btnText.style.display = 'none';
+                btnLoading.style.display = 'inline';
+                
+                // Hide previous messages
+                formMessage.style.display = 'none';
+                
+                // Get form data
+                const formData = new FormData(form);
+                formData.append('action', 'lebonresto_send_contact_email');
+                formData.append('nonce', '<?php echo wp_create_nonce('lebonresto_contact_form'); ?>');
+                
+                // Send AJAX request
+                fetch('<?php echo admin_url('admin-ajax.php'); ?>', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Hide loading state
+                    submitBtn.disabled = false;
+                    btnText.style.display = 'inline';
+                    btnLoading.style.display = 'none';
+                    
+                    // Show message
+                    formMessage.style.display = 'block';
+                    formMessage.className = 'form-message';
+                    
+                    if (data.success) {
+                        formMessage.style.backgroundColor = '#d4edda';
+                        formMessage.style.color = '#155724';
+                        formMessage.style.border = '1px solid #c3e6cb';
+                        formMessage.innerHTML = '<i class="fas fa-check-circle"></i> ' + data.message;
+                        
+                        // Reset form
+                        form.reset();
+                    } else {
+                        formMessage.style.backgroundColor = '#f8d7da';
+                        formMessage.style.color = '#721c24';
+                        formMessage.style.border = '1px solid #f5c6cb';
+                        formMessage.innerHTML = '<i class="fas fa-exclamation-triangle"></i> ' + data.message;
+                    }
+                    
+                    // Scroll to message
+                    formMessage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    
+                    // Hide loading state
+                    submitBtn.disabled = false;
+                    btnText.style.display = 'inline';
+                    btnLoading.style.display = 'none';
+                    
+                    // Show error message
+                    formMessage.style.display = 'block';
+                    formMessage.className = 'form-message';
+                    formMessage.style.backgroundColor = '#f8d7da';
+                    formMessage.style.color = '#721c24';
+                    formMessage.style.border = '1px solid #f5c6cb';
+                    formMessage.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Une erreur s\'est produite. Veuillez réessayer.';
+                });
+            });
+        }
 </script>
 
 <?php get_footer(); ?>
