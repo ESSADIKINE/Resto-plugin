@@ -1308,7 +1308,6 @@ $cuisine_types = lebonresto_get_cuisine_types();
             overflow-y: auto !important;
             overflow-x: hidden !important;
             padding: 0 16px !important;
-            margin-bottom: 80px !important; /* Space for pagination bar */
         }
 
         /* Restaurant Cards List */
