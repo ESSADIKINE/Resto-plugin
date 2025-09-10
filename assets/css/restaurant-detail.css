@@ -2,8 +2,8 @@
 
 /* CSS Custom Properties */
 :root {
-    --primary-color: #FFC107;
-    --primary-dark: #FF8F00;
+    --primary-color: #fedc00;
+    --primary-dark: #fedc00;
     --primary-light: #FFF8E1;
     --secondary-color: #1f2937;
     --accent-color: #10b981;
@@ -27,7 +27,7 @@
     --transition-fast: 0.15s ease;
     --transition-normal: 0.3s ease;
     --transition-slow: 0.5s ease;
-    --gradient-primary: linear-gradient(135deg, #FFC107 0%, #FF8F00 100%);
+    --gradient-primary: linear-gradient(135deg, #fedc00 0%, #fedc00 100%);
     --gradient-secondary: linear-gradient(135deg, #1f2937 0%, #111827 100%);
     --gradient-accent: linear-gradient(135deg, #10b981 0%, #059669 100%);
     --gradient-glass: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
@@ -361,7 +361,7 @@
 }
 
 .breadcrumb-item a:hover {
-    color: #f59e0b;
+    color: #fedc00;
 }
 
 .breadcrumb-item.active {
@@ -397,7 +397,7 @@
 }
 
 .item-tool span:hover {
-    background: #f59e0b;
+    background: #fedc00;
     color: #1f2937;
 }
 
@@ -467,7 +467,7 @@
 
 .nav-link:hover,
 .nav-link.active {
-    background: #f59e0b;
+    background: #fedc00;
     color: #1f2937;
 }
 
@@ -802,7 +802,7 @@
 
 .form-control:focus {
     outline: none;
-    border-color: #f59e0b;
+    border-color: #fedc00;
     box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
 }
 
@@ -1202,7 +1202,7 @@
 
 /* Focus States */
 *:focus {
-    outline: 2px solid #f59e0b;
+    outline: 2px solid #fedc00;
     outline-offset: 2px;
 }
 
@@ -1878,7 +1878,7 @@ html {
     margin-bottom: 2rem;
 }
 
-.menu-item {
+.menu-item1 {
     border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
     padding: 1.5rem;
@@ -1888,20 +1888,20 @@ html {
     text-align: center;
 }
 
-.menu-item:hover {
+.menu-item1:hover {
     transform: translateY(-2px);
     box-shadow: var(--shadow-lg);
     border-color: var(--primary-color);
 }
 
-.menu-item h3 {
+.menu-item1 h3 {
     margin: 0 0 1rem 0;
     color: var(--text-primary);
     font-size: 1.25rem;
     font-weight: 600;
 }
 
-.menu-item a {
+.menu-item1 a {
     display: inline-flex;
     align-items: center;
     padding: 0.75rem 1.5rem;
@@ -1913,7 +1913,7 @@ html {
     transition: var(--transition);
 }
 
-.menu-item a:hover {
+.menu-item1 a:hover {
     transform: scale(1.05);
     box-shadow: var(--shadow-md);
 }
@@ -1924,11 +1924,11 @@ html {
         gap: 1rem;
     }
     
-    .menu-item {
+    .menu-item1 {
         padding: 1rem;
     }
     
-    .menu-item h3 {
+    .menu-item1 h3 {
         font-size: 1.1rem;
     }
 }

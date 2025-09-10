@@ -478,7 +478,7 @@
         content += `<h3 style="font-size: 14px; font-weight: 600; color: #1f2937; margin: 0 0 6px 0; padding: 0; line-height: 1.3;">${escapeHtml(title)}</h3>`;
         
         // Click to view details indicator
-        content += `<div style="display: flex; align-items: center; background-color: #fef3c7; border-radius: 4px; padding: 4px 6px; margin-bottom: 6px; font-size: 10px; color: #92400e;">`;
+        content += `<div style="display: flex; align-items: center; background-color: #fedc00; border-radius: 4px; padding: 4px 6px; margin-bottom: 6px; font-size: 10px; color: #fedc00;">`;
         content += `<i class="fas fa-external-link-alt" style="margin-right: 4px; font-size: 8px;"></i>`;
         content += `<span style="font-weight: 500;">Cliquez pour voir les détails</span>`;
         content += `</div>`;
@@ -486,14 +486,14 @@
         // Restaurant details as cards (smaller on mobile)
         if (meta.city) {
             content += `<div style="display: flex; align-items: center; background-color: #f9fafb; border-radius: 4px; padding: 4px 6px; margin-bottom: 3px; font-size: 10px;">`;
-            content += `<i class="fas fa-map-marker-alt" style="margin-right: 4px; color: #f59e0b; font-size: 8px;"></i>`;
+            content += `<i class="fas fa-map-marker-alt" style="margin-right: 4px; color: #fedc00; font-size: 8px;"></i>`;
             content += `<span style="color: #374151; font-weight: 500;">${escapeHtml(meta.city)}</span>`;
             content += `</div>`;
         }
         
         if (meta.cuisine_type) {
             content += `<div style="display: flex; align-items: center; background-color: #f9fafb; border-radius: 4px; padding: 4px 6px; margin-bottom: 3px; font-size: 10px;">`;
-            content += `<i class="fas fa-utensils" style="margin-right: 4px; color: #f59e0b; font-size: 8px;"></i>`;
+            content += `<i class="fas fa-utensils" style="margin-right: 4px; color: #fedc00; font-size: 8px;"></i>`;
             content += `<span style="color: #374151; font-weight: 500;">${escapeHtml(meta.cuisine_type.charAt(0).toUpperCase() + meta.cuisine_type.slice(1))}</span>`;
             content += `</div>`;
         }

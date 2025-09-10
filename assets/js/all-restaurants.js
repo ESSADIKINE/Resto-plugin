@@ -1390,7 +1390,7 @@
                 <button 
                     onclick="loadRestaurants(true)"
                     class="px-6 py-3 bg-yellow-400 hover:bg-yellow-500 text-gray-800 font-semibold rounded-lg transition duration-200"
-                    style="background-color: #FFC107;"
+                    style="background-color: #fedc00;"
                 >
                     <i class="fas fa-redo mr-2"></i>Try Again
                 </button>

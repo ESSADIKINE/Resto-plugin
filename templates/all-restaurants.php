@@ -53,7 +53,7 @@ wp_localize_script(
         'settings' => array(
             'defaultRadius' => isset($options['default_radius']) ? intval($options['default_radius']) : 25,
             'maxRadius' => isset($options['max_radius']) ? intval($options['max_radius']) : 100,
-            'primaryColor' => isset($options['primary_color']) ? $options['primary_color'] : '#FFC107',
+            'primaryColor' => isset($options['primary_color']) ? $options['primary_color'] : '#fedc00',
         ),
     )
 );
@@ -82,7 +82,7 @@ $cuisine_types = lebonresto_get_cuisine_types();
                 <button 
                     id="mobile-filter-btn"
                     class="bg-yellow-400 hover:bg-yellow-500 text-gray-800 p-3 rounded-full shadow-lg transition-all duration-300 transform hover:scale-105"
-                    style="background-color: #FFC107;"
+                    style="background-color: #fedc00;"
                     title="Basculer les Filtres"
                 >
                     <!-- Menu Icon (Default) -->
@@ -148,7 +148,7 @@ $cuisine_types = lebonresto_get_cuisine_types();
                         
                         <!-- Action Buttons -->
                         <div class="space-y-3 pt-4">
-                            <button id="mobile-search-restaurants" class="w-full px-4 py-3 bg-yellow-400 hover:bg-yellow-500 text-gray-800 font-semibold rounded-lg transition duration-200 text-sm" style="background-color: #FFC107;">
+                            <button id="mobile-search-restaurants" class="w-full px-4 py-3 bg-yellow-400 hover:bg-yellow-500 text-gray-800 font-semibold rounded-lg transition duration-200 text-sm" style="background-color: #fedc00;">
                                 Appliquer les Filtres
                             </button>
                             
@@ -382,7 +382,7 @@ $cuisine_types = lebonresto_get_cuisine_types();
             margin: 0 !important;
             padding: 0 !important;
             background: rgba(255, 255, 255, 0.95) !important;
-            border: 2px solid #FFC107 !important;
+            border: 2px solid #fedc00 !important;
             border-radius: 12px !important;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
             transition: all 0.3s ease !important;
@@ -393,7 +393,7 @@ $cuisine_types = lebonresto_get_cuisine_types();
         }
 
         .mobile-filter-toggle button:hover {
-            background: #FFC107 !important;
+            background: #fedc00 !important;
             transform: scale(1.05) !important;
         }
 
@@ -496,7 +496,7 @@ $cuisine_types = lebonresto_get_cuisine_types();
 
         .mobile-filter-panel input:focus,
         .mobile-filter-panel select:focus {
-            border-color: #FFC107 !important;
+            border-color: #fedc00 !important;
             box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.1) !important;
             outline: none !important;
         }
@@ -543,8 +543,8 @@ $cuisine_types = lebonresto_get_cuisine_types();
         }
 
         .mobile-filter-panel input[type="checkbox"]:checked {
-            background-color: #fbbf24 !important;
-            border-color: #FFC107 !important;
+            background-color: #fedc00 !important;
+            border-color: #fedc00 !important;
         }
 
         .mobile-filter-panel .flex.items-center span {
@@ -573,12 +573,12 @@ $cuisine_types = lebonresto_get_cuisine_types();
         }
 
         .mobile-filter-panel #mobile-search-restaurants {
-            background-color: #FFC107 !important;
+            background-color: #fedc00 !important;
             color: #1f2937 !important;
         }
 
         .mobile-filter-panel #mobile-search-restaurants:hover {
-            background-color: #f59e0b !important;
+            background-color: #fedc00 !important;
         }
 
         .mobile-filter-panel #mobile-clear-filters {
@@ -600,7 +600,7 @@ $cuisine_types = lebonresto_get_cuisine_types();
         }
 
         .mobile-filter-panel::-webkit-scrollbar-thumb {
-            background: #FFC107;
+            background: #fedc00;
             border-radius: 2px;
         }
 
@@ -678,7 +678,7 @@ $cuisine_types = lebonresto_get_cuisine_types();
         .lebonresto-all-restaurants h1 {
             font-size: 3rem !important;
             font-weight: 800 !important;
-            background: linear-gradient(135deg, #FFC107 0%, #FF8F00 100%) !important;
+            background: linear-gradient(135deg, #fedc00 0%, #fedc00 100%) !important;
             -webkit-background-clip: text !important;
             -webkit-text-fill-color: transparent !important;
             background-clip: text !important;
@@ -744,7 +744,7 @@ $cuisine_types = lebonresto_get_cuisine_types();
 
         .lebonresto-all-restaurants .left-column h2 i {
             margin-right: 8px !important;
-            color: #FFC107 !important;
+            color: #fedc00 !important;
         }
 
         /* Website Logo Styling */
@@ -765,7 +765,7 @@ $cuisine_types = lebonresto_get_cuisine_types();
         .lebonresto-all-restaurants .logo-fallback h1 {
             font-size: 2rem !important;
             font-weight: 800 !important;
-            color: #FFC107 !important;
+            color: #fedc00 !important;
             margin-bottom: 8px !important;
         }
 
@@ -804,7 +804,7 @@ $cuisine_types = lebonresto_get_cuisine_types();
         }
 
         .lebonresto-all-restaurants .floating-input:focus {
-            border-color: #FFC107 !important;
+            border-color: #fedc00 !important;
             box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.1), 0 4px 12px rgba(0, 0, 0, 0.1) !important;
             transform: translateY(-1px) !important;
         }
@@ -812,7 +812,7 @@ $cuisine_types = lebonresto_get_cuisine_types();
         .lebonresto-all-restaurants .floating-input:focus + .floating-label,
         .lebonresto-all-restaurants .floating-input:not(:placeholder-shown) + .floating-label {
             transform: translateY(-12px) scale(0.85) !important;
-            color: #FFC107 !important;
+            color: #fedc00 !important;
             background: #ffffff !important;
             padding: 0 4px !important;
         }
@@ -841,19 +841,19 @@ $cuisine_types = lebonresto_get_cuisine_types();
 
         .lebonresto-all-restaurants .floating-input:focus + .floating-label i,
         .lebonresto-all-restaurants .floating-input:not(:placeholder-shown) + .floating-label i {
-            color: #FFC107 !important;
+            color: #fedc00 !important;
         }
 
         /* Active Floating Label State */
         .lebonresto-all-restaurants .floating-label-active {
             transform: translateY(-12px) scale(0.85) !important;
-            color: #FFC107 !important;
+            color: #fedc00 !important;
             background: #ffffff !important;
             padding: 0 4px !important;
         }
 
         .lebonresto-all-restaurants .floating-label-active i {
-            color: #FFC107 !important;
+            color: #fedc00 !important;
         }
 
         /* Modern Select Design */
@@ -883,7 +883,7 @@ $cuisine_types = lebonresto_get_cuisine_types();
         }
 
         .lebonresto-all-restaurants .floating-select:focus {
-            border-color: #FFC107 !important;
+            border-color: #fedc00 !important;
             box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.1), 0 4px 12px rgba(0, 0, 0, 0.1) !important;
             transform: translateY(-1px) !important;
         }
@@ -891,7 +891,7 @@ $cuisine_types = lebonresto_get_cuisine_types();
         .lebonresto-all-restaurants .floating-select:focus + .floating-select-label,
         .lebonresto-all-restaurants .floating-select:not([value=""]) + .floating-select-label {
             transform: translateY(-12px) scale(0.85) !important;
-            color: #FFC107 !important;
+            color: #fedc00 !important;
             background: #ffffff !important;
             padding: 0 4px !important;
         }
@@ -919,7 +919,7 @@ $cuisine_types = lebonresto_get_cuisine_types();
 
         .lebonresto-all-restaurants .floating-select:focus + .floating-select-label i,
         .lebonresto-all-restaurants .floating-select:not([value=""]) + .floating-select-label i {
-            color: #FFC107 !important;
+            color: #fedc00 !important;
         }
 
         .lebonresto-all-restaurants .select-arrow {
@@ -942,7 +942,7 @@ $cuisine_types = lebonresto_get_cuisine_types();
         }
 
         .lebonresto-all-restaurants .floating-select:focus + .floating-select-label + .select-arrow i {
-            color: #FFC107 !important;
+            color: #fedc00 !important;
         }
 
         /* Multi-select styling */
@@ -966,7 +966,7 @@ $cuisine_types = lebonresto_get_cuisine_types();
         }
 
         .lebonresto-all-restaurants .floating-select[multiple] option:checked {
-            background: linear-gradient(135deg, #FFC107 0%, #FF8F00 100%) !important;
+            background: linear-gradient(135deg, #fedc00 0%, #fedc00 100%) !important;
             color: #ffffff !important;
             font-weight: 600 !important;
         }
@@ -1028,7 +1028,7 @@ $cuisine_types = lebonresto_get_cuisine_types();
         }
 
         .lebonresto-all-restaurants .distance-btn:hover {
-            border-color: #FFC107 !important;
+            border-color: #fedc00 !important;
             background: #FFF8E1 !important;
             color: #1f2937 !important;
             transform: translateY(-1px) !important;
@@ -1036,8 +1036,8 @@ $cuisine_types = lebonresto_get_cuisine_types();
         }
 
         .lebonresto-all-restaurants .distance-btn.active {
-            border-color: #FF8F00 !important;
-            background: linear-gradient(135deg, #FFC107 0%, #FF8F00 100%) !important;
+            border-color: #fedc00 !important;
+            background: linear-gradient(135deg, #fedc00 0%, #fedc00 100%) !important;
             color: #ffffff !important;
             font-weight: 600 !important;
             transform: translateY(-1px) !important;
@@ -1136,13 +1136,13 @@ $cuisine_types = lebonresto_get_cuisine_types();
 
         .lebonresto-all-restaurants .filter-input-small:hover,
         .lebonresto-all-restaurants .filter-select-small:hover {
-            border-color: #FFC107 !important;
+            border-color: #fedc00 !important;
             box-shadow: 0 2px 8px rgba(255, 193, 7, 0.15) !important;
         }
 
         .lebonresto-all-restaurants .filter-input-small:focus,
         .lebonresto-all-restaurants .filter-select-small:focus {
-            border-color: #FF8F00 !important;
+            border-color: #fedc00 !important;
             box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.1) !important;
             outline: none !important;
         }
@@ -1165,31 +1165,31 @@ $cuisine_types = lebonresto_get_cuisine_types();
         }
 
         .lebonresto-all-restaurants .checkbox-label-small:hover {
-            color: #FFC107 !important;
+            color: #fedc00 !important;
         }
 
         .lebonresto-all-restaurants .checkbox-label-small input[type="checkbox"] {
             width: 16px !important;
             height: 16px !important;
             margin-right: 8px !important;
-            accent-color: #fbbf24 !important;
+            accent-color: #fedc00 !important;
         }
 
         .lebonresto-all-restaurants .checkbox-label-small i {
             margin-right: 6px !important;
-            color: #FFC107 !important;
+            color: #fedc00 !important;
             font-size: 12px !important;
         }
 
         /* Clear Filter Button */
         .lebonresto-all-restaurants .btn-secondary {
-            background: linear-gradient(135deg, #FFC107 0%, #FF8F00 100%) !important;
+            background: linear-gradient(135deg, #fedc00 0%, #fedc00 100%) !important;
             color: #ffffff !important;
             padding: 12px 24px !important;
             border-radius: 8px !important;
             font-weight: 600 !important;
             font-size: 14px !important;
-            border: 1px solid #FF8F00 !important;
+            border: 1px solid #fedc00 !important;
             cursor: pointer !important;
             transition: all 0.3s ease !important;
             box-shadow: 0 2px 4px rgba(255, 193, 7, 0.3) !important;
@@ -1199,7 +1199,7 @@ $cuisine_types = lebonresto_get_cuisine_types();
         }
 
         .lebonresto-all-restaurants .btn-secondary:hover {
-            background: linear-gradient(135deg, #FF8F00 0%, #FF6F00 100%) !important;
+            background: linear-gradient(135deg, #fedc00 0%, #fedc00 100%) !important;
             transform: translateY(-1px) !important;
             box-shadow: 0 4px 8px rgba(255, 193, 7, 0.4) !important;
         }
@@ -1231,7 +1231,7 @@ $cuisine_types = lebonresto_get_cuisine_types();
 
         .lebonresto-all-restaurants input:focus,
         .lebonresto-all-restaurants select:focus {
-            border-color: #FFC107 !important;
+            border-color: #fedc00 !important;
             box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.1), 0 4px 8px rgba(0, 0, 0, 0.1) !important;
             outline: none !important;
             transform: translateY(-1px) !important;
@@ -1254,9 +1254,9 @@ $cuisine_types = lebonresto_get_cuisine_types();
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
         }
 
-        .lebonresto-all-restaurants button[style*="background-color: #FFC107"],
+        .lebonresto-all-restaurants button[style*="background-color: #fedc00"],
         .lebonresto-all-restaurants .bg-yellow-400 {
-            background: linear-gradient(135deg, #FFC107 0%, #FF8F00 100%) !important;
+            background: linear-gradient(135deg, #fedc00 0%, #fedc00 100%) !important;
             color: #1f2937 !important;
             font-weight: 700 !important;
         }
@@ -1277,8 +1277,8 @@ $cuisine_types = lebonresto_get_cuisine_types();
         }
 
         .lebonresto-all-restaurants input[type="checkbox"]:checked {
-            background-color: #fbbf24 !important;
-            border-color: #FFC107 !important;
+            background-color: #fedc00 !important;
+            border-color: #fedc00 !important;
         }
 
         /* Results Header */
@@ -1369,9 +1369,9 @@ $cuisine_types = lebonresto_get_cuisine_types();
         }
 
         .lebonresto-all-restaurants .pagination-btn.active {
-            background: linear-gradient(135deg, #FFC107 0%, #FF8F00 100%) !important;
+            background: linear-gradient(135deg, #fedc00 0%, #fedc00 100%) !important;
             color: white !important;
-            border-color: #FF8F00 !important;
+            border-color: #fedc00 !important;
             font-weight: 600 !important;
         }
 
@@ -1404,12 +1404,12 @@ $cuisine_types = lebonresto_get_cuisine_types();
         }
 
         .lebonresto-all-restaurants .restaurants-container::-webkit-scrollbar-thumb {
-            background: linear-gradient(135deg, #FFC107 0%, #FF8F00 100%) !important;
+            background: linear-gradient(135deg, #fedc00 0%, #fedc00 100%) !important;
             border-radius: 4px !important;
         }
 
         .lebonresto-all-restaurants .restaurants-container::-webkit-scrollbar-thumb:hover {
-            background: linear-gradient(135deg, #FF8F00 0%, #FF6F00 100%) !important;
+            background: linear-gradient(135deg, #fedc00 0%, #fedc00 100%) !important;
         }
 
         /* Restaurant Cards - New Layout */
@@ -1432,7 +1432,7 @@ $cuisine_types = lebonresto_get_cuisine_types();
         .lebonresto-all-restaurants .restaurant-card:hover {
             box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15) !important;
             transform: translateY(-2px) !important;
-            border-color: #FFC107 !important;
+            border-color: #fedc00 !important;
         }
 
         /* Card Content Layout - Three Columns */
@@ -1556,7 +1556,7 @@ $cuisine_types = lebonresto_get_cuisine_types();
             justify-content: center !important;
             width: 32px !important;
             height: 32px !important;
-            background: linear-gradient(135deg, #FFC107 0%, #FF8F00 100%) !important;
+            background: linear-gradient(135deg, #fedc00 0%, #fedc00 100%) !important;
             border: none !important;
             border-radius: 50% !important;
             color: #ffffff !important;
@@ -1583,7 +1583,7 @@ $cuisine_types = lebonresto_get_cuisine_types();
 
         .lebonresto-all-restaurants .restaurant-card .action-icon-btn:hover {
             background: #ffffff !important;
-            color: #FF8F00 !important;
+            color: #fedc00 !important;
             transform: scale(1.15) translateY(-2px) !important;
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2) !important;
             text-decoration: none !important;
@@ -1608,7 +1608,7 @@ $cuisine_types = lebonresto_get_cuisine_types();
 
         /* WhatsApp Button - Same Color as Other Icons */
         .lebonresto-all-restaurants .restaurant-card .whatsapp-btn {
-            background: linear-gradient(135deg, #FFC107 0%, #FF8F00 100%) !important;
+            background: linear-gradient(135deg, #fedc00 0%, #fedc00 100%) !important;
             box-shadow: 0 2px 6px rgba(255, 193, 7, 0.3) !important;
             width: 32px !important;
             height: 32px !important;
@@ -1616,7 +1616,7 @@ $cuisine_types = lebonresto_get_cuisine_types();
 
         .lebonresto-all-restaurants .restaurant-card .whatsapp-btn:hover {
             background: #ffffff !important;
-            color: #FF8F00 !important;
+            color: #fedc00 !important;
             box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2) !important;
         }
 
@@ -1639,7 +1639,7 @@ $cuisine_types = lebonresto_get_cuisine_types();
 
         .lebonresto-all-restaurants .restaurant-card .restaurant-category {
             font-size: 0.875rem !important;
-            color: #FFC107 !important;
+            color: #fedc00 !important;
             font-weight: 600 !important;
             margin-bottom: 8px !important;
             text-transform: uppercase !important;
@@ -1660,7 +1660,7 @@ $cuisine_types = lebonresto_get_cuisine_types();
 
         /* Featured Badge */
         .lebonresto-all-restaurants .restaurant-card .featured-badge {
-            background: linear-gradient(135deg, #FFC107 0%, #FF8F00 100%) !important;
+            background: linear-gradient(135deg, #fedc00 0%, #fedc00 100%) !important;
             color: #1f2937 !important;
             padding: 2px 6px !important;
             border-radius: 8px !important;
@@ -1693,8 +1693,8 @@ $cuisine_types = lebonresto_get_cuisine_types();
         /* Loading spinner */
         .loading-spinner {
             border: 4px solid #f3f4f6 !important;
-            border-top: 4px solid #FFC107 !important;
-            border-right: 4px solid #FF8F00 !important;
+            border-top: 4px solid #fedc00 !important;
+            border-right: 4px solid #fedc00 !important;
             border-radius: 50% !important;
             width: 32px !important;
             height: 32px !important;

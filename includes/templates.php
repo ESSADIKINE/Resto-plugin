@@ -180,8 +180,8 @@ function lebonresto_create_detail_css() {
 }
 
 .lebonresto-section h2 {
-    color: #FFC107;
-    border-bottom: 2px solid #FFC107;
+    color: #fedc00;
+    border-bottom: 2px solid #fedc00;
     padding-bottom: 10px;
     margin-bottom: 20px;
 }
@@ -197,7 +197,7 @@ function lebonresto_create_detail_css() {
     padding: 15px;
     background: #f8f9fa;
     border-radius: 8px;
-    border-left: 4px solid #FFC107;
+    border-left: 4px solid #fedc00;
 }
 
 .lebonresto-info-item strong {
@@ -225,11 +225,11 @@ function lebonresto_create_detail_css() {
 .lb-data .lb-caption {
     font-size: 16px;
     font-weight: 500;
-    color: #FFC107;
+    color: #fedc00;
 }
 
 .lb-data .lb-number {
-    color: #FFC107;
+    color: #fedc00;
 }';
 
         file_put_contents($css_file, $css_content);
@@ -371,7 +371,7 @@ function lebonresto_create_all_restaurants_page_now() {
  */
 function lebonresto_add_custom_color_css() {
     $options = get_option('lebonresto_options', array());
-    $primary_color = isset($options['primary_color']) ? $options['primary_color'] : '#FFC107';
+    $primary_color = isset($options['primary_color']) ? $options['primary_color'] : '#fedc00';
     
     wp_add_inline_style('tailwind-css', "
         :root {

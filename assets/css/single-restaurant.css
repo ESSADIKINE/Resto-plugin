@@ -92,13 +92,13 @@
 }
 
 .right-column::-webkit-scrollbar-thumb {
-    background: linear-gradient(135deg, #FFC107 0%, #FF8F00 100%) !important;
+    background: linear-gradient(135deg, #fedc00 0%, #fedc00 100%) !important;
     border-radius: 4px !important;
     border: 1px solid #f3f4f6 !important;
 }
 
 .right-column::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(135deg, #FF8F00 0%, #FF6F00 100%) !important;
+    background: linear-gradient(135deg, #fedc00 0%, #fedc00 100%) !important;
 }
 
 /* Enhanced Virtual Tour Section - Bigger and Better */
@@ -142,7 +142,7 @@
 
 .virtual-tour-section i.fa-vr-cardboard {
     font-size: 4rem !important;
-    color: #fbbf24 !important;
+    color: #fedc00 !important;
     margin-bottom: 1rem !important;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
 }
@@ -217,7 +217,7 @@
     left: 0 !important;
     right: 0 !important;
     height: 3px !important;
-    background: linear-gradient(90deg, #fbbf24 0%, #f59e0b 50%, #fbbf24 100%) !important;
+    background: linear-gradient(90deg, #fedc00 0%, #fedc00 50%, #fedc00 100%) !important;
 }
 
 /* Enhanced Form Components - Bigger and Better */
@@ -250,7 +250,7 @@ select:focus,
 textarea:focus,
 .filter-input:focus,
 .filter-select:focus {
-    border-color: #fbbf24 !important;
+    border-color: #fedc00 !important;
     box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.1), 0 4px 8px rgba(0, 0, 0, 0.1) !important;
     outline: none !important;
     transform: translateY(-1px) !important;
@@ -277,16 +277,16 @@ button,
 
 .filter-button,
 .bg-yellow-400,
-button[style*="background-color: #FFC107"] {
-    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%) !important;
+button[style*="background-color: #fedc00"] {
+    background: linear-gradient(135deg, #fedc00 0%, #fedc00 100%) !important;
     color: #1f2937 !important;
     font-weight: 700 !important;
 }
 
 .filter-button:hover,
 .bg-yellow-400:hover,
-button[style*="background-color: #FFC107"]:hover {
-    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+button[style*="background-color: #fedc00"]:hover {
+    background: linear-gradient(135deg, #fedc00 0%, #fedc00 100%) !important;
     transform: translateY(-2px) !important;
     box-shadow: 0 6px 16px rgba(251, 191, 36, 0.4) !important;
 }
@@ -316,8 +316,8 @@ input[type="checkbox"] {
 }
 
 input[type="checkbox"]:checked {
-    background-color: #fbbf24 !important;
-    border-color: #fbbf24 !important;
+    background-color: #fedc00 !important;
+    border-color: #fedc00 !important;
 }
 
 /* Enhanced Restaurant Cards - Bigger and Better */
@@ -338,7 +338,7 @@ input[type="checkbox"]:checked {
 /* Hover effects removed for restaurant cards */
 
 .restaurant-card.ring-2 {
-    border-color: #fbbf24 !important;
+    border-color: #fedc00 !important;
     box-shadow: 0 0 0 4px rgba(251, 191, 36, 0.3), 0 8px 24px rgba(0, 0, 0, 0.15) !important;
     transform: translateY(-2px) scale(1.02) !important;
 }
@@ -407,8 +407,8 @@ input[type="checkbox"]:checked {
 /* Enhanced Loading Spinner - Bigger and Better */
 .loading-spinner {
     border: 4px solid #f3f4f6 !important;
-    border-top: 4px solid #fbbf24 !important;
-    border-right: 4px solid #f59e0b !important;
+    border-top: 4px solid #fedc00 !important;
+    border-right: 4px solid #fedc00 !important;
     border-radius: 50% !important;
     width: 32px !important;
     height: 32px !important;
@@ -437,7 +437,7 @@ input[type="checkbox"]:checked {
 .map-control-button,
 #center-current-restaurant {
     padding: 12px 18px !important;
-    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%) !important;
+    background: linear-gradient(135deg, #fedc00 0%, #fedc00 100%) !important;
     color: #1f2937 !important;
     border: none !important;
     border-radius: 10px !important;
@@ -454,7 +454,7 @@ input[type="checkbox"]:checked {
 
 .map-control-button:hover,
 #center-current-restaurant:hover {
-    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+    background: linear-gradient(135deg, #fedc00 0%, #fedc00 100%) !important;
     transform: translateY(-2px) !important;
     box-shadow: 0 4px 16px rgba(251, 191, 36, 0.4) !important;
 }
@@ -494,7 +494,7 @@ input[type="checkbox"]:checked {
 }
 
 .text-yellow-600 {
-    color: #d97706 !important;
+    color: #fedc00 !important;
 }
 
 .font-semibold {
@@ -697,7 +697,7 @@ input[type="checkbox"]:checked {
 
 .filter-form input:focus,
 .filter-form select:focus {
-    border-color: #FFC107 !important;
+    border-color: #fedc00 !important;
     box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.1) !important;
     outline: none !important;
 }
@@ -723,14 +723,14 @@ input[type="checkbox"]:checked {
 }
 
 #search-restaurants {
-    background: linear-gradient(135deg, #FFC107 0%, #FF8F00 100%) !important;
+    background: linear-gradient(135deg, #fedc00 0%, #fedc00 100%) !important;
     color: white !important;
     font-weight: 600 !important;
     padding: 12px 24px !important;
 }
 
 #search-restaurants:hover {
-    background: linear-gradient(135deg, #FF8F00 0%, #FF6F00 100%) !important;
+    background: linear-gradient(135deg, #fedc00 0%, #fedc00 100%) !important;
 }
 
 #clear-filters {
@@ -750,12 +750,12 @@ input[type="checkbox"]:checked {
     height: 20px !important;
     border-radius: 4px !important;
     border: 2px solid #d1d5db !important;
-    accent-color: #FFC107 !important;
+    accent-color: #fedc00 !important;
 }
 
 .filter-form input[type="checkbox"]:checked {
-    background-color: #FFC107 !important;
-    border-color: #FFC107 !important;
+    background-color: #fedc00 !important;
+    border-color: #fedc00 !important;
 }
 
 /* Responsive improvements */
@@ -833,7 +833,7 @@ input[type="checkbox"]:checked {
 .filter-form input:focus,
 .filter-form select:focus,
 .filter-form button:focus {
-    outline: 2px solid #FFC107 !important;
+    outline: 2px solid #fedc00 !important;
     outline-offset: 2px !important;
 }
 
@@ -894,9 +894,9 @@ input[type="checkbox"]:checked {
 }
 
 .pagination-btn.active {
-    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%) !important;
+    background: linear-gradient(135deg, #fedc00 0%, #fedc00 100%) !important;
     color: white !important;
-    border-color: #f59e0b !important;
+    border-color: #fedc00 !important;
     font-weight: 600 !important;
 }
 
@@ -1065,7 +1065,7 @@ input[type="checkbox"]:checked {
 /* Focus ring improvements */
 .filter-form input:focus,
 .filter-form select:focus {
-    box-shadow: 0 0 0 2px #FFC107 !important;
+    box-shadow: 0 0 0 2px #fedc00 !important;
 }
 
 /* Mobile Filter Styles */
@@ -1079,7 +1079,7 @@ input[type="checkbox"]:checked {
 
 .mobile-filter-toggle button {
     background: rgba(255, 255, 255, 0.95);
-    border: 2px solid #FFC107;
+    border: 2px solid #fedc00;
     border-radius: 12px;
     padding: 12px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -1093,7 +1093,7 @@ input[type="checkbox"]:checked {
 }
 
 .mobile-filter-toggle button:hover {
-    background: #FFC107;
+    background: #fedc00;
     transform: scale(1.05);
 }
 
@@ -1151,7 +1151,7 @@ input[type="checkbox"]:checked {
 }
 
 .mobile-filter-header {
-    background: #FFC107;
+    background: #fedc00;
     color: white;
     padding: 20px;
     display: flex;
@@ -1212,7 +1212,7 @@ input[type="checkbox"]:checked {
 
 .mobile-filter-input:focus {
     outline: none;
-    border-color: #FFC107;
+    border-color: #fedc00;
     box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.1);
 }
 
@@ -1226,7 +1226,7 @@ input[type="checkbox"]:checked {
 .mobile-filter-checkbox input[type="checkbox"] {
     width: 18px;
     height: 18px;
-    accent-color: #FFC107;
+    accent-color: #fedc00;
 }
 
 .mobile-filter-checkbox label {
@@ -1253,12 +1253,12 @@ input[type="checkbox"]:checked {
 }
 
 .mobile-filter-btn-primary {
-    background: #FFC107;
+    background: #fedc00;
     color: white;
 }
 
 .mobile-filter-btn-primary:hover {
-    background: #f59e0b;
+    background: #fedc00;
     transform: translateY(-1px);
 }
 
@@ -1296,7 +1296,7 @@ input[type="checkbox"]:checked {
     justify-content: center !important;
     width: 32px !important;
     height: 32px !important;
-    background: linear-gradient(135deg, #FFC107 0%, #FF8F00 100%) !important;
+    background: linear-gradient(135deg, #fedc00 0%, #fedc00 100%) !important;
     border: none !important;
     border-radius: 50% !important;
     color: #ffffff !important;
@@ -1323,7 +1323,7 @@ input[type="checkbox"]:checked {
 
 .action-icon:hover {
     background: #ffffff !important;
-    color: #FF8F00 !important;
+    color: #fedc00 !important;
     transform: scale(1.15) translateY(-2px) !important;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2) !important;
     text-decoration: none !important;

@@ -484,7 +484,7 @@ if (!$principal_image && !empty($gallery_images)) {
                                 <?php if (!empty($menus)): ?>
                                     <div class="menus-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
                                         <?php foreach ($menus as $index => $menu): ?>
-                                            <div class="menu-item" id="menu-<?php echo $index; ?>" style="border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 1.5rem; background: var(--bg-primary); box-shadow: var(--shadow-sm); transition: var(--transition);">
+                                            <div class="menu-item1" id="menu-<?php echo $index; ?>" style="border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 1.5rem; background: var(--bg-primary); box-shadow: var(--shadow-sm); transition: var(--transition);">
                                                 <h3 style="margin: 0 0 1rem 0; color: var(--text-primary); font-size: 1.25rem; font-weight: 600; cursor: pointer;" 
                                                     class="menu-title" 
                                                     data-menu-index="<?php echo $index; ?>"
@@ -752,7 +752,7 @@ if (!$principal_image && !empty($gallery_images)) {
                         <div style="
                             width: 40px;
                             height: 40px;
-                            background: linear-gradient(135deg, #FFC107 0%, #FF8F00 100%);
+                            background: linear-gradient(135deg, #fedc00 0%, #fedc00 100%);
                             border: 3px solid #ffffff;
                             border-radius: 50%;
                             display: flex;
@@ -911,7 +911,7 @@ if (!$principal_image && !empty($gallery_images)) {
                                            align-items: center;
                                            justify-content: center;
                                            padding: 8px;
-                                           background: linear-gradient(135deg, #FFC107 0%, #FF8F00 100%);
+                                           background: linear-gradient(135deg, #fedc00 0%, #fedc00 100%);
                                            color: white;
                                            text-decoration: none;
                                            border-radius: 50%;
@@ -957,7 +957,7 @@ if (!$principal_image && !empty($gallery_images)) {
                         transition: all 0.3s ease;
                     }
                     .restaurant-popup .leaflet-popup-content-wrapper:hover {
-                        border-color: #FFC107;
+                        border-color: #fedc00;
                         box-shadow: 0 12px 32px rgba(255, 193, 7, 0.3);
                     }
                 `;

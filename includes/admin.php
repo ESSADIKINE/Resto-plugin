@@ -194,7 +194,7 @@ class LeBonResto_Admin {
                             </div>
                             <div class="inside">
                                 <div style="text-align: center; padding: 20px;">
-                                    <div style="font-size: 36px; font-weight: bold; color: #FFC107;"><?php echo $published_count; ?></div>
+                                    <div style="font-size: 36px; font-weight: bold; color: #fedc00;"><?php echo $published_count; ?></div>
                                     <p><?php _e('Active listings', 'le-bon-resto'); ?></p>
                                 </div>
                             </div>
@@ -264,7 +264,7 @@ class LeBonResto_Admin {
         }
         
         .lebonresto-admin-dashboard .postbox-header h2 {
-            color: #FFC107;
+            color: #fedc00;
             font-weight: 600;
         }
         
@@ -297,7 +297,7 @@ class LeBonResto_Admin {
         
         <style>
         .wrap h1 {
-            color: #FFC107;
+            color: #fedc00;
         }
         
         .form-table th {
@@ -436,7 +436,7 @@ class LeBonResto_Admin {
             'distance_filter_options' => '10,25,50,100',
             'enable_layer_switcher' => '1',
             'enable_fullscreen' => '1',
-            'primary_color' => '#FFC107',
+            'primary_color' => '#fedc00',
             'restaurant_options' => array(
                 'Accès PMR (Personnes à Mobilité Réduite)',
                 'Chauffage',
@@ -790,7 +790,7 @@ class LeBonResto_Admin {
             case 'cuisine_type':
                 $cuisine = get_post_meta($post_id, '_restaurant_cuisine_type', true);
                 if ($cuisine) {
-                    echo '<span class="cuisine-badge" style="background: #FFC107; color: #000; padding: 2px 8px; border-radius: 3px; font-size: 11px;">' . esc_html(ucfirst($cuisine)) . '</span>';
+                    echo '<span class="cuisine-badge" style="background: #fedc00; color: #000; padding: 2px 8px; border-radius: 3px; font-size: 11px;">' . esc_html(ucfirst($cuisine)) . '</span>';
                 } else {
                     echo '—';
                 }
@@ -1094,7 +1094,7 @@ class LeBonResto_Admin {
         }
         
         .lebonresto-import-export-container .postbox-header h2 {
-            color: #FFC107;
+            color: #fedc00;
             font-weight: 600;
         }
         
