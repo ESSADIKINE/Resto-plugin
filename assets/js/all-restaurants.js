@@ -1188,7 +1188,7 @@
         }
 
         const card = $(`
-            <div class="restaurant-card" data-restaurant-id="${restaurant.id}">
+            <div class="restaurant-card" data-restaurant-id="${restaurant.id}" onclick="window.location.href='${restaurant.single_link}'" style="cursor: pointer;">
                 <!-- Card Content - Three Columns -->
                 <div class="card-content">
                     <!-- Left Column - Image Slider -->
@@ -1230,16 +1230,16 @@
                     <!-- Right Column - Action Icons -->
                     <div class="action-icons-column">
                         <div class="action-icons-container">
-                            <a href="${restaurant.link}" class="action-icon-btn" title="${lebonrestoAll.strings?.viewDetails || 'View Details'}">
+                            <a href="${restaurant.link}" class="action-icon-btn" title="${lebonrestoAll.strings?.viewDetails || 'View Details'}" onclick="event.stopPropagation();">
                                 <i class="fas fa-eye"></i>
                             </a>
-                            ${meta.phone ? `<a href="tel:${escapeHtml(meta.phone)}" class="action-icon-btn" title="${lebonrestoAll.strings?.phoneTitle || 'Call restaurant'}">
+                            ${meta.phone ? `<a href="tel:${escapeHtml(meta.phone)}" class="action-icon-btn" title="${lebonrestoAll.strings?.phoneTitle || 'Call restaurant'}" onclick="event.stopPropagation();">
                                 <i class="fas fa-phone"></i>
                             </a>` : ''}
-                            <a href="https://wa.me/${escapeHtml(meta.whatsapp || meta.phone || '1234567890')}" class="action-icon-btn whatsapp-btn" title="${lebonrestoAll.strings?.whatsappTitle || 'WhatsApp restaurant'}" target="_blank">
+                            <a href="https://wa.me/${escapeHtml(meta.whatsapp || meta.phone || '1234567890')}" class="action-icon-btn whatsapp-btn" title="${lebonrestoAll.strings?.whatsappTitle || 'WhatsApp restaurant'}" target="_blank" onclick="event.stopPropagation();">
                                 <i class="fab fa-whatsapp"></i>
                             </a>
-                            ${meta.email ? `<a href="mailto:${escapeHtml(meta.email)}" class="action-icon-btn" title="${lebonrestoAll.strings?.emailTitle || 'Email restaurant'}">
+                            ${meta.email ? `<a href="mailto:${escapeHtml(meta.email)}" class="action-icon-btn" title="${lebonrestoAll.strings?.emailTitle || 'Email restaurant'}" onclick="event.stopPropagation();">
                                 <i class="fas fa-envelope"></i>
                             </a>` : ''}
                         </div>

@@ -968,7 +968,7 @@
 }
 
 .agent-details {
-    margin-bottom: 1.5rem;
+    margin-bottom: 0rem;
     padding-bottom: 1.5rem;
     border-bottom: 1px solid #e5e7eb;
 }
@@ -1342,7 +1342,7 @@ html {
         background: var(--bg-primary);
         border-radius: var(--radius-xl);
         box-shadow: var(--shadow-lg);
-        padding: 1.5rem;
+        padding: 0rem;
     }
     
     /* Ensure the parent container allows sticky positioning */
@@ -1385,7 +1385,7 @@ html {
 }
 
 .agent-details {
-    margin-bottom: 2rem;
+    margin-bottom: 0rem;
     padding-bottom: 1.5rem;
     border-bottom: 1px solid var(--border-color);
 }

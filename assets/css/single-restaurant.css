@@ -181,12 +181,11 @@
 /* Enhanced Filter Header - Bigger and Better */
 .filter-header {
     position: sticky !important;
-    top: 0 !important;
+    top: 90px !important;
     z-index: 50 !important;
     background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
     backdrop-filter: blur(10px) !important;
     border-bottom: 3px solid #ffffff !important;
-    padding: 20px 0 !important;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05) !important;
 }
 
@@ -1013,7 +1012,7 @@ input[type="checkbox"]:checked {
 /* Fix for filter header positioning */
 .filter-header {
     position: sticky !important;
-    top: 0 !important;
+    top: 90px !important;
     z-index: 1000 !important;
     background: #f9fafb !important;
     border-bottom: 1px solid #e5e7eb !important;
@@ -1287,7 +1286,7 @@ input[type="checkbox"]:checked {
     right: 15px !important;
     display: flex !important;
     gap: 6px !important;
-    z-index: 1000 !important;
+    z-index: 100 !important;
 }
 
 .action-icon {

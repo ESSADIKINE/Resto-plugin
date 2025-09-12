@@ -7,6 +7,59 @@
 
 get_header(); 
 
+// Get restaurant data for SEO
+$restaurant_id = get_the_ID();
+$restaurant_name = get_the_title();
+$cuisine_type = get_post_meta($restaurant_id, '_restaurant_cuisine_type', true);
+$city = get_post_meta($restaurant_id, '_restaurant_city', true);
+$description = get_post_meta($restaurant_id, '_restaurant_description', true);
+
+// Use city from meta or default to Casablanca
+$city = $city ?: 'Casablanca';
+$cuisine_type = $cuisine_type ?: 'cuisine marocaine';
+
+// Generate SEO meta description
+$seo_description = "Restaurant d'exception à {$city}, Maroc. Cuisine authentique, ambiance chaleureuse et service impeccable. Découvrez nos spécialités culinaires avec visite virtuelle 360°, réservez votre table et vivez une expérience gastronomique unique au cœur de la capitale économique.";
+
+// Add SEO meta tags to head
+add_action('wp_head', function() use ($restaurant_name, $city, $cuisine_type, $seo_description) {
+    echo '<!-- SEO Meta Descriptions -->' . "\n";
+    echo '<meta name="description" content="' . esc_attr($seo_description) . '">' . "\n";
+    echo '<meta name="keywords" content="restaurant ' . esc_attr($restaurant_name) . ', ' . esc_attr($cuisine_type) . ' ' . esc_attr($city) . ', gastronomie Maroc, réservation restaurant ' . esc_attr($city) . ', visite virtuelle restaurant, tour virtuel restaurant, visite 360 restaurant, tour 360 restaurant, visite immersive restaurant">' . "\n";
+    echo '<meta name="robots" content="index, follow">' . "\n";
+    echo '<meta name="author" content="' . get_bloginfo('name') . '">' . "\n";
+    
+    echo '<!-- Open Graph Meta Tags -->' . "\n";
+    echo '<meta property="og:title" content="' . esc_attr($restaurant_name) . ' - Restaurant à ' . esc_attr($city) . ', Maroc">' . "\n";
+    echo '<meta property="og:description" content="' . esc_attr($seo_description) . '">' . "\n";
+    echo '<meta property="og:type" content="restaurant">' . "\n";
+    echo '<meta property="og:locale" content="fr_FR">' . "\n";
+    echo '<meta property="og:site_name" content="' . get_bloginfo('name') . '">' . "\n";
+    echo '<meta property="og:url" content="' . get_permalink() . '">' . "\n";
+    
+    echo '<!-- Twitter Card Meta Tags -->' . "\n";
+    echo '<meta name="twitter:card" content="summary_large_image">' . "\n";
+    echo '<meta name="twitter:title" content="' . esc_attr($restaurant_name) . ' - Restaurant à ' . esc_attr($city) . ', Maroc">' . "\n";
+    echo '<meta name="twitter:description" content="' . esc_attr($seo_description) . '">' . "\n";
+    
+    echo '<!-- Structured Data for Restaurants -->' . "\n";
+    echo '<script type="application/ld+json">' . "\n";
+    echo json_encode([
+        '@context' => 'https://schema.org',
+        '@type' => 'Restaurant',
+        'name' => $restaurant_name,
+        'description' => $seo_description,
+        'address' => [
+            '@type' => 'PostalAddress',
+            'addressLocality' => $city,
+            'addressCountry' => 'MA'
+        ],
+        'servesCuisine' => $cuisine_type,
+        'url' => get_permalink()
+    ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+    echo "\n" . '</script>' . "\n";
+}, 1);
+
 // Enqueue Tailwind CSS with fallback
 wp_enqueue_style(
     'tailwind-css',
@@ -1712,6 +1765,7 @@ wp_localize_script(
     array(
         'apiUrl' => home_url('/wp-json/lebonresto/v1/restaurants'),
         'cuisineTypesUrl' => home_url('/wp-json/lebonresto/v1/cuisine-types'),
+        'homeUrl' => home_url('/'),
         'nonce' => wp_create_nonce('wp_rest'),
         'currentRestaurantId' => $current_restaurant_id,
         'mapCenter' => array(
@@ -1880,11 +1934,6 @@ wp_localize_script(
     border-color: #fedc00 !important;
 }
 
-.restaurant-card.ring-2 {
-    border-color: #fedc00 !important;
-    box-shadow: 0 0 0 4px rgba(251, 191, 36, 0.3), 0 8px 24px rgba(0, 0, 0, 0.15) !important;
-    transform: translateY(-2px) scale(1.02) !important;
-}
 
 /* Loading Spinner */
 .loading-spinner {
@@ -2026,16 +2075,6 @@ wp_localize_script(
     box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
 }
 
-/* Restaurant card highlighting */
-.restaurant-card.ring-2 {
-    animation: pulse-ring 1s ease-in-out;
-}
-
-@keyframes pulse-ring {
-    0% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.7); }
-    70% { box-shadow: 0 0 0 6px rgba(255, 193, 7, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0); }
-}
 
 /* Focus states for accessibility */
 input:focus,

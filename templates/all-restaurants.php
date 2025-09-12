@@ -68,6 +68,23 @@ $cuisine_types = lebonresto_get_cuisine_types();
     <meta charset="<?php bloginfo('charset'); ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?php _e('Tous les Restaurants', 'le-bon-resto'); ?> - <?php bloginfo('name'); ?></title>
+    
+    <!-- SEO Meta Descriptions -->
+    <meta name="description" content="Guide complet des meilleurs restaurants à Casablanca, Maroc. Découvrez plus de 500 restaurants, cafés et bars avec visites virtuelles 360°, photos, menus, avis et réservations en ligne. Cuisine marocaine, internationale, fast-food et gastronomie fine avec tours virtuels.">
+    <meta name="keywords" content="restaurants Casablanca, cuisine marocaine, gastronomie Maroc, réservation restaurant, guide restaurants, cafés Casablanca, bars Casablanca, visite virtuelle restaurant, tour virtuel restaurant, visite 360 restaurant, tour 360 restaurant, visite immersive restaurant">
+    
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="<?php _e('Tous les Restaurants', 'le-bon-resto'); ?> - <?php bloginfo('name'); ?>">
+    <meta property="og:description" content="Guide complet des meilleurs restaurants à Casablanca, Maroc. Découvrez plus de 500 restaurants, cafés et bars avec visites virtuelles 360°, photos, menus, avis et réservations en ligne.">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="fr_FR">
+    <meta property="og:site_name" content="<?php bloginfo('name'); ?>">
+    
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="<?php _e('Tous les Restaurants', 'le-bon-resto'); ?> - <?php bloginfo('name'); ?>">
+    <meta name="twitter:description" content="Guide complet des meilleurs restaurants à Casablanca, Maroc. Découvrez plus de 500 restaurants, cafés et bars avec visites virtuelles 360°, photos, menus, avis et réservations en ligne.">
+    
     <?php wp_head(); ?>
 </head>
 

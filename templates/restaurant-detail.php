@@ -5,7 +5,60 @@
  * @package LeBonResto
  */
 
-get_header(); 
+get_header();
+
+// Get restaurant data for SEO
+$restaurant_id = get_the_ID();
+$restaurant_name = get_the_title();
+$cuisine_type = get_post_meta($restaurant_id, '_restaurant_cuisine_type', true);
+$city = get_post_meta($restaurant_id, '_restaurant_city', true);
+$description = get_post_meta($restaurant_id, '_restaurant_description', true);
+
+// Use city from meta or default to Casablanca
+$city = $city ?: 'Casablanca';
+$cuisine_type = $cuisine_type ?: 'cuisine marocaine';
+
+// Generate SEO meta description
+$seo_description = "Découvrez {$restaurant_name} à {$city}, Maroc. Restaurant spécialisé en {$cuisine_type} avec visite virtuelle 360°, ambiance authentique. Réservation en ligne, menus, photos, tour virtuel et avis clients. Le meilleur de la gastronomie marocaine à {$city}.";
+
+// Add SEO meta tags to head
+add_action('wp_head', function() use ($restaurant_name, $city, $cuisine_type, $seo_description) {
+    echo '<!-- SEO Meta Descriptions -->' . "\n";
+    echo '<meta name="description" content="' . esc_attr($seo_description) . '">' . "\n";
+    echo '<meta name="keywords" content="restaurant ' . esc_attr($restaurant_name) . ', ' . esc_attr($cuisine_type) . ' ' . esc_attr($city) . ', gastronomie Maroc, réservation restaurant ' . esc_attr($city) . ', visite virtuelle restaurant, tour virtuel restaurant, visite 360 restaurant, tour 360 restaurant, visite immersive restaurant">' . "\n";
+    echo '<meta name="robots" content="index, follow">' . "\n";
+    echo '<meta name="author" content="' . get_bloginfo('name') . '">' . "\n";
+    
+    echo '<!-- Open Graph Meta Tags -->' . "\n";
+    echo '<meta property="og:title" content="' . esc_attr($restaurant_name) . ' - Restaurant à ' . esc_attr($city) . ', Maroc">' . "\n";
+    echo '<meta property="og:description" content="' . esc_attr($seo_description) . '">' . "\n";
+    echo '<meta property="og:type" content="restaurant">' . "\n";
+    echo '<meta property="og:locale" content="fr_FR">' . "\n";
+    echo '<meta property="og:site_name" content="' . get_bloginfo('name') . '">' . "\n";
+    echo '<meta property="og:url" content="' . get_permalink() . '">' . "\n";
+    
+    echo '<!-- Twitter Card Meta Tags -->' . "\n";
+    echo '<meta name="twitter:card" content="summary_large_image">' . "\n";
+    echo '<meta name="twitter:title" content="' . esc_attr($restaurant_name) . ' - Restaurant à ' . esc_attr($city) . ', Maroc">' . "\n";
+    echo '<meta name="twitter:description" content="' . esc_attr($seo_description) . '">' . "\n";
+    
+    echo '<!-- Structured Data for Restaurants -->' . "\n";
+    echo '<script type="application/ld+json">' . "\n";
+    echo json_encode([
+        '@context' => 'https://schema.org',
+        '@type' => 'Restaurant',
+        'name' => $restaurant_name,
+        'description' => $seo_description,
+        'address' => [
+            '@type' => 'PostalAddress',
+            'addressLocality' => $city,
+            'addressCountry' => 'MA'
+        ],
+        'servesCuisine' => $cuisine_type,
+        'url' => get_permalink()
+    ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+    echo "\n" . '</script>' . "\n";
+}, 1); 
 
 // Enqueue Tailwind CSS
 wp_enqueue_style(
@@ -138,11 +191,6 @@ if (!$principal_image && !empty($gallery_images)) {
         <div class="property-navigation-wrap">
             <div class="container-fluid">
                 <ul class="property-navigation list-unstyled d-flex justify-content-between">
-                    <li class="property-navigation-item">
-                        <a class="back-top" href="<?php echo home_url('/restaurants/'); ?>">
-                            <i class="fas fa-arrow-left"></i>
-                        </a>
-                    </li>
                     <li class="property-navigation-item">
                         <a class="target" href="#details-section">Détails</a>
                     </li>

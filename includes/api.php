@@ -261,7 +261,8 @@ function lebonresto_prepare_restaurant_data($post_id) {
         'title' => array(
             'rendered' => get_the_title($post_id)
         ),
-        'link' => get_permalink($post_id),
+        'link' => home_url('/details/' . get_post_field('post_name', $post_id) . '/'),
+        'single_link' => get_permalink($post_id),
         'restaurant_meta' => array(
             'description' => get_post_meta($post_id, '_restaurant_description', true),
             'address' => get_post_meta($post_id, '_restaurant_address', true),

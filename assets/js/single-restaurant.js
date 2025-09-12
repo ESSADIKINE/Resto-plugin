@@ -375,7 +375,7 @@
 
             // Add click handler
             marker.on('click', function() {
-                highlightRestaurantInList(restaurant.id);
+                // Highlight functionality removed
             });
 
             markersLayer.addLayer(marker);
@@ -434,9 +434,9 @@
             .replace(/-+/g, '-') // Replace multiple hyphens with single
             .trim();
         
-        // Get current domain dynamically
-        const currentDomain = window.location.origin;
-        const restaurantUrl = `${currentDomain}/details/${restaurantSlug}`;
+        // Get home URL from WordPress localization
+        const homeUrl = window.lebonrestoSingle?.homeUrl || window.location.origin;
+        const restaurantUrl = `${homeUrl}details/${restaurantSlug}`;
         
         let content = `<div class="restaurant-popup-content" style="padding: 0; margin: 0; cursor: pointer;" onclick="window.open('${restaurantUrl}', '_blank')">`;
         
@@ -478,7 +478,7 @@
         content += `<h3 style="font-size: 14px; font-weight: 600; color: #1f2937; margin: 0 0 6px 0; padding: 0; line-height: 1.3;">${escapeHtml(title)}</h3>`;
         
         // Click to view details indicator
-        content += `<div style="display: flex; align-items: center; background-color: #fedc00; border-radius: 4px; padding: 4px 6px; margin-bottom: 6px; font-size: 10px; color: #fedc00;">`;
+        content += `<div style="display: flex; align-items: center; background-color: #fedc00; border-radius: 4px; padding: 4px 6px; margin-bottom: 6px; font-size: 10px; color:rgb(0, 0, 0);">`;
         content += `<i class="fas fa-external-link-alt" style="margin-right: 4px; font-size: 8px;"></i>`;
         content += `<span style="font-weight: 500;">Cliquez pour voir les détails</span>`;
         content += `</div>`;
@@ -562,7 +562,7 @@
         const principalImage = meta.principal_image || {};
 
         const card = $(`
-            <div class="restaurant-card bg-white rounded-lg shadow-sm p-4 ${isFeatured ? 'border-2 border-yellow-400' : 'border-0'} ${isCurrentRestaurant ? 'bg-yellow-50' : ''}" data-restaurant-id="${restaurant.id}" style="min-height: 120px; width: 100%; flex-shrink: 0; position: relative;">
+            <div class="restaurant-card bg-white rounded-lg shadow-sm p-4 ${isFeatured ? 'border-2 border-yellow-400' : 'border-0'} ${isCurrentRestaurant ? 'bg-yellow-50' : ''}" data-restaurant-id="${restaurant.id}" style="min-height: 120px; width: 100%; flex-shrink: 0; position: relative; cursor: pointer;" onclick="window.location.href='${restaurant.single_link}'">
                 
                 <!-- Two Column Layout: Image Left, Info Right -->
                 <div class="flex items-center h-full gap-4" style="display: contents;">
@@ -637,27 +637,27 @@
                 <!-- Action Icons - Bottom Right -->
                 <div class="action-icons-container" style="position: absolute; bottom: 10px; right: 15px; display: flex; gap: 6px; z-index: 1000;">
                     <!-- View Details Icon -->
-                    <a href="${restaurant.link}" class="action-icon" title="Voir détails">
+                    <a href="${restaurant.link}" class="action-icon" title="Voir détails" onclick="event.stopPropagation();">
                         <i class="fas fa-eye"></i>
                     </a>
                     
                     <!-- Phone Icon -->
                     ${meta.phone ? `
-                    <a href="tel:${meta.phone}" class="action-icon" title="Téléphone">
+                    <a href="tel:${meta.phone}" class="action-icon" title="Téléphone" onclick="event.stopPropagation();">
                         <i class="fas fa-phone"></i>
                     </a>
                     ` : ''}
                     
                     <!-- Email Icon -->
                     ${meta.email ? `
-                    <a href="mailto:${meta.email}" class="action-icon" title="Email">
+                    <a href="mailto:${meta.email}" class="action-icon" title="Email" onclick="event.stopPropagation();">
                         <i class="fas fa-envelope"></i>
                     </a>
                     ` : ''}
                     
                     <!-- WhatsApp Icon -->
                     ${meta.phone ? `
-                    <a href="https://wa.me/${meta.phone.replace(/[^0-9]/g, '')}" class="action-icon" title="WhatsApp">
+                    <a href="https://wa.me/${meta.phone.replace(/[^0-9]/g, '')}" class="action-icon" title="WhatsApp" onclick="event.stopPropagation();">
                         <i class="fab fa-whatsapp"></i>
                     </a>
                     ` : ''}
@@ -675,28 +675,6 @@
         return card;
     }
 
-    /**
-     * Highlight restaurant in list
-     */
-    function highlightRestaurantInList(restaurantId) {
-        $('.restaurant-card').removeClass('ring-2 ring-yellow-400');
-        $(`.restaurant-card[data-restaurant-id="${restaurantId}"]`).addClass('ring-2 ring-yellow-400');
-        
-        // Scroll to the card within the right column
-        const card = $(`.restaurant-card[data-restaurant-id="${restaurantId}"]`);
-        if (card.length) {
-            const rightColumn = $('.right-column');
-            const cardOffset = card.offset().top - rightColumn.offset().top;
-            const rightColumnHeight = rightColumn.height();
-            const cardHeight = card.outerHeight();
-            
-            if (cardOffset < 0 || cardOffset + cardHeight > rightColumnHeight) {
-                rightColumn.animate({
-                    scrollTop: rightColumn.scrollTop() + cardOffset - (rightColumnHeight / 2) + (cardHeight / 2)
-                }, 300);
-            }
-        }
-    }
 
     /**
      * Highlight restaurant on map
@@ -724,11 +702,7 @@
      * Highlight current restaurant
      */
     function highlightCurrentRestaurant() {
-        if (currentRestaurantId) {
-            setTimeout(() => {
-                highlightRestaurantInList(currentRestaurantId);
-            }, 500);
-        }
+        // Highlight functionality removed
     }
 
     /**

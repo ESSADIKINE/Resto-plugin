@@ -77,6 +77,11 @@ class LeBonResto {
         require_once LEBONRESTO_PLUGIN_PATH . 'includes/api.php';
         require_once LEBONRESTO_PLUGIN_PATH . 'includes/templates.php';
         require_once LEBONRESTO_PLUGIN_PATH . 'includes/email-handler.php';
+        require_once LEBONRESTO_PLUGIN_PATH . 'includes/seo-meta.php';
+        require_once LEBONRESTO_PLUGIN_PATH . 'includes/seo-advanced.php';
+        require_once LEBONRESTO_PLUGIN_PATH . 'includes/html-optimization.php';
+        require_once LEBONRESTO_PLUGIN_PATH . 'includes/seo-hooks.php';
+        require_once LEBONRESTO_PLUGIN_PATH . 'includes/performance-optimization.php';
         
         // Load admin interface if in admin
         if (is_admin()) {
