@@ -132,7 +132,6 @@ if (!is_array($selected_options)) {
     $selected_options = array();
 }
 $phone = get_post_meta($restaurant_id, '_restaurant_phone', true);
-$email = get_post_meta($restaurant_id, '_restaurant_email', true);
 $latitude = get_post_meta($restaurant_id, '_restaurant_latitude', true);
 $longitude = get_post_meta($restaurant_id, '_restaurant_longitude', true);
 $google_maps_link = get_post_meta($restaurant_id, '_restaurant_google_maps_link', true);
@@ -224,7 +223,7 @@ if (!$principal_image && !empty($gallery_images)) {
                             <i class="fas fa-chevron-right mx-2"></i>
                             <a href="<?php echo home_url('/restaurants/'); ?>" style="color: var(--primary-color); text-decoration: none;">Restaurants</a>
                             <i class="fas fa-chevron-right mx-2"></i>
-                            <span style="color: var(--text-secondary);"><?php the_title(); ?></span>
+                            <span style="color: var(--text-secondary);"><?php echo esc_html($blog_title ?: get_the_title()); ?></span>
                         </p>
                         <p class="blog-date" style="color: var(--text-muted); margin: 0; font-size: 0.9rem;">
                             <i class="fas fa-calendar"></i> Créé le <?php echo date('j F Y', strtotime(get_the_date())); ?>
@@ -275,7 +274,11 @@ if (!$principal_image && !empty($gallery_images)) {
                     <div class="content-sections" style="position: relative;">
                         <!-- Map Section (Default) -->
                         <div class="content-section active" id="map-section" style="width: 100%; height: 600px; border-radius: var(--radius-xl); overflow: hidden; box-shadow: var(--shadow-lg);">
-                            <div id="restaurant-map" style="width: 100%; height: 100%;">
+                            <div id="restaurant-map" 
+                                 data-lat="<?php echo esc_attr($latitude); ?>" 
+                                 data-lng="<?php echo esc_attr($longitude); ?>" 
+                                 data-title="<?php echo esc_attr($blog_title ?: get_the_title()); ?>" 
+                                 style="width: 100%; height: 100%;">
                                 <?php if (!$latitude || !$longitude): ?>
                                 <div style="display: flex; align-items: center; justify-content: center; height: 100%; background: var(--bg-tertiary); color: var(--text-muted);">
                                     <div style="text-align: center;">
@@ -373,7 +376,7 @@ if (!$principal_image && !empty($gallery_images)) {
                         <?php foreach ($gallery_images as $index => $image): ?>
                                             <div class="slide <?php echo $index === 0 ? 'active' : ''; ?>" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: <?php echo $index === 0 ? '1' : '0'; ?>; transition: opacity var(--transition-normal);">
                             <img src="<?php echo esc_url($image['url']); ?>" 
-                                 alt="<?php echo esc_attr($image['alt'] ?: get_the_title()); ?>" 
+                                 alt="<?php echo esc_attr($image['alt'] ?: ($blog_title ?: get_the_title())); ?>" 
                                                      style="width: 100%; height: 100%; object-fit: cover;" />
                                             </div>
                                         <?php endforeach; ?>
@@ -427,12 +430,6 @@ if (!$principal_image && !empty($gallery_images)) {
                                             <span><a href="tel:<?php echo esc_attr($phone); ?>" style="color: var(--primary-color);"><?php echo esc_html($phone); ?></a></span>
                                         </li>
                                         <?php endif; ?>
-                                        <?php if ($email): ?>
-                                        <li>
-                                            <strong>Email:</strong>
-                                            <span><a href="mailto:<?php echo esc_attr($email); ?>" style="color: var(--primary-color);"><?php echo esc_html($email); ?></a></span>
-                                        </li>
-                <?php endif; ?>
                                     </ul>
                                 </div>
                             </div>
@@ -447,7 +444,7 @@ if (!$principal_image && !empty($gallery_images)) {
                             </div>
                             <div class="block-content-wrap">
                                 <div class="blog-content" style="font-size: 1.1rem; line-height: 1.8; color: var(--text-primary);">
-                                    <?php if ($blog_content && $blog_content !== 'Hello world!'): ?>
+                                    <?php if ($blog_content): ?>
                                         <?php echo wpautop($blog_content); ?>
                                     <?php else: ?>
                                         <p>Bienvenue chez <strong><?php echo esc_html(get_the_title()); ?></strong> !</p>
@@ -521,32 +518,43 @@ if (!$principal_image && !empty($gallery_images)) {
                         </div>
                     </div>
                     
+                            
+                </div>
+                
+                <!-- Right Column - 30% -->
+                <div class="col-lg-4 col-md-12 bt-sidebar-wrap">
+                    <aside id="sidebar" class="sidebar-wrap">
                     <!-- Menu Section -->
                     <?php if (!empty($menus) || $menu_image): ?>
-                    <div class="property-section-wrap" id="menu-section" style="margin-bottom: 2rem;">
+                        <div class="property-section-wrap" style="margin-bottom: 2rem;">
                         <div class="block-wrap">
                             <div class="block-title-wrap">
                                 <h2>Menus</h2>
                             </div>
                             <div class="block-content-wrap">
                                 <?php if (!empty($menus)): ?>
-                                    <div class="menus-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+                                    <div class="menus-grid" style="display: grid; grid-template-columns: 1fr; gap: 1.5rem; margin-bottom: 2rem;">
                                         <?php foreach ($menus as $index => $menu): ?>
-                                            <div class="menu-item1" id="menu-<?php echo $index; ?>" style="border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 1.5rem; background: var(--bg-primary); box-shadow: var(--shadow-sm); transition: var(--transition);">
+                                            <div class="menu-item1" id="menu-<?php echo $index; ?>" style="border: 1px solid padding: 1.5rem; background: var(--bg-primary); box-shadow: var(--shadow-sm); transition: var(--transition);">
                                                 <h3 style="margin: 0 0 1rem 0; color: var(--text-primary); font-size: 1.25rem; font-weight: 600; cursor: pointer;" 
                                                     class="menu-title" 
-                                                    data-menu-index="<?php echo $index; ?>"
-                                                    onclick="openMenuPopup(<?php echo $index; ?>, '<?php echo esc_js($menu['name']); ?>', '<?php echo esc_js($menu['file_url']); ?>')">
+                                                    onclick="toggleMenuContent(<?php echo $index; ?>)">
+                                                    <i class="fas fa-chevron-down menu-arrow" style="margin-right: 0.5rem; transition: transform 0.3s ease;"></i>
                                                     <?php echo esc_html($menu['name']); ?>
-                                                    <i class="fas fa-eye" style="margin-left: 0.5rem; font-size: 0.875rem; opacity: 0.7;"></i>
                                                 </h3>
-                                                <div style="text-align: center;">
+                                                <div class="menu-content" id="menu-content-<?php echo $index; ?>" style="display: none;">
+                                                    <?php if (!empty($menu['description'])): ?>
+                                                        <p style="margin-bottom: 1rem; color: var(--text-secondary);"><?php echo esc_html($menu['description']); ?></p>
+                                                    <?php endif; ?>
+                                                    
+                                                    <?php if (!empty($menu['file_url'])): ?>
                                                     <a href="<?php echo esc_url($menu['file_url']); ?>" 
                                                        target="_blank" 
-                                                       style="display: inline-flex; align-items: center; padding: 0.75rem 1.5rem; background: var(--gradient-primary); color: var(--bg-primary); text-decoration: none; border-radius: var(--radius-full); font-weight: 600; transition: var(--transition);">
+                                                           style="display: inline-flex; align-items: center; padding: 0.75rem 1.5rem; text-decoration: none; font-weight: 600; transition: var(--transition);">
                                                         <i class="fas fa-download" style="margin-right: 0.5rem;"></i>
                                                         Télécharger le menu
                                                     </a>
+                                                    <?php endif; ?>
                                                 </div>
                                             </div>
                                         <?php endforeach; ?>
@@ -554,95 +562,182 @@ if (!$principal_image && !empty($gallery_images)) {
                             <?php endif; ?>
                             
                                 <?php if ($menu_image): ?>
-                                <div class="menu-image-container" style="text-align: center;">
+                                    <div class="menu-image-section">
                                     <h3 style="margin-bottom: 1rem; color: var(--text-primary);">Menu Principal</h3>
                                     <?php 
                                     $menu_image_url = wp_get_attachment_image_url($menu_image, 'large');
                                     if ($menu_image_url): ?>
                                         <img src="<?php echo esc_url($menu_image_url); ?>" 
-                                             alt="Menu du restaurant <?php the_title(); ?>" 
+                                                 alt="Menu du restaurant <?php echo esc_attr($blog_title ?: get_the_title()); ?>" 
                                              style="max-width: 100%; height: auto; border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); cursor: pointer;"
-                                             onclick="openImageModal('<?php echo esc_url($menu_image_url); ?>', 'Menu du restaurant <?php the_title(); ?>')" />
+                                                 onclick="openImageModal('<?php echo esc_url($menu_image_url); ?>', 'Menu du restaurant <?php echo esc_attr($blog_title ?: get_the_title()); ?>')" />
                                     <?php endif; ?>
                             </div>
                             <?php endif; ?>
                             </div>
-                        </div>
-                    </div>
-                    <?php endif; ?>
-                            
-                </div>
-                
-                <!-- Right Column - 30% -->
-                <div class="col-lg-4 col-md-12 bt-sidebar-wrap" id="contact-form">
-                    <aside id="sidebar" class="sidebar-wrap">
-                        <div class="property-form-wrap" id="contact-form-wrapper">
-                            <div class="property-form clearfix">
-                                <form id="restaurant-contact-form" method="post" action="#">
-                                    <?php wp_nonce_field('lebonresto_contact_form', 'contact_nonce'); ?>
-                                    <input type="hidden" name="restaurant_id" value="<?php echo esc_attr($restaurant_id); ?>">
-                                    
-                                    <div class="agent-details">
-                                        <div class="d-flex align-items-center">
-                                            <div class="agent-image">
-                                                <?php 
-                                                $restaurant_image_url = '';
-                                                if ($principal_image) {
-                                                    $restaurant_image_url = wp_get_attachment_image_url($principal_image, 'thumbnail');
-                                                }
-                                                if (!$restaurant_image_url) {
-                                                    $restaurant_image_url = 'https://via.placeholder.com/70x70/FFC107/FFFFFF?text=' . urlencode(substr(get_the_title(), 0, 2));
-                                                }
-                                                ?>
-                                                <img class="rounded" src="<?php echo esc_url($restaurant_image_url); ?>" alt="<?php echo esc_attr(get_the_title()); ?>" width="70" height="70">
-                                            </div>
-                                            <ul class="agent-information list-unstyled">
-                                                <li class="agent-name">
-                                                    <i class="fas fa-user mr-1"></i>
-                                                    <?php echo $blog_title ?: get_the_title(); ?>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="form-group">
-                                        <input class="form-control" name="name" type="text" placeholder="Prénom *" required>
-                                    </div>
-                                    
-                                    <div class="form-group">
-                                        <input class="form-control" name="mobile" type="text" placeholder="Téléphone">
-                                    </div>
-                                    
-                                    <div class="form-group">
-                                        <input class="form-control" name="email" type="email" placeholder="Email *" required>
-                                    </div>
-                                    
-                                    <div class="form-group form-group-textarea">
-                                        <textarea class="form-control hz-form-message" name="message" rows="4" placeholder="Message *" required>Bonjour, [<?php the_title(); ?>]</textarea>
-                                    </div>
-                                    
-                                    <button type="submit" class="btn btn-primary btn-full-width">
-                                        <i class="fas fa-paper-plane mr-1"></i>
-                                        <span class="btn-text">Envoyer</span>
-                                        <span class="btn-loading" style="display: none;">
-                                            <i class="fas fa-spinner fa-spin mr-1"></i>
-                                            Envoi en cours...
-                                        </span>
-                                    </button>
-                                    
-                                    <div id="form-message" class="form-message" style="margin-top: 15px; padding: 10px; border-radius: 5px; display: none;"></div>
-                                    
-                                    <?php if ($phone): ?>
-                                    <a href="tel:<?php echo esc_attr($phone); ?>" class="btn btn-success btn-full-width mt-2">
-                                        <i class="fas fa-phone mr-1"></i>
-                                        Appeler <?php echo esc_html($phone); ?>
-                                    </a>
-                                    <?php endif; ?>
-                                </form>
-                            </div>
-                        </div>
-                    </aside>
-                </div>
+                         </div>
+                     </div>
+                     <?php endif; ?>
+                     
+                     <!-- Address Section -->
+                     <?php if ($address || $city): ?>
+                     <div class="property-section-wrap" style="margin-bottom: 2rem;">
+                         <div class="block-wrap">
+                             <div class="block-title-wrap">
+                                 <h2>Adresse</h2>
+                             </div>
+                             <div class="block-content-wrap">
+                                 <div class="address-info" style="padding: 1.5rem; background: var(--bg-secondary); border-radius: var(--radius-lg); border: 1px solid var(--border-color);">
+                                     <div class="address-content" style="display: flex; align-items: flex-start; gap: 1rem; margin-bottom: 1rem;">
+                                         <div class="address-icon" style="flex-shrink: 0; margin-top: 0.25rem;">
+                                             <i class="fas fa-map-marker-alt" style="color: var(--primary-color); font-size: 1.5rem;"></i>
+                                         </div>
+                                         <div class="address-details">
+                                             <?php if ($address): ?>
+                                                 <p class="address-street" style="margin: 0 0 0.5rem 0; color: var(--text-primary); font-weight: 600; font-size: 1.1rem;"><?php echo esc_html($address); ?></p>
+                                             <?php endif; ?>
+                                             <?php if ($city): ?>
+                                                 <p class="address-city" style="margin: 0; color: var(--text-secondary); font-size: 1rem;"><?php echo esc_html($city); ?></p>
+                                             <?php endif; ?>
+                                         </div>
+                                     </div>
+                                     
+                                     <!-- Google Maps Button -->
+                                     <?php if ($latitude && $longitude): ?>
+                                     <div class="map-actions" style="text-align: center;">
+                                         <a href="https://www.google.com/maps?q=<?php echo esc_attr($latitude); ?>,<?php echo esc_attr($longitude); ?>" 
+                                            target="_blank" 
+                                            class="btn btn-primary"
+                                            style="display: inline-flex; align-items: center; padding: 0.75rem 1.5rem; background: var(--gradient-primary); color: var(--bg-primary); text-decoration: none; border-radius: var(--radius-full); font-weight: 600; transition: var(--transition); box-shadow: var(--shadow-sm);">
+                                             <i class="fas fa-map-marked-alt" style="margin-right: 0.5rem;"></i>
+                                             Voir sur Google Maps
+                                         </a>
+                                     </div>
+                                     <?php elseif ($google_maps_link): ?>
+                                     <div class="map-actions" style="text-align: center;">
+                                         <a href="<?php echo esc_url($google_maps_link); ?>" 
+                                            target="_blank" 
+                                            class="btn btn-primary"
+                                            style="display: inline-flex; align-items: center; padding: 0.75rem 1.5rem; background: var(--gradient-primary); color: var(--bg-primary); text-decoration: none; border-radius: var(--radius-full); font-weight: 600; transition: var(--transition); box-shadow: var(--shadow-sm);">
+                                             <i class="fas fa-map-marked-alt" style="margin-right: 0.5rem;"></i>
+                                             Voir sur Google Maps
+                                         </a>
+                                     </div>
+                                     <?php endif; ?>
+                                     
+                                     <?php if ($phone): ?>
+                                     <div class="contact-details" style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color);">
+                                         <div class="contact-list" style="display: flex; flex-direction: column; gap: 0.75rem;">
+                                             <?php if ($phone): ?>
+                                             <div class="contact-item" style="display: flex; align-items: center; gap: 0.75rem;">
+                                                 <i class="fas fa-phone" style="color: var(--primary-color); width: 16px;"></i>
+                                                 <a href="tel:<?php echo esc_attr($phone); ?>" style="color: var(--text-primary); text-decoration: none; font-weight: 500;"><?php echo esc_html($phone); ?></a>
+                                             </div>
+                                             <?php endif; ?>
+                                             
+                                         </div>
+                                     </div>
+                                     <?php endif; ?>
+                                 </div>
+                             </div>
+                         </div>
+                     </div>
+                     <?php endif; ?>
+                     
+                     <!-- Restaurant Info Section -->
+                     <div class="property-section-wrap" style="margin-bottom: 2rem;">
+                         <div class="block-wrap">
+                             <div class="block-title-wrap">
+                                 <h2>Informations</h2>
+                             </div>
+                             <div class="block-content-wrap">
+                                 <div class="restaurant-info" style="padding: 1.5rem; background: var(--bg-secondary); border-radius: var(--radius-lg); border: 1px solid var(--border-color);">
+                                     <div class="info-grid" style="display: grid; gap: 1rem;">
+                                         <?php if ($cuisine_type): ?>
+                                         <div class="info-item" style="display: flex; align-items: center; gap: 0.75rem;">
+                                             <i class="fas fa-utensils" style="color: var(--primary-color); width: 20px;"></i>
+                                             <div>
+                                                 <span style="font-weight: 600; color: var(--text-primary);">Cuisine:</span>
+                                                 <span style="color: var(--text-secondary); margin-left: 0.5rem;"><?php echo esc_html(ucfirst($cuisine_type)); ?></span>
+                                             </div>
+                                         </div>
+                                         <?php endif; ?>
+                                         
+                                         <?php if ($is_featured === '1'): ?>
+                                         <div class="info-item" style="display: flex; align-items: center; gap: 0.75rem;">
+                                             <i class="fas fa-star" style="color: #fbbf24; width: 20px;"></i>
+                                             <div>
+                                                 <span style="font-weight: 600; color: var(--text-primary);">Restaurant recommandé</span>
+                                             </div>
+                                         </div>
+                                         <?php endif; ?>
+                                         
+                                         <?php if ($virtual_tour_url): ?>
+                                         <div class="info-item" style="display: flex; align-items: center; gap: 0.75rem;">
+                                             <i class="fas fa-vr-cardboard" style="color: var(--primary-color); width: 20px;"></i>
+                                             <div>
+                                                 <span style="font-weight: 600; color: var(--text-primary);">Visite virtuelle disponible</span>
+                                             </div>
+                                         </div>
+                                         <?php endif; ?>
+                                         
+                                         <?php if ($video_url): ?>
+                                         <div class="info-item" style="display: flex; align-items: center; gap: 0.75rem;">
+                                             <i class="fas fa-play-circle" style="color: var(--primary-color); width: 20px;"></i>
+                                             <div>
+                                                 <span style="font-weight: 600; color: var(--text-primary);">Vidéo disponible</span>
+                                             </div>
+                                         </div>
+                                         <?php endif; ?>
+                                     </div>
+                                 </div>
+                             </div>
+                         </div>
+                     </div>
+                     
+                     <!-- Contact Actions Section -->
+                     <div class="property-section-wrap" style="margin-bottom: 2rem;">
+                         <div class="block-wrap">
+                             <div class="block-title-wrap">
+                                 <h2>Contact</h2>
+                             </div>
+                             <div class="block-content-wrap">
+                                 <div class="contact-actions" style="display: flex; flex-direction: column; gap: 0.75rem;">
+                                     <?php if ($phone): ?>
+                                     <a href="tel:<?php echo esc_attr($phone); ?>" 
+                                        class="contact-btn"
+                                        style="display: flex; align-items: center; padding: 0.75rem 1rem; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--radius-lg); text-decoration: none; color: var(--text-primary); transition: var(--transition);">
+                                         <i class="fas fa-phone" style="margin-right: 0.75rem; color: var(--primary-color);"></i>
+                                         <span style="font-weight: 500;">Appeler: <?php echo esc_html($phone); ?></span>
+                                     </a>
+                                     <?php endif; ?>
+                                     
+                                     
+                                     <?php if ($phone): ?>
+                                     <a href="https://wa.me/<?php echo esc_attr(preg_replace('/[^0-9]/', '', $phone)); ?>" 
+                                        target="_blank"
+                                        class="contact-btn"
+                                        style="display: flex; align-items: center; padding: 0.75rem 1rem; background: #25D366; border: 1px solid #25D366; border-radius: var(--radius-lg); text-decoration: none; color: white; transition: var(--transition);">
+                                         <i class="fab fa-whatsapp" style="margin-right: 0.75rem;"></i>
+                                         <span style="font-weight: 500;">WhatsApp</span>
+                                     </a>
+                                     <?php endif; ?>
+                                     
+                                     <?php if ($virtual_tour_url): ?>
+                                     <a href="<?php echo esc_url($virtual_tour_url); ?>" 
+                                        target="_blank"
+                                        class="contact-btn"
+                                        style="display: flex; align-items: center; padding: 0.75rem 1rem; background: var(--gradient-primary); border: 1px solid var(--primary-color); border-radius: var(--radius-lg); text-decoration: none; color: var(--bg-primary); transition: var(--transition);">
+                                         <i class="fas fa-vr-cardboard" style="margin-right: 0.75rem;"></i>
+                                         <span style="font-weight: 500;">Visite virtuelle</span>
+                                     </a>
+                                     <?php endif; ?>
+                                 </div>
+                             </div>
+                         </div>
+                     </div>
+                     </aside>
+                 </div>
             </div>
 
         </div>
@@ -755,6 +850,10 @@ if (!$principal_image && !empty($gallery_images)) {
         }
 
         // Map initialization (if coordinates are available)
+        console.log('Debug - Latitude:', '<?php echo $latitude; ?>');
+        console.log('Debug - Longitude:', '<?php echo $longitude; ?>');
+        console.log('Debug - Has coordinates:', <?php echo ($latitude && $longitude && is_numeric($latitude) && is_numeric($longitude)) ? 'true' : 'false'; ?>);
+        
         <?php if ($latitude && $longitude && is_numeric($latitude) && is_numeric($longitude)): ?>
         function initializeMap() {
             console.log('initializeMap called');
@@ -803,36 +902,8 @@ if (!$principal_image && !empty($gallery_images)) {
                     maxZoom: 19
                 }).addTo(window.restaurantMap);
                 
-                // Create custom SVG icon for restaurant
-                const restaurantIcon = L.divIcon({
-                    html: `
-                        <div style="
-                            width: 40px;
-                            height: 40px;
-                            background: linear-gradient(135deg, #fedc00 0%, #fedc00 100%);
-                            border: 3px solid #ffffff;
-                            border-radius: 50%;
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-                            animation: pulse 2s infinite;
-                        ">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
-                                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
-                            </svg>
-                        </div>
-                    `,
-                    className: 'custom-restaurant-marker',
-                    iconSize: [40, 40],
-                    iconAnchor: [20, 20],
-                    popupAnchor: [0, -20]
-                });
+                // No markers - just popup at coordinates
                 
-                // Add custom marker
-                const marker = L.marker([<?php echo $latitude; ?>, <?php echo $longitude; ?>], {
-                    icon: restaurantIcon
-                }).addTo(window.restaurantMap);
                 
                 // Create detailed popup content
                 const popupContent = `
@@ -849,7 +920,7 @@ if (!$principal_image && !empty($gallery_images)) {
                         ">
                             <div style="flex-shrink: 0;">
                                 <img src="<?php echo $principal_image ? wp_get_attachment_image_url($principal_image, 'thumbnail') : 'https://via.placeholder.com/60x60'; ?>" 
-                                     alt="<?php echo esc_attr(get_the_title()); ?>" 
+                                     alt="<?php echo esc_attr($blog_title ?: get_the_title()); ?>" 
                                      style="
                                         width: 60px;
                                         height: 60px;
@@ -865,7 +936,7 @@ if (!$principal_image && !empty($gallery_images)) {
                                     margin: 0 0 4px 0;
                                     line-height: 1.3;
                                     color: #1f2937;
-                                "><?php echo esc_html(get_the_title()); ?></h3>
+                                "><?php echo esc_html($blog_title ?: get_the_title()); ?></h3>
                                 <p style="
                                     margin: 0 0 4px 0;
                                     font-size: 13px;
@@ -988,13 +1059,17 @@ if (!$principal_image && !empty($gallery_images)) {
                     </div>
                 `;
                 
-                // Bind popup with custom content
-                marker.bindPopup(popupContent, {
+                // Create popup at coordinates without marker
+                const popup = L.popup({
                     className: 'restaurant-popup',
-                    closeButton: true,
+                    closeButton: false,
                     autoClose: false,
-                    closeOnClick: false
-                }).openPopup();
+                    closeOnClick: false,
+                    autoPan: false
+                })
+                .setLatLng([<?php echo $latitude; ?>, <?php echo $longitude; ?>])
+                .setContent(popupContent)
+                .openOn(window.restaurantMap);
                 
                 // Add pulse animation CSS
                 const style = document.createElement('style');
@@ -1004,7 +1079,7 @@ if (!$principal_image && !empty($gallery_images)) {
                         50% { transform: scale(1.1); }
                         100% { transform: scale(1); }
                     }
-                    .custom-restaurant-marker {
+                    .restaurant-detail-marker {
                         animation: pulse 2s infinite;
                     }
                     .restaurant-popup .leaflet-popup-content-wrapper {
@@ -1067,24 +1142,211 @@ if (!$principal_image && !empty($gallery_images)) {
             }
         });
         <?php else: ?>
-        console.log('No valid coordinates available for map');
-        // Show message in map container
-        document.addEventListener('DOMContentLoaded', function() {
+        console.log('No valid coordinates available for map - using default coordinates');
+        // Show map with default coordinates (Casablanca) and a message
+        function initializeMapWithDefaults() {
+            console.log('initializeMapWithDefaults called');
+            console.log('Leaflet available:', typeof L !== 'undefined');
+            
+            if (typeof L === 'undefined') {
+                console.error('Leaflet library not loaded');
+                return;
+            }
+            
             const mapContainer = document.getElementById('restaurant-map');
-            if (mapContainer) {
-                mapContainer.innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; background: var(--bg-tertiary); color: var(--text-muted);"><div style="text-align: center;"><i class="fas fa-map-marker-alt" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i><p>Coordonnées non disponibles</p><small>Veuillez ajouter la latitude et longitude dans l\'admin</small></div></div>';
+            if (!mapContainer) {
+                console.error('Map container not found');
+                return;
+            }
+            
+            // Clear existing map if it exists
+            if (window.restaurantMap) {
+                window.restaurantMap.remove();
+            }
+            
+            mapContainer.innerHTML = '';
+            
+            // Ensure container has proper dimensions
+            mapContainer.style.width = '100%';
+            mapContainer.style.height = '100%';
+            
+            // Force a reflow to ensure dimensions are applied
+            mapContainer.offsetHeight;
+            
+            try {
+                // Initialize the map with default coordinates (Casablanca)
+                const defaultLat = 33.5731;
+                const defaultLng = -7.5898;
+                
+                window.restaurantMap = L.map('restaurant-map', {
+                    center: [defaultLat, defaultLng],
+                    zoom: 15,
+                    zoomControl: true
+                });
+                
+                // Add tile layer
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors',
+                    maxZoom: 19
+                }).addTo(window.restaurantMap);
+                
+                // Create custom SVG icon for restaurant
+                const restaurantIcon = L.divIcon({
+                    className: 'restaurant-detail-marker',
+                    html: `<div style="display: flex; align-items: center; justify-content: center; position: relative; width: 40px; height: 40px;">
+                             <svg style="width: 40px; height: 40px;" fill="currentColor" viewBox="0 0 64 64">
+                               <path fill="#ff9800" d="M53 24.267C53 42.633 32 61 32 61S11 42.633 11 24.267a21 21 0 1 1 42 0z"/>
+                               <circle cx="32" cy="24" r="17" fill="#eeeeee"/>
+                               <ellipse cx="39" cy="20" fill="#ff9800" rx="4" ry="5"/>
+                               <path d="M32 2a22.16 22.16 0 0 0-22 22.267c0 7.841 3.6 16.542 10.7 25.86a86.428 86.428 0 0 0 10.642 11.626 1 1 0 0 0 1.316 0A86.428 86.428 0 0 0 43.3 50.127C50.4 40.809 54 32.108 54 24.267A22.16 22.16 0 0 0 32 2zm0 57.646c-3.527-3.288-20-19.5-20-35.379a20 20 0 1 1 40 0c0 15.88-16.473 32.091-20 35.379z" fill="#000000"/>
+                               <path d="M32 6a18 18 0 1 0 18 18A18.021 18.021 0 0 0 32 6zm0 34a16 16 0 1 1 16-16 16.019 16.019 0 0 1-16 16z" fill="#000000"/>
+                               <path d="M30 22c0 .188 0 .382-.582.673L28 23.382V14h-2v9.382l-1.418-.709C24 22.382 24 22.188 24 22v-8h-2v8a2.7 2.7 0 0 0 1.687 2.462l1.948.974a3 3 0 0 0 .365.131V36h2V25.567a3 3 0 0 0 .365-.131l1.947-.974A2.7 2.7 0 0 0 32 22v-8h-2zM39 14c-2.757 0-5 2.691-5 6 0 2.9 1.721 5.321 4 5.879V36h2V25.879c2.279-.558 4-2.981 4-5.879 0-3.309-2.243-6-5-6zm0 10c-1.654 0-3-1.794-3-4s1.346-4 3-4 3 1.794 3 4-1.346 4-3 4z" fill="#000000"/>
+                             </svg>
+                           </div>`,
+                    iconSize: [40, 40],
+                    iconAnchor: [20, 40],
+                    popupAnchor: [0, -40]
+                });
+                
+                // Add custom marker
+                const marker = L.marker([defaultLat, defaultLng], {
+                    icon: restaurantIcon
+                }).addTo(window.restaurantMap);
+                
+                // Create popup content with warning
+                const popupContent = `
+                    <div class="restaurant-popup-content" style="
+                        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                        min-width: 250px;
+                        max-width: 300px;
+                        padding: 0;
+                    ">
+                        <div style="
+                            display: flex;
+                            gap: 12px;
+                            align-items: flex-start;
+                        ">
+                            <div style="flex-shrink: 0;">
+                                <div style="
+                                    width: 60px;
+                                    height: 60px;
+                                    background: linear-gradient(135deg, #fedc00 0%, #fedc00 100%);
+                                    border-radius: 8px;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+                                ">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div style="flex: 1; min-width: 0;">
+                                <h3 style="
+                                    font-size: 16px;
+                                    font-weight: 600;
+                                    margin: 0 0 4px 0;
+                                    line-height: 1.3;
+                                    color: #1f2937;
+                                "><?php echo esc_html($blog_title ?: get_the_title()); ?></h3>
+                                <p style="
+                                    margin: 0 0 8px 0;
+                                    font-size: 13px;
+                                    line-height: 1.4;
+                                    color: #ef4444;
+                                    font-weight: 500;
+                                ">⚠️ Coordonnées non disponibles</p>
+                                <p style="
+                                    margin: 0 0 8px 0;
+                                    font-size: 12px;
+                                    line-height: 1.4;
+                                    color: #6b7280;
+                                ">Veuillez ajouter la latitude et longitude dans l'admin</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // Create popup at coordinates without marker
+                const popup = L.popup({
+                    className: 'restaurant-popup',
+                    closeButton: false,
+                    autoClose: false,
+                    closeOnClick: false,
+                    autoPan: false
+                })
+                .setLatLng([<?php echo $latitude; ?>, <?php echo $longitude; ?>])
+                .setContent(popupContent)
+                .openOn(window.restaurantMap);
+                
+                // Add pulse animation CSS
+                const style = document.createElement('style');
+                style.textContent = `
+                    @keyframes pulse {
+                        0% { transform: scale(1); }
+                        50% { transform: scale(1.1); }
+                        100% { transform: scale(1); }
+                    }
+                    .restaurant-detail-marker {
+                        animation: pulse 2s infinite;
+                    }
+                    .restaurant-popup .leaflet-popup-content-wrapper {
+                        border-radius: 12px;
+                        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+                        border: 2px solid #f3f4f6;
+                        transition: all 0.3s ease;
+                    }
+                    .restaurant-popup .leaflet-popup-content-wrapper:hover {
+                        border-color: #fedc00;
+                        box-shadow: 0 12px 32px rgba(255, 193, 7, 0.3);
+                    }
+                `;
+                document.head.appendChild(style);
+                
+                // Invalidate size after a short delay to ensure proper rendering
+                setTimeout(function() {
+                    if (window.restaurantMap) {
+                        window.restaurantMap.invalidateSize();
+                    }
+                }, 100);
+                
+                console.log('Map with default coordinates initialized successfully');
+            } catch (error) {
+                console.error('Error initializing map with defaults:', error);
+                mapContainer.innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; background: var(--bg-tertiary); color: var(--text-muted);"><div style="text-align: center;"><i class="fas fa-exclamation-triangle" style="font-size: 2rem; margin-bottom: 1rem;"></i><p>Erreur lors du chargement de la carte</p></div></div>';
+            }
+        }
+        
+        // Initialize map with defaults when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Wait for Leaflet to be available
+            function waitForLeaflet() {
+                if (typeof L !== 'undefined') {
+                    initializeMapWithDefaults();
+                } else {
+                    setTimeout(waitForLeaflet, 100);
+                }
+            }
+            waitForLeaflet();
+        });
+        
+        // Also try on window load as backup
+        window.addEventListener('load', function() {
+            if (typeof L !== 'undefined') {
+                setTimeout(initializeMapWithDefaults, 100);
             }
         });
         <?php endif; ?>
 
-        // Smooth scrolling for navigation links
+        // Navigation links (no smooth scrolling)
         document.querySelectorAll('.property-navigation .target').forEach(link => {
             link.addEventListener('click', function(e) {
                 e.preventDefault();
                 const targetId = this.getAttribute('href').substring(1);
                 const targetElement = document.getElementById(targetId);
                 if (targetElement) {
-                    targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    targetElement.scrollIntoView({ behavior: 'auto', block: 'start' });
                 }
             });
         });
@@ -1262,15 +1524,15 @@ document.addEventListener('keydown', function(e) {
     }
 });
 
-        // Smooth scrolling for menu links
-        document.querySelectorAll('.menu-link').forEach(link => {
+        // Menu links (no smooth scrolling)
+        document.querySelectorAll('.menu-link1').forEach(link => {
             link.addEventListener('click', function(e) {
                 e.preventDefault();
                 const targetId = this.getAttribute('href');
                 const targetElement = document.querySelector(targetId);
                 if (targetElement) {
                     targetElement.scrollIntoView({ 
-                        behavior: 'smooth', 
+                        behavior: 'auto', 
                         block: 'start' 
                     });
                     // Highlight the target menu
@@ -1285,174 +1547,18 @@ document.addEventListener('keydown', function(e) {
         });
 
 
-        // Clean sticky contact form implementation
-        function initCleanStickyContact() {
-            const contactForm = document.getElementById('contact-form-wrapper');
-            const contactContainer = document.getElementById('contact-form');
+        // Menu toggle functionality
+        function toggleMenuContent(index) {
+            const content = document.getElementById('menu-content-' + index);
+            const arrow = document.querySelector('#menu-' + index + ' .menu-arrow');
             
-            if (!contactForm || !contactContainer) {
-                console.log('Contact form elements not found');
-                return;
-            }
-
-            // Only on desktop
-            if (window.innerWidth < 992) {
-                return;
-            }
-
-            let originalPosition = null;
-            let isSticky = false;
-
-            function handleScroll() {
-                if (window.innerWidth < 992) return;
-
-                const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-                
-                // Get original position only once
-                if (!originalPosition) {
-                    const rect = contactContainer.getBoundingClientRect();
-                    originalPosition = {
-                        top: rect.top + scrollTop,
-                        left: rect.left,
-                        width: rect.width
-                    };
-                    console.log('Original position captured:', originalPosition);
-                }
-
-                // Check if we should be sticky (when scrolled past the form)
-                const shouldStick = scrollTop > (originalPosition.top - 50);
-
-                if (shouldStick && !isSticky) {
-                    console.log('Making contact form sticky');
-                    isSticky = true;
-                    contactForm.style.cssText = `
-                        position: fixed !important;
-                        top: 20px !important;
-                        left: ${originalPosition.left}px !important;
-                        width: ${originalPosition.width}px !important;
-                        z-index: 1000 !important;
-                        background: white !important;
-                        box-shadow: 0 10px 25px rgba(0,0,0,0.15) !important;
-                        border-radius: 12px !important;
-                        transition: all 0.3s ease !important;
-                    `;
-                } else if (!shouldStick && isSticky) {
-                    console.log('Removing sticky from contact form');
-                    isSticky = false;
-                    contactForm.style.cssText = `
-                        position: relative !important;
-                        top: auto !important;
-                        left: auto !important;
-                        width: 100% !important;
-                        z-index: auto !important;
-                        background: transparent !important;
-                        box-shadow: none !important;
-                        border-radius: 0 !important;
-                    `;
-                }
-            }
-
-            // Wait for page to fully load before capturing position
-            setTimeout(() => {
-                handleScroll();
-            }, 500);
-
-            // Listen to scroll events
-            window.addEventListener('scroll', handleScroll);
-            
-            // Reset on window resize
-            window.addEventListener('resize', function() {
-                originalPosition = null;
-                isSticky = false;
-                contactForm.style.cssText = '';
-                setTimeout(handleScroll, 100);
-            });
-        }
-
-        // Initialize clean sticky contact form
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('Initializing clean sticky contact form...');
-            setTimeout(initCleanStickyContact, 1000);
-            
-            // Initialize contact form
-            initContactForm();
-        });
-        
-        // Contact form functionality
-        function initContactForm() {
-            const form = document.getElementById('restaurant-contact-form');
-            const submitBtn = form.querySelector('button[type="submit"]');
-            const btnText = submitBtn.querySelector('.btn-text');
-            const btnLoading = submitBtn.querySelector('.btn-loading');
-            const formMessage = document.getElementById('form-message');
-            
-            form.addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                // Show loading state
-                submitBtn.disabled = true;
-                btnText.style.display = 'none';
-                btnLoading.style.display = 'inline';
-                
-                // Hide previous messages
-                formMessage.style.display = 'none';
-                
-                // Get form data
-                const formData = new FormData(form);
-                formData.append('action', 'lebonresto_send_contact_email');
-                formData.append('nonce', '<?php echo wp_create_nonce('lebonresto_contact_form'); ?>');
-                
-                // Send AJAX request
-                fetch('<?php echo admin_url('admin-ajax.php'); ?>', {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => response.json())
-                .then(data => {
-                    // Hide loading state
-                    submitBtn.disabled = false;
-                    btnText.style.display = 'inline';
-                    btnLoading.style.display = 'none';
-                    
-                    // Show message
-                    formMessage.style.display = 'block';
-                    formMessage.className = 'form-message';
-                    
-                    if (data.success) {
-                        formMessage.style.backgroundColor = '#d4edda';
-                        formMessage.style.color = '#155724';
-                        formMessage.style.border = '1px solid #c3e6cb';
-                        formMessage.innerHTML = '<i class="fas fa-check-circle"></i> ' + data.message;
-                        
-                        // Reset form
-                        form.reset();
+            if (content.style.display === 'none' || content.style.display === '') {
+                content.style.display = 'block';
+                arrow.style.transform = 'rotate(180deg)';
                     } else {
-                        formMessage.style.backgroundColor = '#f8d7da';
-                        formMessage.style.color = '#721c24';
-                        formMessage.style.border = '1px solid #f5c6cb';
-                        formMessage.innerHTML = '<i class="fas fa-exclamation-triangle"></i> ' + data.message;
-                    }
-                    
-                    // Scroll to message
-                    formMessage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    
-                    // Hide loading state
-                    submitBtn.disabled = false;
-                    btnText.style.display = 'inline';
-                    btnLoading.style.display = 'none';
-                    
-                    // Show error message
-                    formMessage.style.display = 'block';
-                    formMessage.className = 'form-message';
-                    formMessage.style.backgroundColor = '#f8d7da';
-                    formMessage.style.color = '#721c24';
-                    formMessage.style.border = '1px solid #f5c6cb';
-                    formMessage.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Une erreur s\'est produite. Veuillez réessayer.';
-                });
-            });
+                content.style.display = 'none';
+                arrow.style.transform = 'rotate(0deg)';
+            }
         }
 </script>
 

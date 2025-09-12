@@ -271,7 +271,6 @@ function lebonresto_prepare_restaurant_data($post_id) {
             'longitude' => get_post_meta($post_id, '_restaurant_longitude', true),
             'cuisine_type' => get_post_meta($post_id, '_restaurant_cuisine_type', true),
             'phone' => get_post_meta($post_id, '_restaurant_phone', true),
-            'email' => get_post_meta($post_id, '_restaurant_email', true),
             'is_featured' => get_post_meta($post_id, '_restaurant_is_featured', true),
             'principal_image' => $principal_image_urls,
             'gallery_images' => $gallery_urls,

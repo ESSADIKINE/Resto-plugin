@@ -957,14 +957,22 @@
 }
 
 .sidebar-wrap {
-    background: #fff;
     border-radius: 0.5rem;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     overflow: hidden;
 }
 
 .property-form-wrap {
     padding: 2rem;
+}
+
+/* Contact button hover effects */
+.contact-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.contact-btn:active {
+    transform: translateY(0);
 }
 
 .agent-details {
@@ -1206,9 +1214,9 @@
     outline-offset: 2px;
 }
 
-/* Smooth Scrolling */
+/* No Smooth Scrolling */
 html {
-    scroll-behavior: smooth;
+    scroll-behavior: auto;
 }
 
 /* Map Container Styles */
@@ -1326,7 +1334,6 @@ html {
         position: sticky !important;
         top: 2rem !important;
         max-height: calc(100vh - 4rem);
-        overflow-y: auto;
         align-self: flex-start;
         height: fit-content;
     }
@@ -1934,7 +1941,7 @@ html {
 }
 
 /* Menu Links in Details Section */
-.menu-link {
+.menu-link1 {
     display: inline-block;
     margin-right: 0.5rem;
     margin-bottom: 0.25rem;
@@ -1948,7 +1955,7 @@ html {
     transition: var(--transition);
 }
 
-.menu-link:hover {
+.menu-link1:hover {
     transform: scale(1.05);
     box-shadow: var(--shadow-md);
 }

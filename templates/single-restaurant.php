@@ -665,7 +665,6 @@ wp_add_inline_style('lebonresto-debug-css', '
         $cuisine_type = get_post_meta($current_restaurant_id, '_restaurant_cuisine_type', true);
         $description = get_post_meta($current_restaurant_id, '_restaurant_description', true);
         $phone = get_post_meta($current_restaurant_id, '_restaurant_phone', true);
-        $email = get_post_meta($current_restaurant_id, '_restaurant_email', true);
         $latitude = get_post_meta($current_restaurant_id, '_restaurant_latitude', true);
         $longitude = get_post_meta($current_restaurant_id, '_restaurant_longitude', true);
         $is_featured = get_post_meta($current_restaurant_id, '_restaurant_is_featured', true);
@@ -987,7 +986,6 @@ wp_add_inline_style('lebonresto-debug-css', '
             "cuisine_type": <?php echo wp_json_encode($cuisine_type); ?>,
             "description": <?php echo wp_json_encode($description); ?>,
             "phone": <?php echo wp_json_encode($phone); ?>,
-            "email": <?php echo wp_json_encode($email); ?>,
             "latitude": <?php echo wp_json_encode($latitude); ?>,
             "longitude": <?php echo wp_json_encode($longitude); ?>,
             "is_featured": <?php echo wp_json_encode($is_featured === '1'); ?>,
@@ -1778,7 +1776,6 @@ wp_localize_script(
             'noRestaurants' => __('No restaurants found', 'le-bon-resto'),
             'loadingError' => __('Error loading restaurants', 'le-bon-resto'),
             'phoneTitle' => __('Call restaurant', 'le-bon-resto'),
-            'emailTitle' => __('Email restaurant', 'le-bon-resto'),
             'kmAway' => __('%s km away', 'le-bon-resto'),
             'loadingRestaurants' => __('Loading restaurants...', 'le-bon-resto'),
             'restaurantsFound' => __('%s restaurants found', 'le-bon-resto'),

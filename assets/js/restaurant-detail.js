@@ -13,7 +13,7 @@
         initializeNavigation();
         initializeTabs();
         initializeGallery();
-        initializeMap();
+        // initializeMap(); // Handled by PHP template
         initializeForms();
         initializeModals();
     }
@@ -192,32 +192,13 @@
     }
 
     /**
-     * Initialize map functionality
+     * Map functionality is handled by the PHP template
+     * This function is kept for compatibility but does nothing
      */
     function initializeMap() {
-        // Check if Leaflet is available
-        if (typeof L !== 'undefined') {
-            const mapElement = document.getElementById('houzez-single-listing-map');
-            if (mapElement) {
-                // Get coordinates from data attributes or global variables
-                const lat = mapElement.dataset.lat || window.restaurantLat || 48.8566;
-                const lng = mapElement.dataset.lng || window.restaurantLng || 2.3522;
-                const title = mapElement.dataset.title || window.restaurantTitle || 'Restaurant';
-                
-                // Initialize map
-                const map = L.map('houzez-single-listing-map').setView([lat, lng], 15);
-                
-                // Add tile layer
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '© OpenStreetMap contributors'
-                }).addTo(map);
-                
-                // Add marker
-                L.marker([lat, lng]).addTo(map)
-                    .bindPopup(title)
-                    .openPopup();
-            }
-        }
+        // Map initialization is handled in the PHP template
+        // This prevents conflicts with the existing map implementation
+        console.log('Map initialization handled by PHP template');
     }
 
     /**
@@ -410,10 +391,14 @@
     // Initialize social sharing
     initializeSocialSharing();
 
+    // Map initialization is handled by the PHP template
+    // No additional JavaScript map handling needed
+
     // Expose functions globally
     window.lebonrestoDetail = {
         showNotification: showNotification,
-        initializePropertyDetail: initializePropertyDetail
+        initializePropertyDetail: initializePropertyDetail,
+        initializeMap: initializeMap
     };
 
 })(jQuery);

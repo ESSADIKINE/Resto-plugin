@@ -203,7 +203,6 @@ class LeBonResto_HTML_Optimization {
         $city = get_post_meta($restaurant_id, '_restaurant_city', true);
         $address = get_post_meta($restaurant_id, '_restaurant_address', true);
         $phone = get_post_meta($restaurant_id, '_restaurant_phone', true);
-        $email = get_post_meta($restaurant_id, '_restaurant_email', true);
         $description = get_post_meta($restaurant_id, '_restaurant_description', true);
         $is_featured = get_post_meta($restaurant_id, '_restaurant_is_featured', true);
         $latitude = get_post_meta($restaurant_id, '_restaurant_latitude', true);

@@ -76,7 +76,6 @@ class LeBonResto {
         require_once LEBONRESTO_PLUGIN_PATH . 'includes/shortcodes.php';
         require_once LEBONRESTO_PLUGIN_PATH . 'includes/api.php';
         require_once LEBONRESTO_PLUGIN_PATH . 'includes/templates.php';
-        require_once LEBONRESTO_PLUGIN_PATH . 'includes/email-handler.php';
         require_once LEBONRESTO_PLUGIN_PATH . 'includes/seo-meta.php';
         require_once LEBONRESTO_PLUGIN_PATH . 'includes/seo-advanced.php';
         require_once LEBONRESTO_PLUGIN_PATH . 'includes/html-optimization.php';

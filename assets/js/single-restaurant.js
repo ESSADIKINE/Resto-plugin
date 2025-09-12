@@ -60,14 +60,21 @@
      * Initialize the map centered on current restaurant
      */
     function initializeMap() {
+        console.log('🗺️ Initializing map...');
+        
         const mapContainer = document.getElementById('restaurants-map');
-        if (!mapContainer) return;
+        if (!mapContainer) {
+            console.error('Map container not found!');
+            return;
+        }
 
         // Get map center from current restaurant or default
-        const center = lebonrestoSingle?.mapCenter || { lat: 48.8566, lng: 2.3522 };
+        const center = lebonrestoSingle?.mapCenter || { lat: 33.5731, lng: -7.5898 }; // Casablanca default
+        console.log('Map center:', center);
         
         // Initialize map centered on current restaurant
         map = L.map('restaurants-map').setView([center.lat, center.lng], 10);
+        console.log('Map initialized:', !!map);
 
         // Add tile layer
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -76,9 +83,12 @@
 
         // Create markers layer
         markersLayer = L.layerGroup().addTo(map);
+        console.log('Markers layer created:', !!markersLayer);
 
         // Add map controls
         addMapControls();
+        
+        console.log('Map initialization complete');
     }
 
     /**
@@ -291,17 +301,29 @@
      * Update map markers
      */
     function updateMapMarkers() {
+        console.log('🗺️ Updating map markers...');
+        console.log('All restaurants count:', allRestaurants.length);
+        
         // Clear existing markers
         markersLayer.clearLayers();
 
-        if (allRestaurants.length === 0) return;
+        if (allRestaurants.length === 0) {
+            console.log('No restaurants to display on map');
+            return;
+        }
 
         allRestaurants.forEach(restaurant => {
             const meta = restaurant.restaurant_meta || {};
             const lat = parseFloat(meta.latitude);
             const lng = parseFloat(meta.longitude);
 
-            if (isNaN(lat) || isNaN(lng)) return;
+            // Debug logging for coordinates
+            console.log(`Restaurant: ${restaurant.title?.rendered}, Lat: ${lat}, Lng: ${lng}, Valid: ${!isNaN(lat) && !isNaN(lng)}`);
+
+            if (isNaN(lat) || isNaN(lng)) {
+                console.warn(`Invalid coordinates for restaurant ${restaurant.title?.rendered}: lat=${meta.latitude}, lng=${meta.longitude}`);
+                return;
+            }
 
             // Create marker icon based on restaurant type
             const isCurrentRestaurant = restaurant.id === currentRestaurantId;
@@ -312,8 +334,8 @@
                 // Current restaurant - location pin icon
                 markerIcon = L.divIcon({
                     className: 'current-restaurant-marker',
-                    html: `<div class="flex items-center justify-center relative">
-                             <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 64 64">
+                    html: `<div style="display: flex; align-items: center; justify-content: center; position: relative; width: 32px; height: 32px;">
+                             <svg style="width: 32px; height: 32px;" fill="currentColor" viewBox="0 0 64 64">
                                <path fill="#ff9800" d="M53 24.267C53 42.633 32 61 32 61S11 42.633 11 24.267a21 21 0 1 1 42 0z"/>
                                <circle cx="32" cy="24" r="17" fill="#eeeeee"/>
                                <ellipse cx="39" cy="20" fill="#ff9800" rx="4" ry="5"/>
@@ -329,8 +351,8 @@
                 // Featured restaurant marker - location pin icon
                 markerIcon = L.divIcon({
                     className: 'featured-restaurant-marker',
-                    html: `<div class="flex items-center justify-center">
-                             <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 64 64">
+                    html: `<div style="display: flex; align-items: center; justify-content: center; width: 24px; height: 24px;">
+                             <svg style="width: 24px; height: 24px;" fill="currentColor" viewBox="0 0 64 64">
                                <path fill="#ff9800" d="M53 24.267C53 42.633 32 61 32 61S11 42.633 11 24.267a21 21 0 1 1 42 0z"/>
                                <circle cx="32" cy="24" r="17" fill="#eeeeee"/>
                                <ellipse cx="39" cy="20" fill="#ff9800" rx="4" ry="5"/>
@@ -346,8 +368,8 @@
                 // Regular restaurant marker - location pin icon
                 markerIcon = L.divIcon({
                     className: 'regular-restaurant-marker',
-                    html: `<div class="flex items-center justify-center">
-                             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 64 64">
+                    html: `<div style="display: flex; align-items: center; justify-content: center; width: 20px; height: 20px;">
+                             <svg style="width: 20px; height: 20px;" fill="currentColor" viewBox="0 0 64 64">
                                <path fill="#ff9800" d="M53 24.267C53 42.633 32 61 32 61S11 42.633 11 24.267a21 21 0 1 1 42 0z"/>
                                <circle cx="32" cy="24" r="17" fill="#eeeeee"/>
                                <ellipse cx="39" cy="20" fill="#ff9800" rx="4" ry="5"/>
@@ -362,6 +384,7 @@
             }
 
             const marker = L.marker([lat, lng], { icon: markerIcon });
+            console.log(`Created marker for ${restaurant.title?.rendered} at [${lat}, ${lng}] with icon:`, markerIcon);
             
             // Create popup content
             const popupContent = createMarkerPopup(restaurant, isCurrentRestaurant);
@@ -375,11 +398,15 @@
 
             // Add click handler
             marker.on('click', function() {
+                console.log(`Marker clicked for ${restaurant.title?.rendered}`);
                 // Highlight functionality removed
             });
 
             markersLayer.addLayer(marker);
+            console.log(`Added marker for ${restaurant.title?.rendered} at [${lat}, ${lng}]`);
         });
+
+        console.log(`Total markers added: ${markersLayer.getLayers().length}`);
 
         // Highlight current restaurant
         highlightCurrentRestaurant();
@@ -389,18 +416,29 @@
      * Fit map to show all visible markers
      */
     function fitMapToMarkers() {
+        console.log('🎯 Fitting map to markers...');
+        console.log('Map exists:', !!map);
+        console.log('Markers layer exists:', !!markersLayer);
+        console.log('Markers count:', markersLayer ? markersLayer.getLayers().length : 0);
+        
         if (!map || !markersLayer || markersLayer.getLayers().length === 0) {
+            console.log('Cannot fit map - missing map, markers layer, or no markers');
             return;
         }
 
         // Get all marker positions
         const bounds = L.latLngBounds();
         markersLayer.eachLayer(function(marker) {
-            bounds.extend(marker.getLatLng());
+            const latLng = marker.getLatLng();
+            console.log('Marker position:', latLng);
+            bounds.extend(latLng);
         });
+
+        console.log('Bounds:', bounds);
 
         // Fit map to show all markers with some padding
         if (bounds.isValid() && bounds.getNorth() !== bounds.getSouth()) {
+            console.log('Fitting bounds to show all markers');
             map.fitBounds(bounds, {
                 padding: [20, 20], // Add padding around the bounds
                 maxZoom: 15 // Don't zoom in too much
@@ -408,7 +446,14 @@
         } else if (markersLayer.getLayers().length === 1) {
             // If only one marker, center on it with a reasonable zoom level
             const singleMarker = markersLayer.getLayers()[0];
-            map.setView(singleMarker.getLatLng(), 13);
+            const latLng = singleMarker.getLatLng();
+            console.log('Centering on single marker:', latLng);
+            map.setView(latLng, 13);
+        } else {
+            console.log('No valid bounds found, using default view');
+            // Fallback to default view
+            const center = lebonrestoSingle?.mapCenter || { lat: 33.5731, lng: -7.5898 }; // Casablanca
+            map.setView([center.lat, center.lng], 10);
         }
     }
 

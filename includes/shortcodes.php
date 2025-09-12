@@ -388,7 +388,6 @@ function lebonresto_restaurant_detail_shortcode($atts) {
     $city = get_post_meta($restaurant_id, '_restaurant_city', true);
     $cuisine_type = get_post_meta($restaurant_id, '_restaurant_cuisine_type', true);
     $phone = get_post_meta($restaurant_id, '_restaurant_phone', true);
-    $email = get_post_meta($restaurant_id, '_restaurant_email', true);
     $video_url = get_post_meta($restaurant_id, '_restaurant_video_url', true);
     $virtual_tour_url = get_post_meta($restaurant_id, '_restaurant_virtual_tour_url', true);
     $is_featured = get_post_meta($restaurant_id, '_restaurant_is_featured', true);
@@ -485,15 +484,6 @@ function lebonresto_restaurant_detail_shortcode($atts) {
                         </div>
                     <?php endif; ?>
 
-                    <?php if ($email): ?>
-                    <div class="bg-white rounded-lg shadow-lg p-6 text-center">
-                        <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <i class="fas fa-envelope text-blue-600 text-2xl"></i>
-                        </div>
-                        <h3 class="text-lg font-semibold text-gray-800 mb-2"><?php _e('Email', 'le-bon-resto'); ?></h3>
-                            <p class="text-gray-600"><?php echo esc_html($email); ?></p>
-                        </div>
-                    <?php endif; ?>
                 
                 <?php if ($video_url): ?>
                     <div class="bg-white rounded-lg shadow-lg p-6 text-center">
