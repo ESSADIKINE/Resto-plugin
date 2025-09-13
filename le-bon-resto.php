@@ -76,6 +76,7 @@ class LeBonResto {
         require_once LEBONRESTO_PLUGIN_PATH . 'includes/shortcodes.php';
         require_once LEBONRESTO_PLUGIN_PATH . 'includes/api.php';
         require_once LEBONRESTO_PLUGIN_PATH . 'includes/templates.php';
+        require_once LEBONRESTO_PLUGIN_PATH . 'includes/email-handler.php';
         require_once LEBONRESTO_PLUGIN_PATH . 'includes/seo-meta.php';
         require_once LEBONRESTO_PLUGIN_PATH . 'includes/seo-advanced.php';
         require_once LEBONRESTO_PLUGIN_PATH . 'includes/html-optimization.php';
@@ -155,9 +156,22 @@ class LeBonResto {
             
             if (!empty($restaurant)) {
                 // Set up the post data
-                global $post;
+                global $post, $wp_query;
                 $post = $restaurant[0];
                 setup_postdata($post);
+                
+                // Set up the query to make have_posts() work
+                $wp_query->is_single = true;
+                $wp_query->is_singular = true;
+                $wp_query->is_page = false;
+                $wp_query->is_home = false;
+                $wp_query->is_archive = false;
+                $wp_query->is_search = false;
+                $wp_query->is_404 = false;
+                $wp_query->posts = array($post);
+                $wp_query->post_count = 1;
+                $wp_query->current_post = -1;
+                $wp_query->in_the_loop = false;
                 
                 // Load the restaurant detail template
                 $template_path = LEBONRESTO_PLUGIN_PATH . 'templates/restaurant-detail.php';
@@ -240,6 +254,11 @@ class LeBonResto {
         
         // Flush rewrite rules to ensure custom post type URLs work
         flush_rewrite_rules();
+        
+        // Create the all-restaurants page if it doesn't exist
+        if (function_exists('lebonresto_create_all_restaurants_page_now')) {
+            lebonresto_create_all_restaurants_page_now();
+        }
         
         // Set a flag to show activation success
         set_transient('lebonresto_activation_notice', true, 30);

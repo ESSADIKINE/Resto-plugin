@@ -199,6 +199,12 @@
         // Map initialization is handled in the PHP template
         // This prevents conflicts with the existing map implementation
         console.log('Map initialization handled by PHP template');
+        
+        // Additional safety check - ensure map container exists
+        const mapContainer = document.getElementById('restaurant-map');
+        if (!mapContainer) {
+            console.warn('Map container not found - map initialization may fail');
+        }
     }
 
     /**

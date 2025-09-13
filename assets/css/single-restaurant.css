@@ -69,35 +69,35 @@
 }
 
 /* Right column layout */
-.right-column {
+.right-column1 {
     display: flex !important;
     flex-direction: column !important;
     background-color: #ffffff !important;
     position: relative !important;
 }
 
-.left-column {
+.left-column1 {
     display: flex !important;
     flex-direction: column !important;
     background-color: #ffffff !important;
 }
 /* Custom scrollbar styling for webkit browsers */
-.right-column::-webkit-scrollbar {
+.right-column1::-webkit-scrollbar {
     width: 8px !important;
 }
 
-.right-column::-webkit-scrollbar-track {
+.right-column1::-webkit-scrollbar-track {
     background: #f3f4f6 !important;
     border-radius: 4px !important;
 }
 
-.right-column::-webkit-scrollbar-thumb {
+.right-column1::-webkit-scrollbar-thumb {
     background: linear-gradient(135deg, #fedc00 0%, #fedc00 100%) !important;
     border-radius: 4px !important;
     border: 1px solid #f3f4f6 !important;
 }
 
-.right-column::-webkit-scrollbar-thumb:hover {
+.right-column1::-webkit-scrollbar-thumb:hover {
     background: linear-gradient(135deg, #fedc00 0%, #fedc00 100%) !important;
 }
 
@@ -256,7 +256,6 @@ textarea:focus,
 }
 
 /* Enhanced Buttons */
-button,
 .filter-button,
 .btn {
     padding: 14px 24px !important;
@@ -275,16 +274,14 @@ button,
 }
 
 .filter-button,
-.bg-yellow-400,
-button[style*="background-color: #fedc00"] {
+.bg-yellow-400{
     background: linear-gradient(135deg, #fedc00 0%, #fedc00 100%) !important;
     color: #1f2937 !important;
     font-weight: 700 !important;
 }
 
 .filter-button:hover,
-.bg-yellow-400:hover,
-button[style*="background-color: #fedc00"]:hover {
+.bg-yellow-400:hover{
     background: linear-gradient(135deg, #fedc00 0%, #fedc00 100%) !important;
     transform: translateY(-2px) !important;
     box-shadow: 0 6px 16px rgba(251, 191, 36, 0.4) !important;
@@ -1097,7 +1094,7 @@ input[type="checkbox"]:checked {
 }
 
 .mobile-filter-toggle button::before {
-    content: "☰";
+    content: "🔽";
     display: block;
     font-size: 18px;
     font-weight: bold;

@@ -157,6 +157,7 @@ function lebonresto_restaurant_details_callback($post) {
     $cuisine_type = get_post_meta($post->ID, '_restaurant_cuisine_type', true);
     $is_featured = get_post_meta($post->ID, '_restaurant_is_featured', true);
     $phone = get_post_meta($post->ID, '_restaurant_phone', true);
+    $email = get_post_meta($post->ID, '_restaurant_email', true);
     $virtual_tour_url = get_post_meta($post->ID, '_restaurant_virtual_tour_url', true);
 
     ?>
@@ -242,6 +243,15 @@ function lebonresto_restaurant_details_callback($post) {
             <td>
                 <input type="tel" id="restaurant_phone" name="restaurant_phone" value="<?php echo esc_attr($phone); ?>" class="regular-text" />
                 <p class="description"><?php _e('Restaurant contact phone number.', 'le-bon-resto'); ?></p>
+            </td>
+        </tr>
+        <tr>
+            <th scope="row">
+                <label for="restaurant_email"><?php _e('Email Address', 'le-bon-resto'); ?></label>
+            </th>
+            <td>
+                <input type="email" id="restaurant_email" name="restaurant_email" value="<?php echo esc_attr($email); ?>" class="regular-text" />
+                <p class="description"><?php _e('Restaurant contact email address.', 'le-bon-resto'); ?></p>
             </td>
         </tr>
                     <tr>
@@ -565,6 +575,7 @@ function lebonresto_save_restaurant_data($post_id) {
             'restaurant_google_maps_link' => '_restaurant_google_maps_link',
             'restaurant_cuisine_type' => '_restaurant_cuisine_type',
             'restaurant_phone' => '_restaurant_phone',
+            'restaurant_email' => '_restaurant_email',
         );
 
         foreach ($detail_fields as $field => $meta_key) {
@@ -572,6 +583,8 @@ function lebonresto_save_restaurant_data($post_id) {
                 $value = sanitize_text_field($_POST[$field]);
                 if ($field === 'restaurant_description') {
                     $value = sanitize_textarea_field($_POST[$field]);
+                } elseif ($field === 'restaurant_email') {
+                    $value = sanitize_email($_POST[$field]);
                 } elseif ($field === 'restaurant_google_maps_link') {
                     $value = esc_url_raw($_POST[$field]);
                 }
@@ -685,6 +698,7 @@ function lebonresto_get_restaurant_meta_for_rest($object) {
         'google_maps_link' => get_post_meta($post_id, '_restaurant_google_maps_link', true),
         'cuisine_type' => get_post_meta($post_id, '_restaurant_cuisine_type', true),
         'phone' => get_post_meta($post_id, '_restaurant_phone', true),
+        'email' => get_post_meta($post_id, '_restaurant_email', true),
         'is_featured' => get_post_meta($post_id, '_restaurant_is_featured', true),
         'virtual_tour_url' => get_post_meta($post_id, '_restaurant_virtual_tour_url', true),
         'gallery' => get_post_meta($post_id, '_restaurant_gallery', true),

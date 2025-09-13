@@ -334,6 +334,13 @@ class LeBonResto_Admin {
             'lebonresto_settings'
         );
         
+        // Add SMTP settings section
+        add_settings_section(
+            'lebonresto_smtp',
+            __('SMTP Email Settings', 'le-bon-resto'),
+            array($this, 'smtp_section_callback'),
+            'lebonresto_settings'
+        );
         
         // Add settings fields
         add_settings_field(
@@ -417,6 +424,71 @@ class LeBonResto_Admin {
             'lebonresto_general'
         );
         
+        // SMTP Settings Fields
+        add_settings_field(
+            'smtp_enabled',
+            __('Enable SMTP', 'le-bon-resto'),
+            array($this, 'setting_field_smtp_enabled'),
+            'lebonresto_settings',
+            'lebonresto_smtp'
+        );
+        
+        add_settings_field(
+            'smtp_host',
+            __('SMTP Host', 'le-bon-resto'),
+            array($this, 'setting_field_smtp_host'),
+            'lebonresto_settings',
+            'lebonresto_smtp'
+        );
+        
+        add_settings_field(
+            'smtp_port',
+            __('SMTP Port', 'le-bon-resto'),
+            array($this, 'setting_field_smtp_port'),
+            'lebonresto_settings',
+            'lebonresto_smtp'
+        );
+        
+        add_settings_field(
+            'smtp_username',
+            __('SMTP Username', 'le-bon-resto'),
+            array($this, 'setting_field_smtp_username'),
+            'lebonresto_settings',
+            'lebonresto_smtp'
+        );
+        
+        add_settings_field(
+            'smtp_password',
+            __('SMTP Password', 'le-bon-resto'),
+            array($this, 'setting_field_smtp_password'),
+            'lebonresto_settings',
+            'lebonresto_smtp'
+        );
+        
+        add_settings_field(
+            'smtp_encryption',
+            __('SMTP Encryption', 'le-bon-resto'),
+            array($this, 'setting_field_smtp_encryption'),
+            'lebonresto_settings',
+            'lebonresto_smtp'
+        );
+        
+        add_settings_field(
+            'smtp_from_email',
+            __('From Email', 'le-bon-resto'),
+            array($this, 'setting_field_smtp_from_email'),
+            'lebonresto_settings',
+            'lebonresto_smtp'
+        );
+        
+        add_settings_field(
+            'smtp_from_name',
+            __('From Name', 'le-bon-resto'),
+            array($this, 'setting_field_smtp_from_name'),
+            'lebonresto_settings',
+            'lebonresto_smtp'
+        );
+        
         
         // Add admin notices
         add_action('admin_notices', array($this, 'admin_notices'));
@@ -429,6 +501,12 @@ class LeBonResto_Admin {
         echo '<p>' . __('Configure the default settings for your Le Bon Resto plugin.', 'le-bon-resto') . '</p>';
     }
     
+    /**
+     * SMTP section callback
+     */
+    public function smtp_section_callback() {
+        echo '<p>' . __('Configure SMTP settings for sending emails from the admin dashboard. Use Gmail SMTP for reliable email delivery.', 'le-bon-resto') . '</p>';
+    }
     
     /**
      * Get plugin options with defaults
@@ -444,6 +522,14 @@ class LeBonResto_Admin {
             'enable_layer_switcher' => '1',
             'enable_fullscreen' => '1',
             'primary_color' => '#fedc00',
+            'smtp_enabled' => '0',
+            'smtp_host' => 'smtp.gmail.com',
+            'smtp_port' => '587',
+            'smtp_username' => '',
+            'smtp_password' => '',
+            'smtp_encryption' => 'tls',
+            'smtp_from_email' => 'le.bon.restau@gmail.com',
+            'smtp_from_name' => 'Le Bon Resto',
             'restaurant_options' => array(
                 'Accès PMR (Personnes à Mobilité Réduite)',
                 'Chauffage',
@@ -562,6 +648,61 @@ class LeBonResto_Admin {
         </script>';
     }
     
+    /**
+     * SMTP field callbacks
+     */
+    public function setting_field_smtp_enabled() {
+        $options = $this->get_options();
+        echo '<label><input type="checkbox" name="lebonresto_options[smtp_enabled]" value="1" ' . checked($options['smtp_enabled'], '1', false) . ' /> ';
+        echo __('Enable SMTP for sending emails', 'le-bon-resto') . '</label>';
+        echo '<p class="description">' . __('Check this to use SMTP instead of WordPress default mail function', 'le-bon-resto') . '</p>';
+    }
+    
+    public function setting_field_smtp_host() {
+        $options = $this->get_options();
+        echo '<input type="text" name="lebonresto_options[smtp_host]" value="' . esc_attr($options['smtp_host']) . '" class="regular-text" />';
+        echo '<p class="description">' . __('SMTP server hostname (e.g., smtp.gmail.com)', 'le-bon-resto') . '</p>';
+    }
+    
+    public function setting_field_smtp_port() {
+        $options = $this->get_options();
+        echo '<input type="number" name="lebonresto_options[smtp_port]" value="' . esc_attr($options['smtp_port']) . '" class="small-text" min="1" max="65535" />';
+        echo '<p class="description">' . __('SMTP port (587 for TLS, 465 for SSL, 25 for non-encrypted)', 'le-bon-resto') . '</p>';
+    }
+    
+    public function setting_field_smtp_username() {
+        $options = $this->get_options();
+        echo '<input type="text" name="lebonresto_options[smtp_username]" value="' . esc_attr($options['smtp_username']) . '" class="regular-text" />';
+        echo '<p class="description">' . __('SMTP username (usually your email address)', 'le-bon-resto') . '</p>';
+    }
+    
+    public function setting_field_smtp_password() {
+        $options = $this->get_options();
+        echo '<input type="password" name="lebonresto_options[smtp_password]" value="' . esc_attr($options['smtp_password']) . '" class="regular-text" />';
+        echo '<p class="description">' . __('SMTP password (use App Password for Gmail)', 'le-bon-resto') . '</p>';
+    }
+    
+    public function setting_field_smtp_encryption() {
+        $options = $this->get_options();
+        echo '<select name="lebonresto_options[smtp_encryption]">';
+        echo '<option value="none" ' . selected($options['smtp_encryption'], 'none', false) . '>' . __('None', 'le-bon-resto') . '</option>';
+        echo '<option value="tls" ' . selected($options['smtp_encryption'], 'tls', false) . '>' . __('TLS', 'le-bon-resto') . '</option>';
+        echo '<option value="ssl" ' . selected($options['smtp_encryption'], 'ssl', false) . '>' . __('SSL', 'le-bon-resto') . '</option>';
+        echo '</select>';
+        echo '<p class="description">' . __('Encryption method (TLS recommended for Gmail)', 'le-bon-resto') . '</p>';
+    }
+    
+    public function setting_field_smtp_from_email() {
+        $options = $this->get_options();
+        echo '<input type="email" name="lebonresto_options[smtp_from_email]" value="' . esc_attr($options['smtp_from_email']) . '" class="regular-text" />';
+        echo '<p class="description">' . __('Email address that will appear as sender', 'le-bon-resto') . '</p>';
+    }
+    
+    public function setting_field_smtp_from_name() {
+        $options = $this->get_options();
+        echo '<input type="text" name="lebonresto_options[smtp_from_name]" value="' . esc_attr($options['smtp_from_name']) . '" class="regular-text" />';
+        echo '<p class="description">' . __('Name that will appear as sender', 'le-bon-resto') . '</p>';
+    }
     
     
     
@@ -652,6 +793,46 @@ class LeBonResto_Admin {
                 }
             }
             $validated['restaurant_options'] = $validated_options;
+        }
+        
+        // Validate SMTP settings
+        $validated['smtp_enabled'] = isset($input['smtp_enabled']) ? '1' : '0';
+        
+        if (isset($input['smtp_host'])) {
+            $validated['smtp_host'] = sanitize_text_field($input['smtp_host']);
+        }
+        
+        if (isset($input['smtp_port'])) {
+            $port = intval($input['smtp_port']);
+            if ($port > 0 && $port <= 65535) {
+                $validated['smtp_port'] = $port;
+            }
+        }
+        
+        if (isset($input['smtp_username'])) {
+            $validated['smtp_username'] = sanitize_text_field($input['smtp_username']);
+        }
+        
+        if (isset($input['smtp_password'])) {
+            $validated['smtp_password'] = sanitize_text_field($input['smtp_password']);
+        }
+        
+        if (isset($input['smtp_encryption'])) {
+            $encryption = sanitize_text_field($input['smtp_encryption']);
+            if (in_array($encryption, array('none', 'tls', 'ssl'))) {
+                $validated['smtp_encryption'] = $encryption;
+            }
+        }
+        
+        if (isset($input['smtp_from_email'])) {
+            $email = sanitize_email($input['smtp_from_email']);
+            if (is_email($email)) {
+                $validated['smtp_from_email'] = $email;
+            }
+        }
+        
+        if (isset($input['smtp_from_name'])) {
+            $validated['smtp_from_name'] = sanitize_text_field($input['smtp_from_name']);
         }
         
         
@@ -775,6 +956,7 @@ class LeBonResto_Admin {
         $new_columns['city'] = __('City', 'le-bon-resto');
         $new_columns['cuisine_type'] = __('Cuisine Type', 'le-bon-resto');
         $new_columns['phone'] = __('Phone', 'le-bon-resto');
+        $new_columns['email'] = __('Email', 'le-bon-resto');
         $new_columns['coordinates'] = __('Coordinates', 'le-bon-resto');
         $new_columns['principal_image'] = __('Principal Image', 'le-bon-resto');
         $new_columns['media'] = __('Media', 'le-bon-resto');
@@ -815,6 +997,14 @@ class LeBonResto_Admin {
                 }
                 break;
                 
+            case 'email':
+                $email = get_post_meta($post_id, '_restaurant_email', true);
+                if ($email) {
+                    echo '<a href="mailto:' . esc_attr($email) . '" style="color: #0073aa; text-decoration: none;">' . esc_html($email) . '</a>';
+                } else {
+                    echo '—';
+                }
+                break;
                 
             case 'coordinates':
                 $lat = get_post_meta($post_id, '_restaurant_latitude', true);
@@ -1169,6 +1359,7 @@ class LeBonResto_Admin {
                 'cuisine_type' => get_post_meta($restaurant->ID, '_restaurant_cuisine_type', true),
                 'description' => get_post_meta($restaurant->ID, '_restaurant_description', true),
                 'phone' => get_post_meta($restaurant->ID, '_restaurant_phone', true),
+                'email' => get_post_meta($restaurant->ID, '_restaurant_email', true),
                 'latitude' => get_post_meta($restaurant->ID, '_restaurant_latitude', true),
                 'longitude' => get_post_meta($restaurant->ID, '_restaurant_longitude', true),
                 'is_featured' => get_post_meta($restaurant->ID, '_restaurant_is_featured', true),
@@ -1415,6 +1606,7 @@ class LeBonResto_Admin {
             '_restaurant_cuisine_type' => 'cuisine_type',
             '_restaurant_description' => 'description',
             '_restaurant_phone' => 'phone',
+            '_restaurant_email' => 'email',
             '_restaurant_latitude' => 'latitude',
             '_restaurant_longitude' => 'longitude',
             '_restaurant_is_featured' => 'is_featured',
@@ -1449,6 +1641,7 @@ class LeBonResto_Admin {
                 'cuisine_type' => 'french',
                 'description' => 'A wonderful French restaurant',
                 'phone' => '+33 1 23 45 67 89',
+                'email' => 'contact@samplerestaurant1.com',
                 'latitude' => '48.8566',
                 'longitude' => '2.3522',
                 'is_featured' => '1',
@@ -1468,6 +1661,7 @@ class LeBonResto_Admin {
                 'cuisine_type' => 'italian',
                 'description' => 'Authentic Italian cuisine',
                 'phone' => '+33 4 12 34 56 78',
+                'email' => 'info@samplerestaurant2.com',
                 'latitude' => '45.7640',
                 'longitude' => '4.8357',
                 'is_featured' => '0',

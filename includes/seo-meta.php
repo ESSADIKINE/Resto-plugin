@@ -293,6 +293,7 @@ class LeBonResto_SEO_Meta {
         $city = get_post_meta($restaurant_id, '_restaurant_city', true);
         $address = get_post_meta($restaurant_id, '_restaurant_address', true);
         $phone = get_post_meta($restaurant_id, '_restaurant_phone', true);
+        $email = get_post_meta($restaurant_id, '_restaurant_email', true);
         $latitude = get_post_meta($restaurant_id, '_restaurant_latitude', true);
         $longitude = get_post_meta($restaurant_id, '_restaurant_longitude', true);
         

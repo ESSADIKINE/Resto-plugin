@@ -1219,6 +1219,46 @@ html {
     scroll-behavior: auto;
 }
 
+/* Fix double scrollbar issue - Remove plugin internal scrollbar */
+html.lebonresto-detail-page {
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+}
+
+body.lebonresto-detail-page {
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+}
+
+/* Remove internal scrollbar from plugin layout */
+.lebonresto-detail-layout {
+    overflow: visible !important;
+    min-height: auto !important;
+    height: auto !important;
+}
+
+.lebonresto-detail-layout .container {
+    overflow: visible !important;
+    height: auto !important;
+}
+
+/* Ensure main content area doesn't create scrollbars */
+.lebonresto-detail-layout #main-content {
+    overflow: visible !important;
+    height: auto !important;
+}
+
+.lebonresto-detail-layout .bt-content-wrap {
+    overflow: visible !important;
+    height: auto !important;
+}
+
+/* Ensure all content sections flow naturally */
+.lebonresto-detail-layout .row {
+    overflow: visible !important;
+    height: auto !important;
+}
+
 /* Map Container Styles */
 #restaurant-map {
     width: 100% !important;

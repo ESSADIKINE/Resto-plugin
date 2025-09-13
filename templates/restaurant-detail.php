@@ -77,12 +77,22 @@ wp_enqueue_style(
 );
 
 // Enqueue detail page CSS
+if (defined('LEBONRESTO_PLUGIN_URL') && defined('LEBONRESTO_PLUGIN_VERSION')) {
 wp_enqueue_style(
     'lebonresto-detail-css',
     LEBONRESTO_PLUGIN_URL . 'assets/css/restaurant-detail.css',
     array('tailwind-css', 'leaflet-css'),
-    LEBONRESTO_PLUGIN_VERSION . '.' . time()
-);
+        LEBONRESTO_PLUGIN_VERSION
+    );
+} else {
+    // Fallback for missing constants
+    wp_enqueue_style(
+        'lebonresto-detail-css',
+        plugin_dir_url(__FILE__) . '../assets/css/restaurant-detail.css',
+        array('tailwind-css', 'leaflet-css'),
+        '1.0.0'
+    );
+}
 
 // Enqueue Bootstrap CSS
 wp_enqueue_style(
@@ -111,20 +121,50 @@ wp_enqueue_script(
 );
 
 // Enqueue detail page JS
+if (defined('LEBONRESTO_PLUGIN_URL') && defined('LEBONRESTO_PLUGIN_VERSION')) {
 wp_enqueue_script(
     'lebonresto-detail-js',
     LEBONRESTO_PLUGIN_URL . 'assets/js/restaurant-detail.js',
     array('jquery', 'leaflet-js', 'bootstrap-js'),
-    LEBONRESTO_PLUGIN_VERSION . '.' . time(),
+        LEBONRESTO_PLUGIN_VERSION,
     true
 );
+} else {
+    // Fallback for missing constants
+    wp_enqueue_script(
+        'lebonresto-detail-js',
+        plugin_dir_url(__FILE__) . '../assets/js/restaurant-detail.js',
+        array('jquery', 'leaflet-js', 'bootstrap-js'),
+        '1.0.0',
+        true
+    );
+}
 
-// Get restaurant data
+// Get restaurant data with error handling
 $restaurant_id = get_the_ID();
+
+// Check if we have a valid restaurant ID
+if (!$restaurant_id) {
+    wp_die('Restaurant ID not found. Please check your permalink settings.');
+}
+
+// Debug mode - only show in development
+if (defined('WP_DEBUG') && WP_DEBUG) {
+    echo '<!-- Debug: Restaurant ID = ' . $restaurant_id . ' -->';
+    echo '<!-- Debug: Post Type = ' . get_post_type($restaurant_id) . ' -->';
+    echo '<!-- Debug: Post Status = ' . get_post_status($restaurant_id) . ' -->';
+}
+
 $address = get_post_meta($restaurant_id, '_restaurant_address', true);
 $city = get_post_meta($restaurant_id, '_restaurant_city', true);
 $cuisine_type = get_post_meta($restaurant_id, '_restaurant_cuisine_type', true);
 $description = get_post_meta($restaurant_id, '_restaurant_description', true);
+
+// Provide fallbacks for missing data
+$address = $address ?: 'Adresse non disponible';
+$city = $city ?: 'Ville non spécifiée';
+$cuisine_type = $cuisine_type ?: 'Cuisine non spécifiée';
+$description = $description ?: 'Description non disponible';
 
 // Get selected options
 $selected_options = get_post_meta($restaurant_id, '_restaurant_selected_options', true);
@@ -132,6 +172,7 @@ if (!is_array($selected_options)) {
     $selected_options = array();
 }
 $phone = get_post_meta($restaurant_id, '_restaurant_phone', true);
+$email = get_post_meta($restaurant_id, '_restaurant_email', true);
 $latitude = get_post_meta($restaurant_id, '_restaurant_latitude', true);
 $longitude = get_post_meta($restaurant_id, '_restaurant_longitude', true);
 $google_maps_link = get_post_meta($restaurant_id, '_restaurant_google_maps_link', true);
@@ -150,12 +191,27 @@ if (!is_array($selected_options)) {
     $selected_options = array();
 }
 
-// Get gallery images
+// Provide fallbacks for missing data
+$phone = $phone ?: '';
+$email = $email ?: '';
+$latitude = $latitude ?: '';
+$longitude = $longitude ?: '';
+$google_maps_link = $google_maps_link ?: '';
+$is_featured = $is_featured ?: '0';
+$virtual_tour_url = $virtual_tour_url ?: '';
+$video_url = $video_url ?: '';
+$menu_image = $menu_image ?: '';
+$blog_title = $blog_title ?: get_the_title();
+$blog_content = $blog_content ?: '';
+
+// Get gallery images with error handling
+$gallery_images = array();
+
+try {
 if (function_exists('lebonresto_get_gallery_images')) {
     $gallery_images = lebonresto_get_gallery_images($restaurant_id);
 } else {
     $gallery_ids = get_post_meta($restaurant_id, '_restaurant_gallery', true);
-    $gallery_images = array();
     
     if ($gallery_ids) {
         $image_ids = explode(',', $gallery_ids);
@@ -167,24 +223,241 @@ if (function_exists('lebonresto_get_gallery_images')) {
                     $gallery_images[] = array(
                         'id' => $image_id,
                         'url' => $image_url,
-                        'alt' => get_post_meta($image_id, '_wp_attachment_image_alt', true)
+                            'alt' => get_post_meta($image_id, '_wp_attachment_image_alt', true) ?: ($blog_title ?: get_the_title())
                     );
                 }
             }
         }
     }
+    }
+} catch (Exception $e) {
+    error_log('Error loading gallery images: ' . $e->getMessage());
+    $gallery_images = array();
 }
 
-// Get principal image
+// Get principal image with error handling
 $principal_image = get_post_meta($restaurant_id, '_restaurant_principal_image', true);
 if (!$principal_image && !empty($gallery_images)) {
     $principal_image = $gallery_images[0]['url'];
 }
 
+// Provide fallback for missing principal image
+if (!$principal_image) {
+    $principal_image = 'https://via.placeholder.com/400x300?text=Image+non+disponible';
+}
+
 ?>
 
+<style>
+/* Critical CSS fallback for hosted environments */
+.lebonresto-detail-layout {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background: #f8f9fa;
+    min-height: 100vh;
+}
+
+/* Fix double scrollbar issue - Remove plugin internal scrollbar */
+body.lebonresto-detail-page {
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+}
+
+html.lebonresto-detail-page {
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+}
+
+/* Remove internal scrollbar from plugin layout - let content flow naturally */
+.lebonresto-detail-layout {
+    overflow: visible !important;
+    min-height: auto !important;
+    height: auto !important;
+}
+
+/* Ensure content flows naturally without creating scroll containers */
+.lebonresto-detail-layout .container {
+    overflow: visible !important;
+    height: auto !important;
+}
+
+/* Fix any conflicting scroll settings from themes */
+.lebonresto-detail-layout * {
+    box-sizing: border-box;
+}
+
+/* Remove any height restrictions that might create scrollbars */
+.lebonresto-detail-layout .property-section-wrap {
+    overflow: visible !important;
+}
+
+/* Ensure main content area doesn't create scrollbars */
+.lebonresto-detail-layout #main-content {
+    overflow: visible !important;
+    height: auto !important;
+}
+
+.lebonresto-detail-layout .bt-content-wrap {
+    overflow: visible !important;
+    height: auto !important;
+}
+
+/* Ensure all content sections flow naturally */
+.lebonresto-detail-layout .row {
+    overflow: visible !important;
+    height: auto !important;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 15px;
+}
+
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 -15px;
+}
+
+.col-lg-8, .col-lg-4, .col-md-12 {
+    padding: 0 15px;
+}
+
+.col-lg-8 {
+    flex: 0 0 66.666667%;
+    max-width: 66.666667%;
+}
+
+.col-lg-4 {
+    flex: 0 0 33.333333%;
+    max-width: 33.333333%;
+}
+
+@media (max-width: 991px) {
+    .col-lg-8, .col-lg-4 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+}
+
+.property-section-wrap {
+    background: white;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.block-title-wrap h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #1f2937;
+}
+
+.property-navigation {
+    background: white;
+    padding: 1rem 0;
+    border-bottom: 1px solid #e5e7eb;
+    margin-bottom: 2rem;
+}
+
+.property-navigation a {
+    color: #6b7280;
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+}
+
+.property-navigation a:hover {
+    color: #fedc00;
+    background: #fef3c7;
+}
+
+.blog-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #1f2937;
+    margin-bottom: 0.5rem;
+}
+
+.blog-path {
+    color: #6b7280;
+    margin-bottom: 0.5rem;
+}
+
+.blog-path a {
+    color: #fedc00;
+    text-decoration: none;
+}
+
+.cuisine-badge {
+    background: linear-gradient(135deg, #fedc00 0%, #fedc00 100%);
+    color: #1f2937;
+    padding: 0.5rem 1.5rem;
+    border-radius: 25px;
+    font-weight: 600;
+    display: inline-block;
+}
+
+#restaurant-map {
+    width: 100%;
+    height: 600px;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+
+.contact-btn {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    text-decoration: none;
+    color: #374151;
+    transition: all 0.3s ease;
+    margin-bottom: 0.75rem;
+}
+
+.contact-btn:hover {
+    background: #f9fafb;
+    border-color: #fedc00;
+    color: #1f2937;
+}
+
+.contact-btn i {
+    margin-right: 0.75rem;
+    color: #fedc00;
+}
+
+/* Loading state */
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f4f6;
+    border-top: 4px solid #fedc00;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+</style>
+
 <div class="lebonresto-detail-layout">
-    <?php while (have_posts()) : the_post(); ?>
+    <?php 
+    // Check if we have posts or if we're in a custom context
+    if (have_posts()) : 
+        while (have_posts()) : the_post(); 
+    ?>
         
         <!-- Header Navigation -->
         <div class="property-navigation-wrap">
@@ -430,6 +703,12 @@ if (!$principal_image && !empty($gallery_images)) {
                                             <span><a href="tel:<?php echo esc_attr($phone); ?>" style="color: var(--primary-color);"><?php echo esc_html($phone); ?></a></span>
                                         </li>
                                         <?php endif; ?>
+                                        <?php if ($email): ?>
+                                        <li>
+                                            <strong>Email:</strong>
+                                            <span><a href="mailto:<?php echo esc_attr($email); ?>" style="color: var(--primary-color);"><?php echo esc_html($email); ?></a></span>
+                                        </li>
+                <?php endif; ?>
                                     </ul>
                                 </div>
                             </div>
@@ -575,10 +854,10 @@ if (!$principal_image && !empty($gallery_images)) {
                             </div>
                             <?php endif; ?>
                             </div>
-                         </div>
-                     </div>
-                     <?php endif; ?>
-                     
+                        </div>
+                    </div>
+                    <?php endif; ?>
+                            
                      <!-- Address Section -->
                      <?php if ($address || $city): ?>
                      <div class="property-section-wrap" style="margin-bottom: 2rem;">
@@ -600,8 +879,8 @@ if (!$principal_image && !empty($gallery_images)) {
                                                  <p class="address-city" style="margin: 0; color: var(--text-secondary); font-size: 1rem;"><?php echo esc_html($city); ?></p>
                                              <?php endif; ?>
                                          </div>
-                                     </div>
-                                     
+                </div>
+                
                                      <!-- Google Maps Button -->
                                      <?php if ($latitude && $longitude): ?>
                                      <div class="map-actions" style="text-align: center;">
@@ -625,17 +904,23 @@ if (!$principal_image && !empty($gallery_images)) {
                                      </div>
                                      <?php endif; ?>
                                      
-                                     <?php if ($phone): ?>
+                                     <?php if ($phone || $email): ?>
                                      <div class="contact-details" style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color);">
                                          <div class="contact-list" style="display: flex; flex-direction: column; gap: 0.75rem;">
                                              <?php if ($phone): ?>
                                              <div class="contact-item" style="display: flex; align-items: center; gap: 0.75rem;">
                                                  <i class="fas fa-phone" style="color: var(--primary-color); width: 16px;"></i>
                                                  <a href="tel:<?php echo esc_attr($phone); ?>" style="color: var(--text-primary); text-decoration: none; font-weight: 500;"><?php echo esc_html($phone); ?></a>
-                                             </div>
+                                            </div>
                                              <?php endif; ?>
                                              
-                                         </div>
+                                             <?php if ($email): ?>
+                                             <div class="contact-item" style="display: flex; align-items: center; gap: 0.75rem;">
+                                                 <i class="fas fa-envelope" style="color: var(--primary-color); width: 16px;"></i>
+                                                 <a href="mailto:<?php echo esc_attr($email); ?>" style="color: var(--text-primary); text-decoration: none; font-weight: 500;"><?php echo esc_html($email); ?></a>
+                                        </div>
+                                             <?php endif; ?>
+                                    </div>
                                      </div>
                                      <?php endif; ?>
                                  </div>
@@ -649,7 +934,7 @@ if (!$principal_image && !empty($gallery_images)) {
                          <div class="block-wrap">
                              <div class="block-title-wrap">
                                  <h2>Informations</h2>
-                             </div>
+                                    </div>
                              <div class="block-content-wrap">
                                  <div class="restaurant-info" style="padding: 1.5rem; background: var(--bg-secondary); border-radius: var(--radius-lg); border: 1px solid var(--border-color);">
                                      <div class="info-grid" style="display: grid; gap: 1rem;">
@@ -668,7 +953,7 @@ if (!$principal_image && !empty($gallery_images)) {
                                              <i class="fas fa-star" style="color: #fbbf24; width: 20px;"></i>
                                              <div>
                                                  <span style="font-weight: 600; color: var(--text-primary);">Restaurant recommandé</span>
-                                             </div>
+                                    </div>
                                          </div>
                                          <?php endif; ?>
                                          
@@ -677,7 +962,7 @@ if (!$principal_image && !empty($gallery_images)) {
                                              <i class="fas fa-vr-cardboard" style="color: var(--primary-color); width: 20px;"></i>
                                              <div>
                                                  <span style="font-weight: 600; color: var(--text-primary);">Visite virtuelle disponible</span>
-                                             </div>
+                                    </div>
                                          </div>
                                          <?php endif; ?>
                                          
@@ -693,8 +978,8 @@ if (!$principal_image && !empty($gallery_images)) {
                                  </div>
                              </div>
                          </div>
-                     </div>
-                     
+                                    </div>
+                                    
                      <!-- Contact Actions Section -->
                      <div class="property-section-wrap" style="margin-bottom: 2rem;">
                          <div class="block-wrap">
@@ -712,16 +997,24 @@ if (!$principal_image && !empty($gallery_images)) {
                                      </a>
                                      <?php endif; ?>
                                      
-                                     
-                                     <?php if ($phone): ?>
+                                     <?php if ($email): ?>
+                                     <a href="mailto:<?php echo esc_attr($email); ?>" 
+                                        class="contact-btn"
+                                        style="display: flex; align-items: center; padding: 0.75rem 1rem; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--radius-lg); text-decoration: none; color: var(--text-primary); transition: var(--transition);">
+                                         <i class="fas fa-envelope" style="margin-right: 0.75rem; color: var(--primary-color);"></i>
+                                         <span style="font-weight: 500;">Email: <?php echo esc_html($email); ?></span>
+                                     </a>
+                                     <?php endif; ?>
+                                    
+                                    <?php if ($phone): ?>
                                      <a href="https://wa.me/<?php echo esc_attr(preg_replace('/[^0-9]/', '', $phone)); ?>" 
                                         target="_blank"
                                         class="contact-btn"
                                         style="display: flex; align-items: center; padding: 0.75rem 1rem; background: #25D366; border: 1px solid #25D366; border-radius: var(--radius-lg); text-decoration: none; color: white; transition: var(--transition);">
                                          <i class="fab fa-whatsapp" style="margin-right: 0.75rem;"></i>
                                          <span style="font-weight: 500;">WhatsApp</span>
-                                     </a>
-                                     <?php endif; ?>
+                                    </a>
+                                    <?php endif; ?>
                                      
                                      <?php if ($virtual_tour_url): ?>
                                      <a href="<?php echo esc_url($virtual_tour_url); ?>" 
@@ -734,15 +1027,38 @@ if (!$principal_image && !empty($gallery_images)) {
                                      <?php endif; ?>
                                  </div>
                              </div>
-                         </div>
-                     </div>
-                     </aside>
-                 </div>
+                            </div>
+                        </div>
+                    </aside>
+                </div>
             </div>
 
         </div>
         
-    <?php endwhile; ?>
+    <?php 
+        endwhile; 
+    else: 
+        // Fallback content when no posts are found
+    ?>
+        <div class="container" style="padding: 4rem 0; text-align: center;">
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div style="background: #f8f9fa; padding: 3rem; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 4rem; color: #ffc107; margin-bottom: 1.5rem;"></i>
+                        <h2 style="color: #495057; margin-bottom: 1rem;">Restaurant non trouvé</h2>
+                        <p style="color: #6c757d; margin-bottom: 2rem; font-size: 1.1rem;">
+                            Le restaurant que vous recherchez n'existe pas ou a été supprimé.
+                        </p>
+                        <a href="<?php echo home_url('/restaurants/'); ?>" 
+                           style="display: inline-flex; align-items: center; padding: 0.75rem 1.5rem; background: linear-gradient(135deg, #fedc00 0%, #fedc00 100%); color: #1f2937; text-decoration: none; border-radius: 8px; font-weight: 600; transition: all 0.3s ease;">
+                            <i class="fas fa-arrow-left" style="margin-right: 0.5rem;"></i>
+                            Retour aux restaurants
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <?php endif; ?>
 </div>
 
 <!-- Gallery Lightbox Modal -->
@@ -854,14 +1170,25 @@ if (!$principal_image && !empty($gallery_images)) {
         console.log('Debug - Longitude:', '<?php echo $longitude; ?>');
         console.log('Debug - Has coordinates:', <?php echo ($latitude && $longitude && is_numeric($latitude) && is_numeric($longitude)) ? 'true' : 'false'; ?>);
         
+        // Validate coordinates before using them
+        const hasValidCoordinates = <?php echo ($latitude && $longitude && is_numeric($latitude) && is_numeric($longitude)) ? 'true' : 'false'; ?>;
+        const restaurantLat = <?php echo $latitude ?: 'null'; ?>;
+        const restaurantLng = <?php echo $longitude ?: 'null'; ?>;
+        
         <?php if ($latitude && $longitude && is_numeric($latitude) && is_numeric($longitude)): ?>
         function initializeMap() {
             console.log('initializeMap called');
             console.log('Leaflet available:', typeof L !== 'undefined');
-            console.log('Coordinates:', <?php echo $latitude; ?>, <?php echo $longitude; ?>);
+            console.log('Coordinates:', restaurantLat, restaurantLng);
             
             if (typeof L === 'undefined') {
                 console.error('Leaflet library not loaded');
+                return;
+            }
+            
+            // Validate coordinates
+            if (!hasValidCoordinates || !restaurantLat || !restaurantLng) {
+                console.error('Invalid coordinates for map initialization');
                 return;
             }
             
@@ -891,7 +1218,7 @@ if (!$principal_image && !empty($gallery_images)) {
             try {
                 // Initialize the map
                 window.restaurantMap = L.map('restaurant-map', {
-                    center: [<?php echo $latitude; ?>, <?php echo $longitude; ?>],
+                    center: [restaurantLat, restaurantLng],
                     zoom: 15,
                     zoomControl: true
                 });
@@ -1067,7 +1394,7 @@ if (!$principal_image && !empty($gallery_images)) {
                     closeOnClick: false,
                     autoPan: false
                 })
-                .setLatLng([<?php echo $latitude; ?>, <?php echo $longitude; ?>])
+                .setLatLng([restaurantLat, restaurantLng])
                 .setContent(popupContent)
                 .openOn(window.restaurantMap);
                 
@@ -1150,6 +1477,12 @@ if (!$principal_image && !empty($gallery_images)) {
             
             if (typeof L === 'undefined') {
                 console.error('Leaflet library not loaded');
+                return;
+            }
+            
+            // Validate that we have default coordinates
+            if (!defaultLat || !defaultLng || isNaN(defaultLat) || isNaN(defaultLng)) {
+                console.error('Invalid default coordinates');
                 return;
             }
             
@@ -1276,7 +1609,7 @@ if (!$principal_image && !empty($gallery_images)) {
                     closeOnClick: false,
                     autoPan: false
                 })
-                .setLatLng([<?php echo $latitude; ?>, <?php echo $longitude; ?>])
+                .setLatLng([defaultLat, defaultLng])
                 .setContent(popupContent)
                 .openOn(window.restaurantMap);
                 
@@ -1488,6 +1821,7 @@ function openMenuPopup(menuIndex, menuName, fileUrl) {
     // Show popup
     popup.style.display = 'block';
     document.body.style.overflow = 'hidden';
+    document.documentElement.classList.add('lebonresto-detail-page');
     
     // Add animation
     popup.style.opacity = '0';
@@ -1503,8 +1837,15 @@ function closeMenuPopup() {
     setTimeout(() => {
         popup.style.display = 'none';
         document.body.style.overflow = 'auto';
+        document.documentElement.classList.remove('lebonresto-detail-page');
     }, 300);
 }
+
+// Apply classes for scrollbar management (minimal approach)
+document.addEventListener('DOMContentLoaded', function() {
+    document.body.classList.add('lebonresto-detail-page');
+    document.documentElement.classList.add('lebonresto-detail-page');
+});
 
 // Event listeners
 document.getElementById('menu-popup-close').addEventListener('click', closeMenuPopup);

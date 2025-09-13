@@ -117,6 +117,7 @@ class LeBonResto_Advanced_SEO {
         $address = get_post_meta($restaurant_id, '_restaurant_address', true);
         $city = get_post_meta($restaurant_id, '_restaurant_city', true);
         $phone = get_post_meta($restaurant_id, '_restaurant_phone', true);
+        $email = get_post_meta($restaurant_id, '_restaurant_email', true);
         $cuisine_type = get_post_meta($restaurant_id, '_restaurant_cuisine_type', true);
         $latitude = get_post_meta($restaurant_id, '_restaurant_latitude', true);
         $longitude = get_post_meta($restaurant_id, '_restaurant_longitude', true);

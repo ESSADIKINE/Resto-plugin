@@ -77,15 +77,45 @@ function lebonresto_register_api_endpoints() {
 add_action('rest_api_init', 'lebonresto_register_api_endpoints');
 
 /**
+ * Clear restaurant cache when restaurants are updated
+ */
+function lebonresto_clear_restaurant_cache() {
+    // Clear all restaurant-related transients
+    global $wpdb;
+    $wpdb->query("DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_lebonresto_restaurants_%'");
+    $wpdb->query("DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_timeout_lebonresto_restaurants_%'");
+    
+    // Clear cuisine types cache
+    delete_transient('lebonresto_cuisine_types');
+}
+
+// Clear cache when restaurants are saved, updated, or deleted
+add_action('save_post_restaurant', 'lebonresto_clear_restaurant_cache');
+add_action('delete_post', 'lebonresto_clear_restaurant_cache');
+add_action('wp_trash_post', 'lebonresto_clear_restaurant_cache');
+
+/**
  * Custom REST API endpoint callback
  */
 function lebonresto_get_restaurants_endpoint($request) {
     try {
+        // Set execution time limit
+        set_time_limit(30);
+        
         $params = $request->get_params();
         
         // Handle pagination
         $page = isset($params['page']) ? max(1, intval($params['page'])) : 1;
         $per_page = isset($params['per_page']) ? max(1, min(100, intval($params['per_page']))) : 12;
+        
+        // Create cache key based on parameters
+        $cache_key = 'lebonresto_restaurants_' . md5(serialize($params));
+        
+        // Try to get from cache first
+        $cached_result = get_transient($cache_key);
+        if ($cached_result !== false) {
+            return rest_ensure_response($cached_result);
+        }
     
     // Base query arguments
     $args = array(
@@ -213,6 +243,9 @@ function lebonresto_get_restaurants_endpoint($request) {
         });
     }
 
+        // Cache the result for 5 minutes
+        set_transient($cache_key, $restaurants, 300);
+        
         return rest_ensure_response($restaurants);
         
     } catch (Exception $e) {
@@ -222,15 +255,38 @@ function lebonresto_get_restaurants_endpoint($request) {
 }
 
 /**
- * Prepare restaurant data for API response
+ * Prepare restaurant data for API response (optimized for performance)
  */
 function lebonresto_prepare_restaurant_data($post_id) {
-    $post = get_post($post_id);
+    // Get all meta data in one query
+    $meta_keys = array(
+        '_restaurant_description',
+        '_restaurant_address', 
+        '_restaurant_city',
+        '_restaurant_latitude',
+        '_restaurant_longitude',
+        '_restaurant_cuisine_type',
+        '_restaurant_phone',
+        '_restaurant_email',
+        '_restaurant_is_featured',
+        '_restaurant_principal_image',
+        '_restaurant_gallery',
+        '_restaurant_video_url',
+        '_restaurant_virtual_tour_url'
+    );
     
-    // Get principal image URLs
-    $principal_image_id = get_post_meta($post_id, '_restaurant_principal_image', true);
+    $meta_data = get_post_meta($post_id);
+    $restaurant_meta = array();
+    
+    // Extract meta values
+    foreach ($meta_keys as $key) {
+        $restaurant_meta[str_replace('_restaurant_', '', $key)] = isset($meta_data[$key][0]) ? $meta_data[$key][0] : '';
+    }
+    
+    // Get principal image URLs (only if needed)
     $principal_image_urls = array();
-    if ($principal_image_id) {
+    if (!empty($restaurant_meta['principal_image'])) {
+        $principal_image_id = $restaurant_meta['principal_image'];
         $principal_image_urls = array(
             'full' => wp_get_attachment_image_url($principal_image_id, 'full'),
             'medium' => wp_get_attachment_image_url($principal_image_id, 'medium'),
@@ -238,11 +294,10 @@ function lebonresto_prepare_restaurant_data($post_id) {
         );
     }
     
-    // Get gallery image URLs
-    $gallery_ids = get_post_meta($post_id, '_restaurant_gallery', true);
+    // Get gallery image URLs (only if needed)
     $gallery_urls = array();
-    if ($gallery_ids) {
-        $image_ids = explode(',', $gallery_ids);
+    if (!empty($restaurant_meta['gallery'])) {
+        $image_ids = explode(',', $restaurant_meta['gallery']);
         foreach ($image_ids as $image_id) {
             $image_id = intval($image_id);
             if ($image_id) {
@@ -264,18 +319,19 @@ function lebonresto_prepare_restaurant_data($post_id) {
         'link' => home_url('/details/' . get_post_field('post_name', $post_id) . '/'),
         'single_link' => get_permalink($post_id),
         'restaurant_meta' => array(
-            'description' => get_post_meta($post_id, '_restaurant_description', true),
-            'address' => get_post_meta($post_id, '_restaurant_address', true),
-            'city' => get_post_meta($post_id, '_restaurant_city', true),
-            'latitude' => get_post_meta($post_id, '_restaurant_latitude', true),
-            'longitude' => get_post_meta($post_id, '_restaurant_longitude', true),
-            'cuisine_type' => get_post_meta($post_id, '_restaurant_cuisine_type', true),
-            'phone' => get_post_meta($post_id, '_restaurant_phone', true),
-            'is_featured' => get_post_meta($post_id, '_restaurant_is_featured', true),
+            'description' => $restaurant_meta['description'],
+            'address' => $restaurant_meta['address'],
+            'city' => $restaurant_meta['city'],
+            'latitude' => $restaurant_meta['latitude'],
+            'longitude' => $restaurant_meta['longitude'],
+            'cuisine_type' => $restaurant_meta['cuisine_type'],
+            'phone' => $restaurant_meta['phone'],
+            'email' => $restaurant_meta['email'],
+            'is_featured' => $restaurant_meta['is_featured'],
             'principal_image' => $principal_image_urls,
             'gallery_images' => $gallery_urls,
-            'video_url' => get_post_meta($post_id, '_restaurant_video_url', true),
-            'virtual_tour_url' => get_post_meta($post_id, '_restaurant_virtual_tour_url', true),
+            'video_url' => $restaurant_meta['video_url'],
+            'virtual_tour_url' => $restaurant_meta['virtual_tour_url'],
         ),
     );
 }
@@ -305,9 +361,15 @@ function lebonresto_calculate_distance($lat1, $lng1, $lat2, $lng2) {
 }
 
 /**
- * Get unique cuisine types for filter dropdown
+ * Get unique cuisine types for filter dropdown (optimized with caching)
  */
 function lebonresto_get_cuisine_types() {
+    // Try to get from cache first
+    $cached_cuisines = get_transient('lebonresto_cuisine_types');
+    if ($cached_cuisines !== false) {
+        return $cached_cuisines;
+    }
+    
     global $wpdb;
     
     $cuisine_types = $wpdb->get_col(
@@ -317,6 +379,9 @@ function lebonresto_get_cuisine_types() {
          AND meta_value != '' 
          ORDER BY meta_value ASC"
     );
+    
+    // Cache for 1 hour
+    set_transient('lebonresto_cuisine_types', $cuisine_types, 3600);
     
     return $cuisine_types;
 }

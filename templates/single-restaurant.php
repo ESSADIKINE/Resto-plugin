@@ -165,34 +165,25 @@ wp_enqueue_script(
     true
 );
 
-// Enqueue updated single restaurant script
+// Enqueue single restaurant script (main script)
 wp_enqueue_script(
-    'lebonresto-single-updated',
+    'lebonresto-single-js',
     LEBONRESTO_PLUGIN_URL . 'assets/js/single-restaurant.js',
-    array('leaflet-js', 'wp-api'),
-    LEBONRESTO_PLUGIN_VERSION . '.' . time() . '.' . rand(1000, 9999), // Aggressive cache busting
+    array('jquery', 'leaflet-js', 'wp-api'),
+    LEBONRESTO_PLUGIN_VERSION,
     true
 );
 
-// Enqueue single restaurant map script (the one we've been modifying)
-wp_enqueue_script(
-    'lebonresto-single-map',
-    LEBONRESTO_PLUGIN_URL . 'assets/js/single-restaurant-map.js',
-    array('leaflet-js', 'wp-api'),
-    LEBONRESTO_PLUGIN_VERSION . '.' . time() . '.' . rand(1000, 9999), // Aggressive cache busting
-    true
-);
-
-// Enqueue debug CSS for fallback styling
+// Enqueue single restaurant CSS
 wp_enqueue_style(
-    'lebonresto-debug-css',
+    'lebonresto-single-css',
     LEBONRESTO_PLUGIN_URL . 'assets/css/single-restaurant.css',
     array('tailwind-css'),
-    LEBONRESTO_PLUGIN_VERSION . '.' . time() // Cache busting
+    LEBONRESTO_PLUGIN_VERSION
 );
 
 // Add critical inline styles to ensure they're applied
-wp_add_inline_style('lebonresto-debug-css', '
+wp_add_inline_style('lebonresto-single-css', '
 /* Critical inline styles for immediate application */
 .lebonresto-single-layout {
     background: linear-gradient(135deg, #f9fafb 0%, #e5e7eb 100%) !important;
@@ -248,7 +239,7 @@ wp_add_inline_style('lebonresto-debug-css', '
 /* MOBILE FILTER STYLES - INLINE FOR IMMEDIATE APPLICATION */
 .mobile-filter-toggle {
     position: fixed !important;
-    top: 20px !important;
+    top: 60px !important;
     right: 20px !important;
     z-index: 50 !important;
     display: block !important;
@@ -257,7 +248,7 @@ wp_add_inline_style('lebonresto-debug-css', '
 
 /* When filter is open, move icon to top-right */
 .mobile-filter-toggle.filter-open {
-    top: 20px !important;
+    top: 60px !important;
     left: auto !important;
     right: 20px !important;
 }
@@ -283,7 +274,7 @@ wp_add_inline_style('lebonresto-debug-css', '
 }
 
 .mobile-filter-toggle button::before {
-    content: "☰" !important;
+    content: "🔽" !important;
     display: block !important;
     font-size: 18px !important;
     font-weight: bold !important;
@@ -665,6 +656,7 @@ wp_add_inline_style('lebonresto-debug-css', '
         $cuisine_type = get_post_meta($current_restaurant_id, '_restaurant_cuisine_type', true);
         $description = get_post_meta($current_restaurant_id, '_restaurant_description', true);
         $phone = get_post_meta($current_restaurant_id, '_restaurant_phone', true);
+        $email = get_post_meta($current_restaurant_id, '_restaurant_email', true);
         $latitude = get_post_meta($current_restaurant_id, '_restaurant_latitude', true);
         $longitude = get_post_meta($current_restaurant_id, '_restaurant_longitude', true);
         $is_featured = get_post_meta($current_restaurant_id, '_restaurant_is_featured', true);
@@ -922,7 +914,7 @@ wp_add_inline_style('lebonresto-debug-css', '
         <div class="two-column-layout flex-1 grid grid-cols-1 lg:grid-cols-2 min-h-screen">
             
             <!-- Left Column: Map + Gallery (50% width) -->
-            <div class="left-column relative bg-white border-r border-gray-200 flex flex-col">
+            <div class="left-column1 relative bg-white border-r border-gray-200 flex flex-col">
                 <!-- Map Section -->
                 <div id="restaurants-map" class="w-full flex-1" style="height: 60vh; min-height: 400px;">
                 <!-- Map Controls -->
@@ -949,7 +941,7 @@ wp_add_inline_style('lebonresto-debug-css', '
                             </div>
                             
             <!-- Right Column: All Sections Combined (50% width) -->
-            <div class="right-column flex flex-col bg-white">
+            <div class="right-column1 flex flex-col bg-white">
                 
                 <!-- Virtual Tour Section -->
                 <div class="virtual-tour-section h-96 border-b border-gray-200 relative">
@@ -986,6 +978,7 @@ wp_add_inline_style('lebonresto-debug-css', '
             "cuisine_type": <?php echo wp_json_encode($cuisine_type); ?>,
             "description": <?php echo wp_json_encode($description); ?>,
             "phone": <?php echo wp_json_encode($phone); ?>,
+            "email": <?php echo wp_json_encode($email); ?>,
             "latitude": <?php echo wp_json_encode($latitude); ?>,
             "longitude": <?php echo wp_json_encode($longitude); ?>,
             "is_featured": <?php echo wp_json_encode($is_featured === '1'); ?>,
@@ -1044,17 +1037,35 @@ wp_add_inline_style('lebonresto-debug-css', '
 
                 
 <script>
-
-// Mobile filter functionality
-function initializeMobileFilters() {
-    console.log('🔧 [MOBILE DEBUG] Initializing mobile filters...');
-    console.log('🔧 [MOBILE DEBUG] Screen info:');
-    console.log('  - window.innerWidth:', window.innerWidth);
-    console.log('  - window.innerHeight:', window.innerHeight);
-    console.log('  - screen.width:', screen.width);
-    console.log('  - screen.height:', screen.height);
-    console.log('  - userAgent:', navigator.userAgent);
-    console.log('  - is mobile check (768px):', window.innerWidth <= 768);
+// Essential inline functions only - main functionality moved to external JS
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize mobile filters
+    if (typeof initializeMobileFilters === 'function') {
+        initializeMobileFilters();
+    }
+    
+    // Initialize mobile tabs
+    if (typeof initializeMobileTabs === 'function') {
+        initializeMobileTabs();
+    }
+    
+    // Initialize location detection for distance filtering
+    const distanceFilter = document.getElementById('distance-filter');
+    if (distanceFilter && navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            function(position) {
+                window.userLocation = {
+                    lat: position.coords.latitude,
+                    lng: position.coords.longitude
+                };
+                distanceFilter.disabled = false;
+            },
+            function(error) {
+                distanceFilter.disabled = true;
+            }
+        );
+    }
+});
     
     const mobileFilterBtn = document.getElementById('mobile-filter-btn');
     const mobileFilterOverlay = document.getElementById('mobile-filter-overlay');
@@ -1363,8 +1374,8 @@ function handleTabClick(e) {
     const tabType = this.getAttribute('data-tab');
     const vrContent = document.querySelector('.virtual-tour-section');
     const mapContent = document.querySelector('#restaurants-map');
-    const leftColumn = document.querySelector('.left-column');
-    const rightColumn = document.querySelector('.right-column');
+    const leftColumn = document.querySelector('.left-column1');
+    const rightColumn = document.querySelector('.right-column1');
     const tabButtons = document.querySelectorAll('.mobile-tab-btn');
     
     console.log('🔧 [MOBILE TABS] Tab type:', tabType);
@@ -1462,8 +1473,8 @@ function initializeMobileTabs() {
         const tabButtons = document.querySelectorAll('.mobile-tab-btn');
         const vrContent = document.querySelector('.virtual-tour-section');
         const mapContent = document.querySelector('#restaurants-map');
-        const leftColumn = document.querySelector('.left-column');
-        const rightColumn = document.querySelector('.right-column');
+        const leftColumn = document.querySelector('.left-column1');
+        const rightColumn = document.querySelector('.right-column1');
         
         console.log('🔧 [MOBILE TABS] Elements found:');
         console.log('  - tabButtons:', tabButtons.length);
@@ -1623,7 +1634,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 100);
     
     // Apply essential styles
-    const rightColumn = document.querySelector('.right-column');
+    const rightColumn = document.querySelector('.right-column1');
     const restaurantsContainer = document.querySelector('#restaurants-container');
     
     if (rightColumn) {
@@ -1676,7 +1687,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Handle window resize to update scroll behavior and tab visibility
     window.addEventListener('resize', function() {
-        const rightColumn = document.querySelector('.right-column');
+        const rightColumn = document.querySelector('.right-column1');
         const restaurantsContainer = document.querySelector('#restaurants-container');
         const vrContent = document.querySelector('.virtual-tour-section');
         const mapContent = document.querySelector('#restaurants-map');
@@ -1758,7 +1769,7 @@ window.addEventListener('load', function() {
 // Localize script data
 <?php
 wp_localize_script(
-    'lebonresto-single-map',
+    'lebonresto-single-js',
     'lebonrestoSingle',
     array(
         'apiUrl' => home_url('/wp-json/lebonresto/v1/restaurants'),
@@ -1776,6 +1787,7 @@ wp_localize_script(
             'noRestaurants' => __('No restaurants found', 'le-bon-resto'),
             'loadingError' => __('Error loading restaurants', 'le-bon-resto'),
             'phoneTitle' => __('Call restaurant', 'le-bon-resto'),
+            'emailTitle' => __('Email restaurant', 'le-bon-resto'),
             'kmAway' => __('%s km away', 'le-bon-resto'),
             'loadingRestaurants' => __('Loading restaurants...', 'le-bon-resto'),
             'restaurantsFound' => __('%s restaurants found', 'le-bon-resto'),
@@ -2258,7 +2270,7 @@ button:focus {
 
 .mobile-tab-btn.active i {
     transform: scale(1.15) !important;
-    color: #fedc00 !important;
+    color:rgb(255, 255, 255) !important;
     animation: iconBounce 1.5s ease-in-out infinite !important;
 }
 
@@ -2290,7 +2302,7 @@ button:focus {
 }
 
 .mobile-tab-btn.active .tab-text {
-    color: #fedc00 !important;
+    color:rgb(255, 255, 255) !important;
     font-weight: 800 !important;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
 }
@@ -2402,11 +2414,11 @@ button:focus {
     }
     
     /* Make sure both containers are in the same area on mobile */
-    .left-column {
+    .left-column1 {
         position: relative !important;
     }
     
-    .right-column {
+    .right-column1 {
         position: relative !important;
     }
     
@@ -2473,7 +2485,7 @@ button:focus {
 /* Mobile Filter Styles */
 .mobile-filter-toggle {
     position: fixed;
-    top: 16px;
+    top: 60px;
     right: 16px;
     z-index: 50;
 }
@@ -2498,7 +2510,7 @@ button:focus {
 
 /* Fallback filter icon using CSS */
 .mobile-filter-toggle button::before {
-    content: "☰";
+    content: "🔽";
     display: block;
     font-size: 18px;
     font-weight: bold;
@@ -2640,7 +2652,7 @@ button:focus {
     }
     
     /* Disable scroll in right column on mobile - AGGRESSIVE APPROACH */
-    .right-column {
+    .right-column1 {
         display: flex !important;
         flex-direction: column !important;
         background-color: #ffffff !important;
@@ -2654,13 +2666,13 @@ button:focus {
     }
     
     /* Force all child elements to not scroll */
-    .right-column * {
+    .right-column1 * {
         overflow: visible !important;
         max-height: none !important;
     }
     
     /* Specifically target restaurants container */
-    .right-column #restaurants-container {
+    .right-column1 #restaurants-container {
         overflow: visible !important;
         overflow-y: visible !important;
         overflow-x: visible !important;
