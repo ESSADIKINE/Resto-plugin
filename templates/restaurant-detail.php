@@ -450,6 +450,173 @@ html.lebonresto-detail-page {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+
+/* Animated Section Switcher Buttons */
+.section-switcher .section-btn {
+    display: flex !important;
+    align-items: center !important;
+    height: 60px;
+    width: 60px;
+    text-decoration: none;
+    margin: 0 5px;
+    overflow: hidden;
+    background: #fff;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0px 10px 10px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease-out;
+    border: none;
+    position: relative;
+    padding: 0;
+}
+
+.section-switcher .section-btn:hover {
+    width: 200px;
+}
+
+.section-switcher .section-btn .icon {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    height: 60px;
+    width: 60px;
+    color: #000;
+    border-radius: 50px;
+    box-sizing: border-box;
+    transition: all 0.3s ease-out;
+    flex-shrink: 0;
+}
+
+.section-switcher .section-btn:nth-child(1):hover .icon {
+    background: #4285F4;
+}
+
+.section-switcher .section-btn:nth-child(2):hover .icon {
+    background: #00C851;
+}
+
+.section-switcher .section-btn:nth-child(3):hover .icon {
+    background: #ff0000;
+}
+
+.section-switcher .section-btn:nth-child(4):hover .icon {
+    background: #E1306C;
+}
+
+.section-switcher .section-btn .icon svg {
+    width: 20px !important;
+    height: 20px !important;
+    transition: all 0.3s ease-out;
+    display: block !important;
+}
+
+.section-switcher .section-btn:hover .icon svg {
+    color: #fff;
+}
+
+.section-switcher .section-btn span {
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 60px;
+    margin-left: 10px;
+    transition: all 0.3s ease-out;
+    white-space: nowrap;
+    opacity: 0;
+    transform: translateX(-10px);
+}
+
+.section-switcher .section-btn:nth-child(1) span {
+    color: #4285F4;
+}
+
+.section-switcher .section-btn:nth-child(2) span {
+    color: #00C851;
+}
+
+.section-switcher .section-btn:nth-child(3) span {
+    color: #ff0000;
+}
+
+.section-switcher .section-btn:nth-child(4) span {
+    color: #E1306C;
+}
+
+.section-switcher .section-btn:hover span {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/* Active state styling */
+.section-switcher .section-btn.active {
+    background: var(--gradient-primary);
+    color: var(--bg-primary);
+}
+
+.section-switcher .section-btn.active .icon {
+    background: var(--gradient-primary);
+    color: var(--bg-primary);
+}
+
+.section-switcher .section-btn.active .icon svg {
+    color: var(--bg-primary);
+}
+
+.section-switcher .section-btn.active span {
+    color: var(--bg-primary);
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/* Ensure icons are visible */
+.section-switcher .section-btn .icon svg {
+    fill: currentColor !important;
+    stroke: none !important;
+}
+
+.section-switcher .section-btn .icon svg path {
+    fill: currentColor !important;
+}
+
+/* Override any conflicting styles */
+.section-switcher .section-btn * {
+    box-sizing: border-box !important;
+}
+
+.section-switcher .section-btn .icon * {
+    display: block !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .section-switcher {
+        right: 20px !important;
+        top: 10px !important;
+    }
+    
+    .section-switcher .section-btn {
+        height: 50px;
+        width: 50px;
+    }
+    
+    .section-switcher .section-btn:hover {
+        width: 160px;
+    }
+    
+    .section-switcher .section-btn .icon {
+        height: 50px;
+        width: 50px;
+    }
+    
+    .section-switcher .section-btn .icon svg {
+        width: 18px !important;
+        height: 18px !important;
+    }
+    
+    .section-switcher .section-btn span {
+        font-size: 14px;
+        line-height: 50px;
+    }
+}
 </style>
 
 <div class="lebonresto-detail-layout">
@@ -520,25 +687,37 @@ html.lebonresto-detail-page {
                     <!-- Section Switcher Icons -->
                     <div class="section-switcher" style="position: absolute; top: 20px; right: 50px; z-index: 1000;">
                         <div class="switcher-icons" style="display: inline-flex; background: var(--bg-primary); padding: 0.5rem; border-radius: var(--radius-full); box-shadow: var(--shadow-lg); gap: 0.5rem;">
-                            <button class="section-btn active" data-section="map" style="padding: 1rem; border: none; background: var(--gradient-primary); color: var(--bg-primary); border-radius: var(--radius-full); cursor: pointer; transition: all var(--transition-normal);" title="Carte">
+                            <button class="section-btn active" data-section="map" title="Carte">
+                                <div class="icon">
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                                     <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
                                 </svg>
+                                </div>
+                                <span>Carte</span>
                             </button>
-                            <button class="section-btn" data-section="virtual-tour" style="padding: 1rem; border: none; background: var(--bg-tertiary); color: var(--text-secondary); border-radius: var(--radius-full); cursor: pointer; transition: all var(--transition-normal);" title="Visite Virtuelle">
+                            <button class="section-btn" data-section="virtual-tour" title="Visite Virtuelle">
+                                <div class="icon">
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
                                 </svg>
+                                </div>
+                                <span>Visite Virtuelle</span>
                             </button>
-                            <button class="section-btn" data-section="video" style="padding: 1rem; border: none; background: var(--bg-tertiary); color: var(--text-secondary); border-radius: var(--radius-full); cursor: pointer; transition: all var(--transition-normal);" title="Vidéo">
+                            <button class="section-btn" data-section="video" title="Vidéo">
+                                <div class="icon">
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                                     <path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/>
                                 </svg>
+                                </div>
+                                <span>Vidéo</span>
                             </button>
-                            <button class="section-btn" data-section="images" style="padding: 1rem; border: none; background: var(--bg-tertiary); color: var(--text-secondary); border-radius: var(--radius-full); cursor: pointer; transition: all var(--transition-normal);" title="Images">
+                            <button class="section-btn" data-section="images" title="Images">
+                                <div class="icon">
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                                     <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
                                 </svg>
+                                </div>
+                                <span>Images</span>
                             </button>
                         </div>
                     </div>
@@ -1095,13 +1274,9 @@ html.lebonresto-detail-page {
                 // Update button states
                 sectionButtons.forEach(btn => {
                     btn.classList.remove('active');
-                    btn.style.background = 'var(--bg-tertiary)';
-                    btn.style.color = 'var(--text-secondary)';
                 });
                 
                 this.classList.add('active');
-                this.style.background = 'var(--gradient-primary)';
-                this.style.color = 'var(--bg-primary)';
                 
                 // Update content sections
                 contentSections.forEach(section => {
