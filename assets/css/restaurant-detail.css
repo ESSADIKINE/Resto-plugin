@@ -1518,10 +1518,8 @@ body.lebonresto-detail-page {
 
 .switcher-icons {
     display: inline-flex;
-    background: var(--bg-primary);
     padding: 0.5rem;
     border-radius: var(--radius-full);
-    box-shadow: var(--shadow-lg);
     gap: 0.5rem;
 }
 

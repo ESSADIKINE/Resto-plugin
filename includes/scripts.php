@@ -14,6 +14,14 @@ if (!defined('ABSPATH')) {
  * Enqueue Leaflet scripts and styles
  */
 function lebonresto_enqueue_scripts() {
+    // Enqueue Font Awesome CSS
+    wp_enqueue_style(
+        'font-awesome',
+        'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css',
+        array(),
+        '6.4.0'
+    );
+
     // Enqueue Leaflet CSS
     wp_enqueue_style(
         'leaflet-css',
@@ -63,8 +71,24 @@ function lebonresto_enqueue_scripts_conditionally() {
     }
 }
 
+/**
+ * Enqueue Font Awesome on restaurant pages
+ */
+function lebonresto_enqueue_font_awesome() {
+    // Load Font Awesome on restaurant pages
+    if (is_singular('restaurant')) {
+        wp_enqueue_style(
+            'font-awesome',
+            'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css',
+            array(),
+            '6.4.0'
+        );
+    }
+}
+
 // Hook to enqueue scripts
 add_action('wp_enqueue_scripts', 'lebonresto_enqueue_scripts_conditionally');
+add_action('wp_enqueue_scripts', 'lebonresto_enqueue_font_awesome');
 
 /**
  * Create assets directory and map.js file if they don't exist

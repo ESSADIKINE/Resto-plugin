@@ -102,14 +102,6 @@ function lebonresto_add_restaurant_meta_boxes() {
         'high'
     );
     
-    add_meta_box(
-        'restaurant-menu',
-        __('Restaurant Menu', 'le-bon-resto'),
-        'lebonresto_restaurant_menu_callback',
-        'restaurant',
-        'normal',
-        'high'
-    );
     
     add_meta_box(
         'restaurant-blog',
@@ -133,6 +125,15 @@ function lebonresto_add_restaurant_meta_boxes() {
         'restaurant-menus',
         __('Restaurant Menus', 'le-bon-resto'),
         'lebonresto_restaurant_menus_callback',
+        'restaurant',
+        'normal',
+        'high'
+    );
+    
+    add_meta_box(
+        'restaurant-reviews',
+        __('Restaurant Reviews', 'le-bon-resto'),
+        'lebonresto_restaurant_reviews_callback',
         'restaurant',
         'normal',
         'high'
@@ -538,8 +539,6 @@ function lebonresto_save_restaurant_data($post_id) {
     // Check if nonce is valid for media
     $media_nonce_valid = isset($_POST['lebonresto_restaurant_media_nonce']) && wp_verify_nonce($_POST['lebonresto_restaurant_media_nonce'], 'lebonresto_save_restaurant_media');
 
-    // Check if nonce is valid for menu
-    $menu_nonce_valid = isset($_POST['lebonresto_restaurant_menu_nonce']) && wp_verify_nonce($_POST['lebonresto_restaurant_menu_nonce'], 'lebonresto_save_restaurant_menu');
     
     // Check if nonce is valid for blog
     $blog_nonce_valid = isset($_POST['lebonresto_restaurant_blog_nonce']) && wp_verify_nonce($_POST['lebonresto_restaurant_blog_nonce'], 'lebonresto_save_restaurant_blog');
@@ -549,8 +548,11 @@ function lebonresto_save_restaurant_data($post_id) {
     
     // Check if nonce is valid for menus
     $menus_nonce_valid = isset($_POST['lebonresto_restaurant_menus_nonce']) && wp_verify_nonce($_POST['lebonresto_restaurant_menus_nonce'], 'lebonresto_save_restaurant_menus');
+    
+    // Check if nonce is valid for reviews
+    $reviews_nonce_valid = isset($_POST['lebonresto_reviews_nonce']) && wp_verify_nonce($_POST['lebonresto_reviews_nonce'], 'lebonresto_save_restaurant_data');
 
-    if (!$details_nonce_valid && !$media_nonce_valid && !$menu_nonce_valid && !$blog_nonce_valid && !$options_nonce_valid && !$menus_nonce_valid) {
+    if (!$details_nonce_valid && !$media_nonce_valid && !$blog_nonce_valid && !$options_nonce_valid && !$menus_nonce_valid && !$reviews_nonce_valid) {
         return;
     }
 
@@ -617,13 +619,6 @@ function lebonresto_save_restaurant_data($post_id) {
         }
     }
     
-    // Save menu meta fields
-    if ($menu_nonce_valid) {
-        if (isset($_POST['restaurant_menu_image'])) {
-            $menu_image = sanitize_text_field($_POST['restaurant_menu_image']);
-            update_post_meta($post_id, '_restaurant_menu_image', $menu_image);
-        }
-    }
     
     // Save blog meta fields
     if ($blog_nonce_valid) {
@@ -666,6 +661,16 @@ function lebonresto_save_restaurant_data($post_id) {
             update_post_meta($post_id, '_restaurant_menus', array());
         }
     }
+    
+    // Save reviews meta fields
+    if ($reviews_nonce_valid) {
+        // Save Google Place ID for automatic review fetching
+        if (isset($_POST['restaurant_google_place_id'])) {
+            $google_place_id = sanitize_text_field($_POST['restaurant_google_place_id']);
+            update_post_meta($post_id, '_restaurant_google_place_id', $google_place_id);
+        }
+        
+    }
 }
 add_action('save_post', 'lebonresto_save_restaurant_data');
 
@@ -704,104 +709,14 @@ function lebonresto_get_restaurant_meta_for_rest($object) {
         'gallery' => get_post_meta($post_id, '_restaurant_gallery', true),
         'video_url' => get_post_meta($post_id, '_restaurant_video_url', true),
         'principal_image' => get_post_meta($post_id, '_restaurant_principal_image', true),
-        'menu_image' => get_post_meta($post_id, '_restaurant_menu_image', true),
         'blog_title' => get_post_meta($post_id, '_restaurant_blog_title', true),
         'blog_content' => get_post_meta($post_id, '_restaurant_blog_content', true),
         'selected_options' => get_post_meta($post_id, '_restaurant_selected_options', true),
         'menus' => get_post_meta($post_id, '_restaurant_menus', true),
+        'google_place_id' => get_post_meta($post_id, '_restaurant_google_place_id', true),
     );
 }
 
-/**
- * Restaurant menu meta box callback function
- */
-function lebonresto_restaurant_menu_callback($post) {
-    // Add nonce for security
-    wp_nonce_field('lebonresto_save_restaurant_menu', 'lebonresto_restaurant_menu_nonce');
-
-    // Get current values
-    $menu_image = get_post_meta($post->ID, '_restaurant_menu_image', true);
-
-    ?>
-    <table class="form-table">
-        <tr>
-            <th scope="row">
-                <label for="restaurant_menu_image"><?php _e('Menu Image', 'le-bon-resto'); ?></label>
-            </th>
-            <td>
-                <div id="restaurant-menu-image-container">
-                    <input type="hidden" id="restaurant_menu_image" name="restaurant_menu_image" value="<?php echo esc_attr($menu_image); ?>" />
-                    <button type="button" class="button" id="restaurant-menu-image-button">
-                        <?php _e('Select Menu Image', 'le-bon-resto'); ?>
-                    </button>
-                    <button type="button" class="button" id="restaurant-menu-image-clear" style="margin-left: 10px;">
-                        <?php _e('Clear Image', 'le-bon-resto'); ?>
-                    </button>
-                    <div id="restaurant-menu-image-preview" style="margin-top: 10px;">
-                        <?php if ($menu_image): ?>
-                            <?php lebonresto_display_menu_image_preview($menu_image); ?>
-                        <?php endif; ?>
-                    </div>
-                </div>
-                <p class="description"><?php _e('Upload an image of the restaurant menu or menu board.', 'le-bon-resto'); ?></p>
-            </td>
-        </tr>
-    </table>
-
-    <script>
-    jQuery(document).ready(function($) {
-        var menuImageUploader;
-
-        // Menu Image functionality
-        $('#restaurant-menu-image-button').click(function(e) {
-            e.preventDefault();
-            
-            if (menuImageUploader) {
-                menuImageUploader.open();
-                return;
-            }
-            
-            menuImageUploader = wp.media({
-                title: '<?php _e('Select Menu Image', 'le-bon-resto'); ?>',
-                button: {
-                    text: '<?php _e('Use this image', 'le-bon-resto'); ?>'
-                },
-                multiple: false,
-                library: {
-                    type: 'image'
-                }
-            });
-            
-            menuImageUploader.on('select', function() {
-                var attachment = menuImageUploader.state().get('selection').first().toJSON();
-                $('#restaurant_menu_image').val(attachment.id);
-                updateMenuImagePreview(attachment);
-            });
-            
-            menuImageUploader.open();
-        });
-
-        $('#restaurant-menu-image-clear').click(function(e) {
-            e.preventDefault();
-            $('#restaurant_menu_image').val('');
-            $('#restaurant-menu-image-preview').empty();
-        });
-
-        function updateMenuImagePreview(attachment) {
-            var preview = $('#restaurant-menu-image-preview');
-            preview.empty();
-            
-            if (attachment) {
-                var imageDiv = $('<div style="position: relative; width: 200px; height: 150px;"></div>');
-                var img = $('<img src="' + attachment.sizes.medium.url + '" style="width: 100%; height: 100%; object-fit: cover; border-radius: 4px; border: 2px solid #ddd;" />');
-                imageDiv.append(img);
-                preview.append(imageDiv);
-            }
-        }
-    });
-    </script>
-    <?php
-}
 
 /**
  * Restaurant blog content meta box callback function
@@ -1024,18 +939,300 @@ function lebonresto_restaurant_menus_callback($post) {
     <?php
 }
 
-/**
- * Display menu image preview in admin
- */
-function lebonresto_display_menu_image_preview($image_id) {
-    if (empty($image_id)) {
-        return;
-    }
 
-    $image_url = wp_get_attachment_image_url($image_id, 'medium');
-    if ($image_url) {
-        echo '<div style="position: relative; width: 200px; height: 150px;">';
-        echo '<img src="' . esc_url($image_url) . '" style="width: 100%; height: 100%; object-fit: cover; border-radius: 4px; border: 2px solid #ddd;" />';
-        echo '</div>';
+/**
+ * Add Google Maps API key setting to admin
+ */
+function lebonresto_add_google_maps_api_setting() {
+    add_settings_field(
+        'google_maps_api_key',
+        'Google Maps API Key',
+        'lebonresto_google_maps_api_key_callback',
+        'general',
+        'default',
+        array('label_for' => 'google_maps_api_key')
+    );
+    register_setting('general', 'google_maps_api_key');
+}
+add_action('admin_init', 'lebonresto_add_google_maps_api_setting');
+
+function lebonresto_google_maps_api_key_callback() {
+    $api_key = get_option('google_maps_api_key', '');
+    echo '<input type="text" id="google_maps_api_key" name="google_maps_api_key" value="' . esc_attr($api_key) . '" class="regular-text" placeholder="AIzaSyDXSSijLxRtL9tz7FbYqvnB3eWwTojpNlI" />';
+    echo '<p class="description">Enter your Google Maps API key with Places API enabled. This will be used to automatically fetch restaurant reviews and ratings.</p>';
+    echo '<div style="background: #e7f3ff; padding: 1rem; border-radius: 4px; margin-top: 0.5rem; border-left: 4px solid #2196F3;">';
+    echo '<strong>Current API Key:</strong> ' . ($api_key ? esc_html($api_key) : 'Not set - using default key');
+    echo '</div>';
+}
+
+/**
+ * Get Google Maps API key
+ */
+function lebonresto_get_google_maps_api_key() {
+    // First try to get from plugin settings
+    $plugin_options = get_option('lebonresto_options', array());
+    if (isset($plugin_options['google_maps_api_key']) && !empty($plugin_options['google_maps_api_key'])) {
+        return $plugin_options['google_maps_api_key'];
     }
+    
+    // Fallback to WordPress general settings
+    $wp_api_key = get_option('google_maps_api_key', '');
+    if (!empty($wp_api_key)) {
+        return $wp_api_key;
+    }
+    
+    // Final fallback to default key
+    return 'AIzaSyDXSSijLxRtL9tz7FbYqvnB3eWwTojpNlI';
+}
+
+/**
+ * Extract place ID from Google Maps URL
+ */
+function lebonresto_extract_place_id_from_url($google_maps_url) {
+    if (empty($google_maps_url)) {
+        return false;
+    }
+    
+    // Pattern 1: maps.google.com/maps/place/...
+    if (preg_match('/maps\.google\.com\/maps\/place\/([^\/\?]+)/', $google_maps_url, $matches)) {
+        return $matches[1];
+    }
+    
+    // Pattern 2: goo.gl/maps/... or maps.app.goo.gl/...
+    if (preg_match('/(?:goo\.gl|maps\.app\.goo\.gl)\/maps\/([^\/\?]+)/', $google_maps_url, $matches)) {
+        return $matches[1];
+    }
+    
+    // Pattern 3: Direct place ID in URL
+    if (preg_match('/place_id=([^&]+)/', $google_maps_url, $matches)) {
+        return $matches[1];
+    }
+    
+    // Pattern 4: @lat,lng,zoom format
+    if (preg_match('/@(-?\d+\.?\d*),(-?\d+\.?\d*),(\d+\.?\d*)z/', $google_maps_url, $matches)) {
+        // For @lat,lng format, we need to use the coordinates to find the place
+        return 'coordinates_' . $matches[1] . '_' . $matches[2];
+    }
+    
+    // Pattern 5: maps.google.com/?q=... format
+    if (preg_match('/maps\.google\.com\/\?q=([^&]+)/', $google_maps_url, $matches)) {
+        return urldecode($matches[1]);
+    }
+    
+    // Pattern 6: maps.google.com/maps?q=... format
+    if (preg_match('/maps\.google\.com\/maps\?q=([^&]+)/', $google_maps_url, $matches)) {
+        return urldecode($matches[1]);
+    }
+    
+    // Pattern 7: Any URL with /place/ in it
+    if (preg_match('/\/place\/([^\/\?&]+)/', $google_maps_url, $matches)) {
+        return $matches[1];
+    }
+    
+    return false;
+}
+
+/**
+ * Search for a place by name using Google Places API
+ */
+function lebonresto_search_place_by_name($place_name, $api_key) {
+    if (empty($place_name) || empty($api_key)) {
+        return false;
+    }
+    
+    // Check cache first
+    $cache_key = 'google_place_search_' . md5($place_name);
+    $cached_data = get_transient($cache_key);
+    
+    if ($cached_data !== false) {
+        return $cached_data;
+    }
+    
+    // Google Places API search endpoint
+    $url = 'https://maps.googleapis.com/maps/api/place/findplacefromtext/json';
+    $params = array(
+        'input' => $place_name,
+        'inputtype' => 'textquery',
+        'fields' => 'place_id,name,rating,user_ratings_total,formatted_address',
+        'key' => $api_key
+    );
+    
+    $request_url = $url . '?' . http_build_query($params);
+    
+    // Make API request
+    $response = wp_remote_get($request_url, array(
+        'timeout' => 15,
+        'headers' => array(
+            'User-Agent' => 'WordPress/' . get_bloginfo('version')
+        )
+    ));
+    
+    if (is_wp_error($response)) {
+        return false;
+    }
+    
+    $body = wp_remote_retrieve_body($response);
+    $data = json_decode($body, true);
+    
+    if (!$data || $data['status'] !== 'OK' || empty($data['candidates'])) {
+        return false;
+    }
+    
+    $candidate = $data['candidates'][0]; // Take the first result
+    $place_id = $candidate['place_id'];
+    
+    // Now fetch detailed data using the place ID
+    return lebonresto_fetch_google_places_data($place_id, $api_key);
+}
+
+/**
+ * Fetch Google Places data using API
+ */
+function lebonresto_fetch_google_places_data($place_id, $api_key) {
+    if (empty($place_id) || empty($api_key)) {
+        return false;
+    }
+    
+    // Check cache first
+    $cache_key = 'google_places_' . md5($place_id);
+    $cached_data = get_transient($cache_key);
+    
+    if ($cached_data !== false) {
+        return $cached_data;
+    }
+    
+    // Google Places API endpoint
+    $url = 'https://maps.googleapis.com/maps/api/place/details/json';
+    $params = array(
+        'place_id' => $place_id,
+        'fields' => 'rating,user_ratings_total,reviews,name,formatted_address',
+        'key' => $api_key
+    );
+    
+    $request_url = $url . '?' . http_build_query($params);
+    
+    // Make API request
+    $response = wp_remote_get($request_url, array(
+        'timeout' => 15,
+        'headers' => array(
+            'User-Agent' => 'WordPress/' . get_bloginfo('version')
+        )
+    ));
+    
+    if (is_wp_error($response)) {
+        return false;
+    }
+    
+    $body = wp_remote_retrieve_body($response);
+    $data = json_decode($body, true);
+    
+    if (!$data || $data['status'] !== 'OK') {
+        return false;
+    }
+    
+    $result = $data['result'];
+    $places_data = array(
+        'rating' => isset($result['rating']) ? floatval($result['rating']) : null,
+        'review_count' => isset($result['user_ratings_total']) ? intval($result['user_ratings_total']) : null,
+        'name' => isset($result['name']) ? $result['name'] : null,
+        'address' => isset($result['formatted_address']) ? $result['formatted_address'] : null,
+        'reviews' => array()
+    );
+    
+    // Extract individual reviews if available
+    if (isset($result['reviews']) && is_array($result['reviews'])) {
+        foreach ($result['reviews'] as $review) {
+            $places_data['reviews'][] = array(
+                'author_name' => isset($review['author_name']) ? $review['author_name'] : 'Anonymous',
+                'rating' => isset($review['rating']) ? intval($review['rating']) : 0,
+                'text' => isset($review['text']) ? $review['text'] : '',
+                'time' => isset($review['time']) ? intval($review['time']) : 0,
+                'relative_time_description' => isset($review['relative_time_description']) ? $review['relative_time_description'] : ''
+            );
+        }
+    }
+    
+    // Cache for 6 hours to avoid excessive API calls
+    set_transient($cache_key, $places_data, 6 * HOUR_IN_SECONDS);
+    
+    return $places_data;
+}
+
+/**
+ * Extract Google Maps data from URL (fallback function)
+ */
+function lebonresto_extract_google_maps_data($google_maps_url) {
+    if (empty($google_maps_url)) {
+        return false;
+    }
+    
+    $data = array();
+    
+    // Extract place ID from various Google Maps URL formats
+    if (preg_match('/place\/([^\/]+)/', $google_maps_url, $matches)) {
+        $data['place_id'] = $matches[1];
+    } elseif (preg_match('/maps\/place\/([^\/]+)/', $google_maps_url, $matches)) {
+        $data['place_id'] = $matches[1];
+    }
+    
+    return $data;
+}
+
+/**
+ * Get Google Maps rating from URL (simplified version)
+ */
+function lebonresto_get_google_rating_from_url($google_maps_url) {
+    // This is a simplified approach - in reality, you'd need to scrape the page
+    // or use a service that can extract this data
+    
+    // For demonstration, we'll return some sample data
+    // In production, you might want to:
+    // 1. Use a web scraping service
+    // 2. Use a third-party API
+    // 3. Store the data manually in the admin
+    
+    return array(
+        'rating' => null, // Would be extracted from the page
+        'review_count' => null, // Would be extracted from the page
+        'place_id' => null // Would be extracted from URL
+    );
+}
+
+/**
+ * Restaurant reviews meta box callback function
+ */
+function lebonresto_restaurant_reviews_callback($post) {
+    // Add nonce for security
+    wp_nonce_field('lebonresto_save_restaurant_data', 'lebonresto_reviews_nonce');
+
+    // Get current values
+    $google_place_id = get_post_meta($post->ID, '_restaurant_google_place_id', true);
+
+    ?>
+    <table class="form-table">
+        <tr>
+            <th scope="row">
+                <label for="restaurant_google_place_id"><?php _e('Google Place ID', 'le-bon-resto'); ?></label>
+            </th>
+            <td>
+                <input type="text" id="restaurant_google_place_id" name="restaurant_google_place_id" value="<?php echo esc_attr($google_place_id); ?>" class="regular-text" placeholder="ChIJN1t_tDeuEmsRUsoyG83frY4" />
+                <p class="description">
+                    <strong><?php _e('Automatic Review Fetching', 'le-bon-resto'); ?></strong><br>
+                    <?php _e('Enter the Google Place ID to automatically fetch reviews, ratings, and review counts from Google Places API.', 'le-bon-resto'); ?><br>
+                    <em><?php _e('You can find this in the Google Maps URL or use the Google Places API to search for your restaurant.', 'le-bon-resto'); ?></em>
+                </p>
+                <div style="background: #e7f3ff; padding: 1rem; border-radius: 4px; margin-top: 0.5rem; border-left: 4px solid #2196F3;">
+                    <strong><?php _e('How to get Google Place ID:', 'le-bon-resto'); ?></strong>
+                    <ol style="margin: 0.5rem 0 0 1.5rem;">
+                        <li><?php _e('Go to Google Maps and search for your restaurant', 'le-bon-resto'); ?></li>
+                        <li><?php _e('Click on your restaurant in the results', 'le-bon-resto'); ?></li>
+                        <li><?php _e('Copy the URL - the Place ID is in the URL after /place/', 'le-bon-resto'); ?></li>
+                        <li><?php _e('Example: maps.google.com/maps/place/Restaurant+Name/@lat,lng,zoom/data=!3m1!4b1!4m5!3m4!1s0x1234567890abcdef:0x1234567890abcdef!8m2!3d40.7128!4d-74.0060', 'le-bon-resto'); ?></li>
+                    </ol>
+                </div>
+            </td>
+        </tr>
+    </table>
+
+    <?php
 }

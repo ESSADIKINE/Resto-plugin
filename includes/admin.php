@@ -334,13 +334,6 @@ class LeBonResto_Admin {
             'lebonresto_settings'
         );
         
-        // Add SMTP settings section
-        add_settings_section(
-            'lebonresto_smtp',
-            __('SMTP Email Settings', 'le-bon-resto'),
-            array($this, 'smtp_section_callback'),
-            'lebonresto_settings'
-        );
         
         // Add settings fields
         add_settings_field(
@@ -415,6 +408,15 @@ class LeBonResto_Admin {
             'lebonresto_general'
         );
         
+        // Google Maps API Key
+        add_settings_field(
+            'google_maps_api_key',
+            __('Google Maps API Key', 'le-bon-resto'),
+            array($this, 'setting_field_google_maps_api_key'),
+            'lebonresto_settings',
+            'lebonresto_general'
+        );
+        
         // Restaurant Options Management
         add_settings_field(
             'restaurant_options',
@@ -424,70 +426,6 @@ class LeBonResto_Admin {
             'lebonresto_general'
         );
         
-        // SMTP Settings Fields
-        add_settings_field(
-            'smtp_enabled',
-            __('Enable SMTP', 'le-bon-resto'),
-            array($this, 'setting_field_smtp_enabled'),
-            'lebonresto_settings',
-            'lebonresto_smtp'
-        );
-        
-        add_settings_field(
-            'smtp_host',
-            __('SMTP Host', 'le-bon-resto'),
-            array($this, 'setting_field_smtp_host'),
-            'lebonresto_settings',
-            'lebonresto_smtp'
-        );
-        
-        add_settings_field(
-            'smtp_port',
-            __('SMTP Port', 'le-bon-resto'),
-            array($this, 'setting_field_smtp_port'),
-            'lebonresto_settings',
-            'lebonresto_smtp'
-        );
-        
-        add_settings_field(
-            'smtp_username',
-            __('SMTP Username', 'le-bon-resto'),
-            array($this, 'setting_field_smtp_username'),
-            'lebonresto_settings',
-            'lebonresto_smtp'
-        );
-        
-        add_settings_field(
-            'smtp_password',
-            __('SMTP Password', 'le-bon-resto'),
-            array($this, 'setting_field_smtp_password'),
-            'lebonresto_settings',
-            'lebonresto_smtp'
-        );
-        
-        add_settings_field(
-            'smtp_encryption',
-            __('SMTP Encryption', 'le-bon-resto'),
-            array($this, 'setting_field_smtp_encryption'),
-            'lebonresto_settings',
-            'lebonresto_smtp'
-        );
-        
-        add_settings_field(
-            'smtp_from_email',
-            __('From Email', 'le-bon-resto'),
-            array($this, 'setting_field_smtp_from_email'),
-            'lebonresto_settings',
-            'lebonresto_smtp'
-        );
-        
-        add_settings_field(
-            'smtp_from_name',
-            __('From Name', 'le-bon-resto'),
-            array($this, 'setting_field_smtp_from_name'),
-            'lebonresto_settings',
-            'lebonresto_smtp'
-        );
         
         
         // Add admin notices
@@ -501,12 +439,6 @@ class LeBonResto_Admin {
         echo '<p>' . __('Configure the default settings for your Le Bon Resto plugin.', 'le-bon-resto') . '</p>';
     }
     
-    /**
-     * SMTP section callback
-     */
-    public function smtp_section_callback() {
-        echo '<p>' . __('Configure SMTP settings for sending emails from the admin dashboard. Use Gmail SMTP for reliable email delivery.', 'le-bon-resto') . '</p>';
-    }
     
     /**
      * Get plugin options with defaults
@@ -522,14 +454,7 @@ class LeBonResto_Admin {
             'enable_layer_switcher' => '1',
             'enable_fullscreen' => '1',
             'primary_color' => '#fedc00',
-            'smtp_enabled' => '0',
-            'smtp_host' => 'smtp.gmail.com',
-            'smtp_port' => '587',
-            'smtp_username' => '',
-            'smtp_password' => '',
-            'smtp_encryption' => 'tls',
-            'smtp_from_email' => 'le.bon.restau@gmail.com',
-            'smtp_from_name' => 'Le Bon Resto',
+            'google_maps_api_key' => 'AIzaSyDXSSijLxRtL9tz7FbYqvnB3eWwTojpNlI',
             'restaurant_options' => array(
                 'Accès PMR (Personnes à Mobilité Réduite)',
                 'Chauffage',
@@ -607,6 +532,22 @@ class LeBonResto_Admin {
         echo '<p class="description">' . __('Primary color used throughout the plugin interface and frontend', 'le-bon-resto') . '</p>';
     }
     
+    public function setting_field_google_maps_api_key() {
+        $options = $this->get_options();
+        $api_key = isset($options['google_maps_api_key']) ? $options['google_maps_api_key'] : '';
+        $default_api_key = 'AIzaSyDXSSijLxRtL9tz7FbYqvnB3eWwTojpNlI';
+        
+        echo '<input type="text" name="lebonresto_options[google_maps_api_key]" value="' . esc_attr($api_key) . '" class="regular-text" placeholder="' . esc_attr($default_api_key) . '" />';
+        echo '<p class="description">' . __('Google Maps API key with Places API enabled. Used to automatically fetch restaurant reviews and ratings.', 'le-bon-resto') . '</p>';
+        
+        // Show current status
+        $current_key = $api_key ?: $default_api_key;
+        echo '<div style="background: #e7f3ff; padding: 1rem; border-radius: 4px; margin-top: 0.5rem; border-left: 4px solid #2196F3;">';
+        echo '<strong>' . __('Current API Key:', 'le-bon-resto') . '</strong> ' . esc_html($current_key);
+        echo '<br><small>' . __('This key is used to automatically fetch Google reviews for restaurants.', 'le-bon-resto') . '</small>';
+        echo '</div>';
+    }
+    
     public function setting_field_restaurant_options() {
         $options = $this->get_options();
         $restaurant_options = isset($options['restaurant_options']) ? $options['restaurant_options'] : array();
@@ -648,61 +589,6 @@ class LeBonResto_Admin {
         </script>';
     }
     
-    /**
-     * SMTP field callbacks
-     */
-    public function setting_field_smtp_enabled() {
-        $options = $this->get_options();
-        echo '<label><input type="checkbox" name="lebonresto_options[smtp_enabled]" value="1" ' . checked($options['smtp_enabled'], '1', false) . ' /> ';
-        echo __('Enable SMTP for sending emails', 'le-bon-resto') . '</label>';
-        echo '<p class="description">' . __('Check this to use SMTP instead of WordPress default mail function', 'le-bon-resto') . '</p>';
-    }
-    
-    public function setting_field_smtp_host() {
-        $options = $this->get_options();
-        echo '<input type="text" name="lebonresto_options[smtp_host]" value="' . esc_attr($options['smtp_host']) . '" class="regular-text" />';
-        echo '<p class="description">' . __('SMTP server hostname (e.g., smtp.gmail.com)', 'le-bon-resto') . '</p>';
-    }
-    
-    public function setting_field_smtp_port() {
-        $options = $this->get_options();
-        echo '<input type="number" name="lebonresto_options[smtp_port]" value="' . esc_attr($options['smtp_port']) . '" class="small-text" min="1" max="65535" />';
-        echo '<p class="description">' . __('SMTP port (587 for TLS, 465 for SSL, 25 for non-encrypted)', 'le-bon-resto') . '</p>';
-    }
-    
-    public function setting_field_smtp_username() {
-        $options = $this->get_options();
-        echo '<input type="text" name="lebonresto_options[smtp_username]" value="' . esc_attr($options['smtp_username']) . '" class="regular-text" />';
-        echo '<p class="description">' . __('SMTP username (usually your email address)', 'le-bon-resto') . '</p>';
-    }
-    
-    public function setting_field_smtp_password() {
-        $options = $this->get_options();
-        echo '<input type="password" name="lebonresto_options[smtp_password]" value="' . esc_attr($options['smtp_password']) . '" class="regular-text" />';
-        echo '<p class="description">' . __('SMTP password (use App Password for Gmail)', 'le-bon-resto') . '</p>';
-    }
-    
-    public function setting_field_smtp_encryption() {
-        $options = $this->get_options();
-        echo '<select name="lebonresto_options[smtp_encryption]">';
-        echo '<option value="none" ' . selected($options['smtp_encryption'], 'none', false) . '>' . __('None', 'le-bon-resto') . '</option>';
-        echo '<option value="tls" ' . selected($options['smtp_encryption'], 'tls', false) . '>' . __('TLS', 'le-bon-resto') . '</option>';
-        echo '<option value="ssl" ' . selected($options['smtp_encryption'], 'ssl', false) . '>' . __('SSL', 'le-bon-resto') . '</option>';
-        echo '</select>';
-        echo '<p class="description">' . __('Encryption method (TLS recommended for Gmail)', 'le-bon-resto') . '</p>';
-    }
-    
-    public function setting_field_smtp_from_email() {
-        $options = $this->get_options();
-        echo '<input type="email" name="lebonresto_options[smtp_from_email]" value="' . esc_attr($options['smtp_from_email']) . '" class="regular-text" />';
-        echo '<p class="description">' . __('Email address that will appear as sender', 'le-bon-resto') . '</p>';
-    }
-    
-    public function setting_field_smtp_from_name() {
-        $options = $this->get_options();
-        echo '<input type="text" name="lebonresto_options[smtp_from_name]" value="' . esc_attr($options['smtp_from_name']) . '" class="regular-text" />';
-        echo '<p class="description">' . __('Name that will appear as sender', 'le-bon-resto') . '</p>';
-    }
     
     
     
@@ -795,45 +681,6 @@ class LeBonResto_Admin {
             $validated['restaurant_options'] = $validated_options;
         }
         
-        // Validate SMTP settings
-        $validated['smtp_enabled'] = isset($input['smtp_enabled']) ? '1' : '0';
-        
-        if (isset($input['smtp_host'])) {
-            $validated['smtp_host'] = sanitize_text_field($input['smtp_host']);
-        }
-        
-        if (isset($input['smtp_port'])) {
-            $port = intval($input['smtp_port']);
-            if ($port > 0 && $port <= 65535) {
-                $validated['smtp_port'] = $port;
-            }
-        }
-        
-        if (isset($input['smtp_username'])) {
-            $validated['smtp_username'] = sanitize_text_field($input['smtp_username']);
-        }
-        
-        if (isset($input['smtp_password'])) {
-            $validated['smtp_password'] = sanitize_text_field($input['smtp_password']);
-        }
-        
-        if (isset($input['smtp_encryption'])) {
-            $encryption = sanitize_text_field($input['smtp_encryption']);
-            if (in_array($encryption, array('none', 'tls', 'ssl'))) {
-                $validated['smtp_encryption'] = $encryption;
-            }
-        }
-        
-        if (isset($input['smtp_from_email'])) {
-            $email = sanitize_email($input['smtp_from_email']);
-            if (is_email($email)) {
-                $validated['smtp_from_email'] = $email;
-            }
-        }
-        
-        if (isset($input['smtp_from_name'])) {
-            $validated['smtp_from_name'] = sanitize_text_field($input['smtp_from_name']);
-        }
         
         
         return $validated;
@@ -1362,13 +1209,21 @@ class LeBonResto_Admin {
                 'email' => get_post_meta($restaurant->ID, '_restaurant_email', true),
                 'latitude' => get_post_meta($restaurant->ID, '_restaurant_latitude', true),
                 'longitude' => get_post_meta($restaurant->ID, '_restaurant_longitude', true),
+                'google_maps_link' => get_post_meta($restaurant->ID, '_restaurant_google_maps_link', true),
                 'is_featured' => get_post_meta($restaurant->ID, '_restaurant_is_featured', true),
                 'video_url' => get_post_meta($restaurant->ID, '_restaurant_video_url', true),
                 'virtual_tour_url' => get_post_meta($restaurant->ID, '_restaurant_virtual_tour_url', true),
                 'website_url' => get_post_meta($restaurant->ID, '_restaurant_website_url', true),
                 'price_range' => get_post_meta($restaurant->ID, '_restaurant_price_range', true),
                 'opening_hours' => get_post_meta($restaurant->ID, '_restaurant_opening_hours', true),
-                'restaurant_options' => get_post_meta($restaurant->ID, '_restaurant_options', true)
+                'restaurant_options' => get_post_meta($restaurant->ID, '_restaurant_options', true),
+                'principal_image' => get_post_meta($restaurant->ID, '_restaurant_principal_image', true),
+                'gallery' => get_post_meta($restaurant->ID, '_restaurant_gallery', true),
+                'blog_title' => get_post_meta($restaurant->ID, '_restaurant_blog_title', true),
+                'blog_content' => get_post_meta($restaurant->ID, '_restaurant_blog_content', true),
+                'selected_options' => get_post_meta($restaurant->ID, '_restaurant_selected_options', true),
+                'menus' => get_post_meta($restaurant->ID, '_restaurant_menus', true),
+                'google_place_id' => get_post_meta($restaurant->ID, '_restaurant_google_place_id', true)
             );
             
             if ($include_media) {
@@ -1609,18 +1464,59 @@ class LeBonResto_Admin {
             '_restaurant_email' => 'email',
             '_restaurant_latitude' => 'latitude',
             '_restaurant_longitude' => 'longitude',
+            '_restaurant_google_maps_link' => 'google_maps_link',
             '_restaurant_is_featured' => 'is_featured',
             '_restaurant_video_url' => 'video_url',
             '_restaurant_virtual_tour_url' => 'virtual_tour_url',
             '_restaurant_website_url' => 'website_url',
             '_restaurant_price_range' => 'price_range',
             '_restaurant_opening_hours' => 'opening_hours',
-            '_restaurant_options' => 'restaurant_options'
+            '_restaurant_options' => 'restaurant_options',
+            '_restaurant_principal_image' => 'principal_image',
+            '_restaurant_gallery' => 'gallery',
+            '_restaurant_blog_title' => 'blog_title',
+            '_restaurant_blog_content' => 'blog_content',
+            '_restaurant_selected_options' => 'selected_options',
+            '_restaurant_menus' => 'menus',
+            '_restaurant_google_place_id' => 'google_place_id'
         );
         
         foreach ($meta_fields as $meta_key => $data_key) {
-            if (isset($data[$data_key]) && !empty($data[$data_key])) {
-                update_post_meta($post_id, $meta_key, sanitize_text_field($data[$data_key]));
+            if (isset($data[$data_key])) {
+                $value = $data[$data_key];
+                
+                // Handle different data types
+                if (is_array($value)) {
+                    // For arrays (like selected_options, menus, gallery)
+                    $sanitized_value = array();
+                    foreach ($value as $item) {
+                        if (is_array($item)) {
+                            $sanitized_item = array();
+                            foreach ($item as $key => $val) {
+                                if ($key === 'file_url') {
+                                    $sanitized_item[$key] = esc_url_raw($val);
+                                } else {
+                                    $sanitized_item[$key] = sanitize_text_field($val);
+                                }
+                            }
+                            $sanitized_value[] = $sanitized_item;
+                        } else {
+                            $sanitized_value[] = sanitize_text_field($item);
+                        }
+                    }
+                    update_post_meta($post_id, $meta_key, $sanitized_value);
+                } elseif (!empty($value)) {
+                    // Handle different field types
+                    if (in_array($meta_key, ['_restaurant_google_maps_link', '_restaurant_video_url', '_restaurant_virtual_tour_url', '_restaurant_website_url'])) {
+                        update_post_meta($post_id, $meta_key, esc_url_raw($value));
+                    } elseif ($meta_key === '_restaurant_email') {
+                        update_post_meta($post_id, $meta_key, sanitize_email($value));
+                    } elseif ($meta_key === '_restaurant_blog_content') {
+                        update_post_meta($post_id, $meta_key, wp_kses_post($value));
+                    } else {
+                        update_post_meta($post_id, $meta_key, sanitize_text_field($value));
+                    }
+                }
             }
         }
         
@@ -1644,13 +1540,21 @@ class LeBonResto_Admin {
                 'email' => 'contact@samplerestaurant1.com',
                 'latitude' => '48.8566',
                 'longitude' => '2.3522',
+                'google_maps_link' => 'https://maps.google.com/?q=123+Main+Street+Paris',
                 'is_featured' => '1',
                 'video_url' => 'https://example.com/video1.mp4',
                 'virtual_tour_url' => 'https://example.com/tour1',
                 'website_url' => 'https://samplerestaurant1.com',
                 'price_range' => '€€',
                 'opening_hours' => 'Mon-Sun: 12:00-22:00',
-                'restaurant_options' => 'Wi-Fi gratuit,Parking gratuit'
+                'restaurant_options' => 'Wi-Fi gratuit,Parking gratuit',
+                'principal_image' => 'https://example.com/principal1.jpg',
+                'gallery' => 'https://example.com/gallery1.jpg,https://example.com/gallery2.jpg',
+                'blog_title' => 'Our Restaurant Story',
+                'blog_content' => 'This is our restaurant blog content with rich HTML formatting.',
+                'selected_options' => 'Wi-Fi gratuit,Parking gratuit,Climatisation',
+                'menus' => '[{"name":"Menu Principal","file_id":"123","file_url":"https://example.com/menu1.pdf"}]',
+                'google_place_id' => 'ChIJN1t_tDeuEmsRUsoyG83frY4'
             ),
             array(
                 'title' => 'Sample Restaurant 2',
@@ -1664,13 +1568,21 @@ class LeBonResto_Admin {
                 'email' => 'info@samplerestaurant2.com',
                 'latitude' => '45.7640',
                 'longitude' => '4.8357',
+                'google_maps_link' => 'https://maps.google.com/?q=456+Oak+Avenue+Lyon',
                 'is_featured' => '0',
                 'video_url' => '',
                 'virtual_tour_url' => '',
                 'website_url' => 'https://samplerestaurant2.com',
                 'price_range' => '€€€',
                 'opening_hours' => 'Tue-Sat: 19:00-23:00',
-                'restaurant_options' => 'Salle à manger privée'
+                'restaurant_options' => 'Salle à manger privée',
+                'principal_image' => '',
+                'gallery' => '',
+                'blog_title' => '',
+                'blog_content' => '',
+                'selected_options' => 'Salle à manger privée',
+                'menus' => '',
+                'google_place_id' => ''
             )
         );
         
