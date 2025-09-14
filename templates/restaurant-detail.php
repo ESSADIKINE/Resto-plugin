@@ -198,6 +198,9 @@ if (!is_array($selected_options)) {
 }
 $phone = get_post_meta($restaurant_id, '_restaurant_phone', true);
 $email = get_post_meta($restaurant_id, '_restaurant_email', true);
+$min_price = get_post_meta($restaurant_id, '_restaurant_min_price', true);
+$max_price = get_post_meta($restaurant_id, '_restaurant_max_price', true);
+$currency = get_post_meta($restaurant_id, '_restaurant_currency', true);
 $latitude = get_post_meta($restaurant_id, '_restaurant_latitude', true);
 $longitude = get_post_meta($restaurant_id, '_restaurant_longitude', true);
 $google_maps_link = get_post_meta($restaurant_id, '_restaurant_google_maps_link', true);
@@ -894,6 +897,26 @@ html.lebonresto-detail-page {
                                     (<?php echo esc_html($google_review_count); ?> avis)
                                 </span>
                                 <?php endif; ?>
+                            </div>
+                            <?php endif; ?>
+                            
+                            <?php if ($min_price || $max_price): ?>
+                            <div class="price-range-display" style="display: flex; align-items: center; gap: 0.5rem; background: rgba(255, 255, 255, 0.1); padding: 0.5rem 1rem; border-radius: var(--radius-full); backdrop-filter: blur(10px);">
+                                <span class="currency-symbol" style="color: var(--primary-color); font-size: 1.1rem; font-weight: 700;"><?php echo lebonresto_get_currency_symbol($currency); ?></span>
+                                <span class="price-range" style="font-weight: 600; color: var(--text-primary); font-size: 1rem;">
+                                    <?php 
+                                    if ($min_price && $max_price) {
+                                        echo number_format($min_price, 2) . ' - ' . number_format($max_price, 2);
+                                    } elseif ($min_price) {
+                                        echo 'À partir de ' . number_format($min_price, 2);
+                                    } elseif ($max_price) {
+                                        echo 'Jusqu\'à ' . number_format($max_price, 2);
+                                    }
+                                    ?>
+                                </span>
+                                <span class="price-unit" style="color: var(--text-secondary); font-size: 0.9rem;">
+                                    /personne
+                                </span>
                             </div>
                             <?php endif; ?>
                             

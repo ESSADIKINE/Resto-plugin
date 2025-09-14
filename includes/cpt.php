@@ -160,6 +160,9 @@ function lebonresto_restaurant_details_callback($post) {
     $phone = get_post_meta($post->ID, '_restaurant_phone', true);
     $email = get_post_meta($post->ID, '_restaurant_email', true);
     $virtual_tour_url = get_post_meta($post->ID, '_restaurant_virtual_tour_url', true);
+    $min_price = get_post_meta($post->ID, '_restaurant_min_price', true);
+    $max_price = get_post_meta($post->ID, '_restaurant_max_price', true);
+    $currency = get_post_meta($post->ID, '_restaurant_currency', true);
 
     ?>
     <table class="form-table">
@@ -253,6 +256,37 @@ function lebonresto_restaurant_details_callback($post) {
             <td>
                 <input type="email" id="restaurant_email" name="restaurant_email" value="<?php echo esc_attr($email); ?>" class="regular-text" />
                 <p class="description"><?php _e('Restaurant contact email address.', 'le-bon-resto'); ?></p>
+            </td>
+        </tr>
+        <tr>
+            <th scope="row">
+                <label for="restaurant_min_price"><?php _e('Minimum Price', 'le-bon-resto'); ?></label>
+            </th>
+            <td>
+                <input type="number" id="restaurant_min_price" name="restaurant_min_price" value="<?php echo esc_attr($min_price); ?>" min="0" step="0.01" class="regular-text" />
+                <p class="description"><?php _e('Minimum price per person (e.g., 15.50).', 'le-bon-resto'); ?></p>
+            </td>
+        </tr>
+        <tr>
+            <th scope="row">
+                <label for="restaurant_max_price"><?php _e('Maximum Price', 'le-bon-resto'); ?></label>
+            </th>
+            <td>
+                <input type="number" id="restaurant_max_price" name="restaurant_max_price" value="<?php echo esc_attr($max_price); ?>" min="0" step="0.01" class="regular-text" />
+                <p class="description"><?php _e('Maximum price per person (e.g., 45.00).', 'le-bon-resto'); ?></p>
+            </td>
+        </tr>
+        <tr>
+            <th scope="row">
+                <label for="restaurant_currency"><?php _e('Currency', 'le-bon-resto'); ?></label>
+            </th>
+            <td>
+                <select id="restaurant_currency" name="restaurant_currency" class="regular-text">
+                    <option value="MAD" <?php selected($currency, 'MAD'); ?>>MAD - Moroccan Dirham (د.م.)</option>
+                    <option value="EUR" <?php selected($currency, 'EUR'); ?>>EUR - Euro (€)</option>
+                    <option value="USD" <?php selected($currency, 'USD'); ?>>USD - US Dollar ($)</option>
+                </select>
+                <p class="description"><?php _e('Select the currency for this restaurant\'s prices.', 'le-bon-resto'); ?></p>
             </td>
         </tr>
                     <tr>
@@ -578,6 +612,9 @@ function lebonresto_save_restaurant_data($post_id) {
             'restaurant_cuisine_type' => '_restaurant_cuisine_type',
             'restaurant_phone' => '_restaurant_phone',
             'restaurant_email' => '_restaurant_email',
+            'restaurant_min_price' => '_restaurant_min_price',
+            'restaurant_max_price' => '_restaurant_max_price',
+            'restaurant_currency' => '_restaurant_currency',
         );
 
         foreach ($detail_fields as $field => $meta_key) {
@@ -589,6 +626,8 @@ function lebonresto_save_restaurant_data($post_id) {
                     $value = sanitize_email($_POST[$field]);
                 } elseif ($field === 'restaurant_google_maps_link') {
                     $value = esc_url_raw($_POST[$field]);
+                } elseif (in_array($field, ['restaurant_min_price', 'restaurant_max_price'])) {
+                    $value = floatval($_POST[$field]);
                 }
                 update_post_meta($post_id, $meta_key, $value);
             }
@@ -704,6 +743,9 @@ function lebonresto_get_restaurant_meta_for_rest($object) {
         'cuisine_type' => get_post_meta($post_id, '_restaurant_cuisine_type', true),
         'phone' => get_post_meta($post_id, '_restaurant_phone', true),
         'email' => get_post_meta($post_id, '_restaurant_email', true),
+        'min_price' => get_post_meta($post_id, '_restaurant_min_price', true),
+        'max_price' => get_post_meta($post_id, '_restaurant_max_price', true),
+        'currency' => get_post_meta($post_id, '_restaurant_currency', true),
         'is_featured' => get_post_meta($post_id, '_restaurant_is_featured', true),
         'virtual_tour_url' => get_post_meta($post_id, '_restaurant_virtual_tour_url', true),
         'gallery' => get_post_meta($post_id, '_restaurant_gallery', true),
@@ -717,6 +759,38 @@ function lebonresto_get_restaurant_meta_for_rest($object) {
     );
 }
 
+
+/**
+ * Get currency symbol based on selected currency
+ */
+function lebonresto_get_currency_symbol($currency = null) {
+    if (!$currency) {
+        $options = get_option('lebonresto_options', array());
+        $currency = isset($options['currency']) ? $options['currency'] : 'MAD';
+    }
+    
+    switch ($currency) {
+        case 'EUR':
+            return '€';
+        case 'USD':
+            return '$';
+        case 'MAD':
+        default:
+            return 'د.م.';
+    }
+}
+
+/**
+ * Get currency code based on selected currency
+ */
+function lebonresto_get_currency_code($currency = null) {
+    if (!$currency) {
+        $options = get_option('lebonresto_options', array());
+        $currency = isset($options['currency']) ? $options['currency'] : 'MAD';
+    }
+    
+    return $currency;
+}
 
 /**
  * Restaurant blog content meta box callback function

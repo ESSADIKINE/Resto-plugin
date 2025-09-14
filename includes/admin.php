@@ -417,6 +417,32 @@ class LeBonResto_Admin {
             'lebonresto_general'
         );
         
+        // Currency Setting
+        add_settings_field(
+            'currency',
+            __('Currency', 'le-bon-resto'),
+            array($this, 'setting_field_currency'),
+            'lebonresto_settings',
+            'lebonresto_general'
+        );
+        
+        // Google Forms Integration
+        add_settings_field(
+            'google_forms_url',
+            __('Google Forms URL', 'le-bon-resto'),
+            array($this, 'setting_field_google_forms_url'),
+            'lebonresto_settings',
+            'lebonresto_general'
+        );
+        
+        add_settings_field(
+            'admin_email',
+            __('Admin Email for Notifications', 'le-bon-resto'),
+            array($this, 'setting_field_admin_email'),
+            'lebonresto_settings',
+            'lebonresto_general'
+        );
+        
         // Restaurant Options Management
         add_settings_field(
             'restaurant_options',
@@ -455,6 +481,9 @@ class LeBonResto_Admin {
             'enable_fullscreen' => '1',
             'primary_color' => '#fedc00',
             'google_maps_api_key' => 'AIzaSyDXSSijLxRtL9tz7FbYqvnB3eWwTojpNlI',
+            'currency' => 'MAD',
+            'google_forms_url' => '',
+            'admin_email' => get_option('admin_email'),
             'restaurant_options' => array(
                 'Accès PMR (Personnes à Mobilité Réduite)',
                 'Chauffage',
@@ -546,6 +575,49 @@ class LeBonResto_Admin {
         echo '<strong>' . __('Current API Key:', 'le-bon-resto') . '</strong> ' . esc_html($current_key);
         echo '<br><small>' . __('This key is used to automatically fetch Google reviews for restaurants.', 'le-bon-resto') . '</small>';
         echo '</div>';
+    }
+    
+    public function setting_field_currency() {
+        $options = $this->get_options();
+        $currency = isset($options['currency']) ? $options['currency'] : 'MAD';
+        
+        echo '<select name="lebonresto_options[currency]" id="currency">';
+        echo '<option value="MAD" ' . selected($currency, 'MAD', false) . '>MAD - Moroccan Dirham (د.م.)</option>';
+        echo '<option value="EUR" ' . selected($currency, 'EUR', false) . '>EUR - Euro (€)</option>';
+        echo '<option value="USD" ' . selected($currency, 'USD', false) . '>USD - US Dollar ($)</option>';
+        echo '</select>';
+        echo '<p class="description">' . __('Select the currency to display for restaurant prices.', 'le-bon-resto') . '</p>';
+        
+        // Show currency symbols
+        echo '<div style="background: #f0f0f1; padding: 1rem; border-radius: 4px; margin-top: 0.5rem;">';
+        echo '<strong>' . __('Currency Symbols:', 'le-bon-resto') . '</strong><br>';
+        echo '<span style="margin-right: 1rem;"><strong>MAD:</strong> د.م. (Moroccan Dirham)</span>';
+        echo '<span style="margin-right: 1rem;"><strong>EUR:</strong> € (Euro)</span>';
+        echo '<span><strong>USD:</strong> $ (US Dollar)</span>';
+        echo '</div>';
+    }
+    
+    public function setting_field_google_forms_url() {
+        $options = $this->get_options();
+        $google_forms_url = isset($options['google_forms_url']) ? $options['google_forms_url'] : '';
+        
+        echo '<input type="url" name="lebonresto_options[google_forms_url]" value="' . esc_attr($google_forms_url) . '" class="regular-text" placeholder="https://docs.google.com/forms/d/e/..." />';
+        echo '<p class="description">' . __('URL de votre Google Form pour recevoir les demandes de service. Créez un formulaire sur <a href="https://forms.google.com" target="_blank">Google Forms</a> et collez l\'URL ici.', 'le-bon-resto') . '</p>';
+        
+        if ($google_forms_url) {
+            echo '<div style="background: #e7f3ff; padding: 1rem; border-radius: 4px; margin-top: 0.5rem; border-left: 4px solid #2196F3;">';
+            echo '<strong>' . __('URL configurée:', 'le-bon-resto') . '</strong> ' . esc_html($google_forms_url);
+            echo '<br><small>' . __('Les demandes de service seront automatiquement envoyées à ce formulaire.', 'le-bon-resto') . '</small>';
+            echo '</div>';
+        }
+    }
+    
+    public function setting_field_admin_email() {
+        $options = $this->get_options();
+        $admin_email = isset($options['admin_email']) ? $options['admin_email'] : get_option('admin_email');
+        
+        echo '<input type="email" name="lebonresto_options[admin_email]" value="' . esc_attr($admin_email) . '" class="regular-text" />';
+        echo '<p class="description">' . __('Email pour recevoir les notifications de nouvelles demandes de service.', 'le-bon-resto') . '</p>';
     }
     
     public function setting_field_restaurant_options() {
@@ -1207,6 +1279,9 @@ class LeBonResto_Admin {
                 'description' => get_post_meta($restaurant->ID, '_restaurant_description', true),
                 'phone' => get_post_meta($restaurant->ID, '_restaurant_phone', true),
                 'email' => get_post_meta($restaurant->ID, '_restaurant_email', true),
+                'min_price' => get_post_meta($restaurant->ID, '_restaurant_min_price', true),
+                'max_price' => get_post_meta($restaurant->ID, '_restaurant_max_price', true),
+                'currency' => get_post_meta($restaurant->ID, '_restaurant_currency', true),
                 'latitude' => get_post_meta($restaurant->ID, '_restaurant_latitude', true),
                 'longitude' => get_post_meta($restaurant->ID, '_restaurant_longitude', true),
                 'google_maps_link' => get_post_meta($restaurant->ID, '_restaurant_google_maps_link', true),
@@ -1462,6 +1537,9 @@ class LeBonResto_Admin {
             '_restaurant_description' => 'description',
             '_restaurant_phone' => 'phone',
             '_restaurant_email' => 'email',
+            '_restaurant_min_price' => 'min_price',
+            '_restaurant_max_price' => 'max_price',
+            '_restaurant_currency' => 'currency',
             '_restaurant_latitude' => 'latitude',
             '_restaurant_longitude' => 'longitude',
             '_restaurant_google_maps_link' => 'google_maps_link',
@@ -1511,6 +1589,8 @@ class LeBonResto_Admin {
                         update_post_meta($post_id, $meta_key, esc_url_raw($value));
                     } elseif ($meta_key === '_restaurant_email') {
                         update_post_meta($post_id, $meta_key, sanitize_email($value));
+                    } elseif (in_array($meta_key, ['_restaurant_min_price', '_restaurant_max_price'])) {
+                        update_post_meta($post_id, $meta_key, floatval($value));
                     } elseif ($meta_key === '_restaurant_blog_content') {
                         update_post_meta($post_id, $meta_key, wp_kses_post($value));
                     } else {
@@ -1538,6 +1618,9 @@ class LeBonResto_Admin {
                 'description' => 'A wonderful French restaurant',
                 'phone' => '+33 1 23 45 67 89',
                 'email' => 'contact@samplerestaurant1.com',
+                'min_price' => '25.00',
+                'max_price' => '65.00',
+                'currency' => 'MAD',
                 'latitude' => '48.8566',
                 'longitude' => '2.3522',
                 'google_maps_link' => 'https://maps.google.com/?q=123+Main+Street+Paris',
@@ -1566,6 +1649,9 @@ class LeBonResto_Admin {
                 'description' => 'Authentic Italian cuisine',
                 'phone' => '+33 4 12 34 56 78',
                 'email' => 'info@samplerestaurant2.com',
+                'min_price' => '15.00',
+                'max_price' => '35.00',
+                'currency' => 'EUR',
                 'latitude' => '45.7640',
                 'longitude' => '4.8357',
                 'google_maps_link' => 'https://maps.google.com/?q=456+Oak+Avenue+Lyon',
