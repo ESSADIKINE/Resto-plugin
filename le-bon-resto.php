@@ -82,7 +82,6 @@ class LeBonResto {
         require_once LEBONRESTO_PLUGIN_PATH . 'includes/html-optimization.php';
         require_once LEBONRESTO_PLUGIN_PATH . 'includes/seo-hooks.php';
         require_once LEBONRESTO_PLUGIN_PATH . 'includes/performance-optimization.php';
-        require_once LEBONRESTO_PLUGIN_PATH . 'includes/google-forms-integration.php';
         
         // Load admin interface if in admin
         if (is_admin()) {
@@ -265,42 +264,8 @@ class LeBonResto {
         set_transient('lebonresto_activation_notice', true, 30);
         set_transient('lebonresto_rewrite_notice', true, 30);
         
-        // Create service requests table
-        $this->create_service_requests_table();
-        
         // Trigger custom activation hook
         do_action('lebonresto_plugin_activated');
-    }
-    
-    /**
-     * Create service requests table
-     */
-    private function create_service_requests_table() {
-        global $wpdb;
-        
-        $table_name = $wpdb->prefix . 'lebonresto_service_requests';
-        
-        $charset_collate = $wpdb->get_charset_collate();
-        
-        $sql = "CREATE TABLE $table_name (
-            id mediumint(9) NOT NULL AUTO_INCREMENT,
-            restaurant_name varchar(255) NOT NULL,
-            contact_person varchar(255) NOT NULL,
-            email varchar(255) NOT NULL,
-            phone varchar(50) NOT NULL,
-            restaurant_address text NOT NULL,
-            cuisine_type varchar(100) NOT NULL,
-            services_needed text NOT NULL,
-            budget varchar(100) DEFAULT '',
-            message text DEFAULT '',
-            submission_date datetime DEFAULT CURRENT_TIMESTAMP,
-            ip_address varchar(45) DEFAULT '',
-            status varchar(20) DEFAULT 'new',
-            PRIMARY KEY (id)
-        ) $charset_collate;";
-        
-        require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
-        dbDelta($sql);
     }
     
     /**

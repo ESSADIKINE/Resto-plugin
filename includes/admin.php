@@ -426,23 +426,6 @@ class LeBonResto_Admin {
             'lebonresto_general'
         );
         
-        // Google Forms Integration
-        add_settings_field(
-            'google_forms_url',
-            __('Google Forms URL', 'le-bon-resto'),
-            array($this, 'setting_field_google_forms_url'),
-            'lebonresto_settings',
-            'lebonresto_general'
-        );
-        
-        add_settings_field(
-            'admin_email',
-            __('Admin Email for Notifications', 'le-bon-resto'),
-            array($this, 'setting_field_admin_email'),
-            'lebonresto_settings',
-            'lebonresto_general'
-        );
-        
         // Restaurant Options Management
         add_settings_field(
             'restaurant_options',
@@ -482,8 +465,6 @@ class LeBonResto_Admin {
             'primary_color' => '#fedc00',
             'google_maps_api_key' => 'AIzaSyDXSSijLxRtL9tz7FbYqvnB3eWwTojpNlI',
             'currency' => 'MAD',
-            'google_forms_url' => '',
-            'admin_email' => get_option('admin_email'),
             'restaurant_options' => array(
                 'Accès PMR (Personnes à Mobilité Réduite)',
                 'Chauffage',
@@ -595,29 +576,6 @@ class LeBonResto_Admin {
         echo '<span style="margin-right: 1rem;"><strong>EUR:</strong> € (Euro)</span>';
         echo '<span><strong>USD:</strong> $ (US Dollar)</span>';
         echo '</div>';
-    }
-    
-    public function setting_field_google_forms_url() {
-        $options = $this->get_options();
-        $google_forms_url = isset($options['google_forms_url']) ? $options['google_forms_url'] : '';
-        
-        echo '<input type="url" name="lebonresto_options[google_forms_url]" value="' . esc_attr($google_forms_url) . '" class="regular-text" placeholder="https://docs.google.com/forms/d/e/..." />';
-        echo '<p class="description">' . __('URL de votre Google Form pour recevoir les demandes de service. Créez un formulaire sur <a href="https://forms.google.com" target="_blank">Google Forms</a> et collez l\'URL ici.', 'le-bon-resto') . '</p>';
-        
-        if ($google_forms_url) {
-            echo '<div style="background: #e7f3ff; padding: 1rem; border-radius: 4px; margin-top: 0.5rem; border-left: 4px solid #2196F3;">';
-            echo '<strong>' . __('URL configurée:', 'le-bon-resto') . '</strong> ' . esc_html($google_forms_url);
-            echo '<br><small>' . __('Les demandes de service seront automatiquement envoyées à ce formulaire.', 'le-bon-resto') . '</small>';
-            echo '</div>';
-        }
-    }
-    
-    public function setting_field_admin_email() {
-        $options = $this->get_options();
-        $admin_email = isset($options['admin_email']) ? $options['admin_email'] : get_option('admin_email');
-        
-        echo '<input type="email" name="lebonresto_options[admin_email]" value="' . esc_attr($admin_email) . '" class="regular-text" />';
-        echo '<p class="description">' . __('Email pour recevoir les notifications de nouvelles demandes de service.', 'le-bon-resto') . '</p>';
     }
     
     public function setting_field_restaurant_options() {
