@@ -14,6 +14,16 @@
     // Initialize when document is ready
     $(document).ready(function() {
         initializeSingleRestaurantUpdated();
+        
+        // Add global event listener for VR popup
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const vtPopup = document.getElementById('virtual-tour-popup');
+                if (vtPopup?.classList.contains('show')) {
+                    closeVirtualTourPopup();
+                }
+            }
+        });
     });
 
     /**
@@ -597,127 +607,189 @@
     }
 
     /**
-     * Create compact restaurant card for the list
+     * Create compact restaurant card for the list - Redesigned to match all restaurants page
      */
     function createCompactRestaurantCard(restaurant) {
         const meta = restaurant.restaurant_meta || {};
         const title = restaurant.title?.rendered || 'Restaurant';
         const isFeatured = meta.is_featured === '1';
         const isCurrentRestaurant = restaurant.id === currentRestaurantId;
-        const principalImage = meta.principal_image || {};
-
-        const card = $(`
-            <div class="restaurant-card bg-white rounded-lg shadow-sm p-4 ${isFeatured ? 'border-2 border-yellow-400' : 'border-0'} ${isCurrentRestaurant ? 'bg-yellow-50' : ''}" data-restaurant-id="${restaurant.id}" style="min-height: 120px; width: 100%; flex-shrink: 0; position: relative; cursor: pointer;" onclick="window.location.href='${restaurant.single_link}'">
-                
-                <!-- Two Column Layout: Image Left, Info Right -->
-                <div class="flex items-center h-full gap-4" style="display: contents;">
-                    <!-- LEFT COLUMN: Restaurant Image -->
-                    <div class="flex-shrink-0">
-                        ${(() => {
-                            let imageUrl = null;
-                            if (principalImage.thumbnail) {
-                                imageUrl = principalImage.thumbnail;
-                            } else if (principalImage.medium) {
-                                imageUrl = principalImage.medium;
-                            } else if (principalImage.full) {
-                                imageUrl = principalImage.full;
-                            } else if (typeof principalImage === 'string' && principalImage) {
-                                imageUrl = principalImage;
-                            }
-                            
-                            if (imageUrl) {
-                                return `<img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(title)}" class="w-32 h-32 object-cover rounded-lg shadow-sm" />`;
-                            } else {
-                                return `<div class="w-32 h-32 bg-gray-200 rounded-lg flex items-center justify-center shadow-sm">
-                                          <svg class="w-12 h-12 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
-                                            <path d="M8.1 13.34l2.83-2.83L3.91 3.5c-1.56 1.56-1.56 4.09 0 5.66l4.19 4.18zm6.78-1.81c1.53.71 3.68.21 5.27-1.38 1.91-1.91 2.28-4.65.81-6.12-1.46-1.46-4.2-1.1-6.12.81-1.59 1.59-2.09 3.74-1.38 5.27L3.7 19.87l1.41 1.41L12 14.41l6.88 6.88 1.41-1.41L13.41 12l1.47-1.47z"/>
+        const link = restaurant.link || '#';
+        
+        // Use Google rating if available, fallback to local rating
+        const googleRating = parseFloat(meta.google_rating) || 0;
+        const localRating = parseFloat(meta.average_rating) || 0;
+        const rating = googleRating > 0 ? googleRating : localRating;
+        
+        // Use Google review count if available, fallback to local count
+        const googleReviewCount = parseInt(meta.google_review_count) || 0;
+        const localReviewCount = parseInt(meta.review_count) || 0;
+        const reviewCount = googleReviewCount > 0 ? googleReviewCount : localReviewCount;
+        
+        const cuisineType = meta.cuisine_type || '';
+        
+        // Calculate price range
+        const minPrice = parseFloat(meta.min_price) || 0;
+        const maxPrice = parseFloat(meta.max_price) || 0;
+        const priceRange = getPriceRangeDisplay(minPrice, maxPrice);
+        
+        // Build Google Maps URL
+        const placeId = meta.google_place_id;
+        const latitude = parseFloat(meta.latitude);
+        const longitude = parseFloat(meta.longitude);
+        const address = meta.address || '';
+        let mapsUrl = '';
+        if (placeId) {
+            mapsUrl = `https://www.google.com/maps/search/?api=1&query_place_id=${encodeURIComponent(placeId)}&query=${encodeURIComponent(title)}`;
+        } else if (latitude && longitude) {
+            mapsUrl = `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
+        } else if (address) {
+            mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
+        }
+        
+        // Get primary image
+        let imageUrl = 'data:image/svg+xml;base64,' + btoa(`
+            <svg width="240" height="160" xmlns="http://www.w3.org/2000/svg">
+                <rect width="100%" height="100%" fill="#f3f4f6"/>
+                <text x="50%" y="50%" text-anchor="middle" dy=".3em" fill="#9ca3af" font-family="Arial" font-size="14">${title}</text>
                                           </svg>
-                                        </div>`;
-                            }
-                        })()}
+        `);
+        
+        if (meta.principal_image && meta.principal_image.full) {
+            imageUrl = meta.principal_image.full;
+        } else if (meta.gallery_images && meta.gallery_images.length > 0) {
+            imageUrl = meta.gallery_images[0].full;
+        }
+
+        const $card = $(`
+            <div class="restaurant-card ${isCurrentRestaurant ? 'current-restaurant' : ''}" data-restaurant-id="${restaurant.id}">
+                <div class="card-layout">
+                    <div class="card-image">
+                        <img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(title)}" class="restaurant-image" loading="lazy">
+                        <div class="image-overlay">
+                            <button class="save-btn" aria-label="Ouvrir la carte">
+                                <svg viewBox="0 0 24 24" width="16" height="16">
+                                    <path fill-rule="evenodd" clip-rule="evenodd" d="M4.25 9.799c0-4.247 3.488-7.707 7.75-7.707s7.75 3.46 7.75 7.707c0 2.28-1.138 4.477-2.471 6.323-1.31 1.813-2.883 3.388-3.977 4.483l-.083.083-.002.002-1.225 1.218-1.213-1.243-.03-.03-.012-.013c-1.1-1.092-2.705-2.687-4.035-4.53-1.324-1.838-2.452-4.024-2.452-6.293M12 3.592c-3.442 0-6.25 2.797-6.25 6.207 0 1.796.907 3.665 2.17 5.415 1.252 1.736 2.778 3.256 3.886 4.357l.043.042.16.164.148-.149.002-.002.061-.06c1.103-1.105 2.605-2.608 3.843-4.322 1.271-1.76 2.187-3.64 2.187-5.445 0-3.41-2.808-6.207-6.25-6.207m1.699 5.013a1.838 1.838 0 1 0-3.397 1.407A1.838 1.838 0 0 0 13.7 8.605m-2.976-2.38a3.338 3.338 0 1 1 2.555 6.168 3.338 3.338 0 0 1-2.555-6.169"></path>
+                                </svg>
+                            </button>
+                            ${meta.virtual_tour_url ? `
+                                <button class="vr-btn" aria-label="Visite virtuelle">
+                                    <svg viewBox="0 0 24 24" width="16" height="16">
+                                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zM7 9c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm5 9c-4 0-6-3-6-3s2-3 6-3 6 3 6 3-2 3-6 3zm5-9c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1z"/>
+                                    </svg>
+                                </button>
+                            ` : ''}
+                            ${isFeatured ? `
+                                <div class="award-badge">
+                                    <svg viewBox="0 0 24 24" width="16" height="16">
+                                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="#fedc00"/>
+                                    </svg>
+                        </div>
+                                ` : ''}
+                        </div>
                     </div>
                     
-                    <!-- RIGHT COLUMN: Restaurant Information -->
-                    <div class="flex-1 min-w-0 h-full flex flex-col justify-between">
-                        <!-- Top Section: Title -->
-                        <div class="mb-3">
-                            <div class="flex items-center justify-between mb-3">
-                                <h4 class="text-lg font-bold text-gray-900 truncate ${isCurrentRestaurant ? 'text-yellow-700' : ''}">${escapeHtml(title)}</h4>
+                    <div class="card-content">
+                        <div class="restaurant-header">
+                            <div class="restaurant-info">
+                                <h3 class="restaurant-name">
+                                    <a href="${escapeHtml(link)}">${escapeHtml(title)}</a>
+                                </h3>
+                                
+                                <div class="rating-section">
+                                    ${rating > 0 ? `
+                                        <span class="rating-value">${rating.toFixed(1)}</span>
+                                        <div class="rating-bubbles">
+                                            ${generateRatingBubbles(rating)}
+                        </div>
+                                        ${reviewCount > 0 ? `
+                                            <a href="${escapeHtml(link)}#reviews" class="review-count">(${reviewCount} avis Google)</a>
+                                ` : ''}
+                                    ` : ''}
+                                </div>
                             </div>
-                            
-                            <!-- Restaurant Details - Better Structured -->
-                            <div class="space-y-2">
-                                ${meta.city ? `
-                                    <div class="flex items-center bg-gray-50 rounded-lg px-3">
-                                        <i class="fas fa-map-marker-alt text-yellow-500 mr-3 text-sm"></i>
-                                        <span class="text-sm font-medium text-gray-700 truncate">${escapeHtml(meta.city)}</span>
                         </div>
-                                ` : ''}
-                                
-                                ${meta.cuisine_type ? `
-                                    <div class="flex items-center bg-gray-50 rounded-lg px-3">
-                                        <i class="fas fa-utensils text-yellow-500 mr-3 text-sm"></i>
-                                        <span class="text-sm font-medium text-gray-700 truncate">${escapeHtml(meta.cuisine_type.charAt(0).toUpperCase() + meta.cuisine_type.slice(1))}</span>
-                        </div>
-                                ` : ''}
-                                
-                                ${restaurant.distance ? `
-                                    <div class="flex items-center bg-green-50 rounded-lg px-3">
-                                        <i class="fas fa-route text-green-500 mr-3 text-sm"></i>
-                                        <span class="text-sm font-medium text-green-700 truncate">${restaurant.distance} km de distance</span>
+                        
+                        <div class="restaurant-details">
+                            <div class="detail-row">
+                                <svg viewBox="0 0 24 24" width="16" height="16" class="detail-icon">
+                                    <path fill-rule="evenodd" clip-rule="evenodd" d="M14.051 6.549v.003l1.134 1.14 3.241-3.25.003-.002 1.134 1.136-3.243 3.252 1.134 1.14a1 1 0 0 0 .09-.008c.293-.05.573-.324.72-.474l.005-.006 2.596-2.603L22 8.016l-2.597 2.604a3.73 3.73 0 0 1-1.982 1.015 4.3 4.3 0 0 1-3.162-.657l-.023-.016-.026-.018-1.366 1.407 8.509 8.512L20.219 22l-.002-.002-6.654-6.663-2.597 2.76-7.3-7.315C1.967 8.948 1.531 6.274 2.524 4.198c.241-.504.566-.973.978-1.386l8.154 8.416 1.418-1.423-.039-.045c-.858-1.002-1.048-2.368-.62-3.595a4.15 4.15 0 0 1 .983-1.561L16 2l1.135 1.138-2.598 2.602-.047.045c-.16.151-.394.374-.433.678zM3.809 5.523c-.362 1.319-.037 2.905 1.06 4.103L10.93 15.7l1.408-1.496zM2.205 20.697 3.34 21.84l4.543-4.552-1.135-1.143z"></path>
+                                </svg>
+                                <div class="cuisine-price">
+                                    <span>${escapeHtml(cuisineType)}</span>
+                                    ${priceRange ? `<span class="price-range">${priceRange}</span>` : ''}
                                     </div>
-                                ` : ''}
                             </div>
                             
-                            <!-- Restaurant Description -->
-                            ${meta.description ? `
-                                <div class="mt-3">
-                                    <p class="description text-xs text-gray-500 leading-relaxed">${escapeHtml(meta.description)}</p>
+                            <a ${mapsUrl ? `href="${mapsUrl}" target="_blank" rel="noopener"` : ''} class="detail-row" ${mapsUrl ? '' : 'style="pointer-events: none;"'}>
+                                <svg viewBox="0 0 24 24" width="16" height="16" class="detail-icon">
+                                    <path fill-rule="evenodd" clip-rule="evenodd" d="M3.5 6.75c0-.414.336-.75.75-.75h.243l4.716 1.886 5.5-2.2.051-.02H15c.081 0 .161.013.236.038l4.514 1.505c.304.101.5.384.5.702v9.75a.75.75 0 0 1-.514.712l-4.486 1.495a.75.75 0 0 1-.472 0l-5.528-1.992-4.756 1.902A.75.75 0 0 1 3.5 18.75zM9 7.89v9.22l5 1.8V9.69zM8 7.89 5 6.75v9.36l3-.12zm11 1.16-3-1v9.36l3-1.02z"></path>
+                                </svg>
+                                <span>Voir sur Google Maps</span>
+                            </a>
+                            
+                            ${meta.city ? `
+                                <div class="detail-row">
+                                    <svg viewBox="0 0 24 24" width="16" height="16" class="detail-icon">
+                                        <path fill-rule="evenodd" clip-rule="evenodd" d="M4.25 9.799c0-4.247 3.488-7.707 7.75-7.707s7.75 3.46 7.75 7.707c0 2.28-1.138 4.477-2.471 6.323-1.31 1.813-2.883 3.388-3.977 4.483l-.083.083-.002.002-1.225 1.218-1.213-1.243-.03-.30-.012-.013c-1.1-1.092-2.705-2.687-4.035-4.53-1.324-1.838-2.452-4.024-2.452-6.293"></path>
+                                    </svg>
+                                    <span>${escapeHtml(meta.city)}</span>
                                 </div>
                             ` : ''}
-                        </div>
                     </div>
                 </div>
                 
-                <!-- Action Icons - Bottom Right -->
-                <div class="action-icons-container" style="position: absolute; bottom: 10px; right: 15px; display: flex; gap: 6px; z-index: 1000;">
-                    <!-- View Details Icon -->
-                    <a href="${restaurant.link}" class="action-icon" title="Voir détails" onclick="event.stopPropagation();">
-                        <i class="fas fa-eye"></i>
-                    </a>
-                    
-                    <!-- Phone Icon -->
+                    <div class="card-actions">
+                        <div class="action-buttons">
+                            <a href="${escapeHtml(link)}" class="action-btn primary">
+                                Voir les détails
+                            </a>
+                        </div>
+                        <div class="action-icons-vertical">
                     ${meta.phone ? `
-                    <a href="tel:${meta.phone}" class="action-icon" title="Téléphone" onclick="event.stopPropagation();">
-                        <i class="fas fa-phone"></i>
+                                <a href="tel:${escapeHtml(meta.phone)}" class="action-btn" title="Appeler">
+                                    <svg viewBox="0 0 24 24" width="16" height="16">
+                                        <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"></path>
+                                    </svg>
                     </a>
                     ` : ''}
-                    
-                    <!-- Email Icon -->
-                    ${meta.email ? `
-                    <a href="mailto:${meta.email}" class="action-icon" title="Email" onclick="event.stopPropagation();">
-                        <i class="fas fa-envelope"></i>
+                            ${meta.phone ? `
+                                <a href="https://wa.me/${meta.phone.replace(/[^0-9]/g, '')}" class="action-btn" target="_blank" rel="noopener" title="WhatsApp">
+                                    <svg viewBox="0 0 24 24" width="16" height="16">
+                                        <path fill="currentColor" d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488"></path>
+                                    </svg>
                     </a>
                     ` : ''}
-                    
-                    <!-- WhatsApp Icon -->
-                    ${meta.phone ? `
-                    <a href="https://wa.me/${meta.phone.replace(/[^0-9]/g, '')}" class="action-icon" title="WhatsApp" onclick="event.stopPropagation();">
-                        <i class="fab fa-whatsapp"></i>
+                            ${meta.email ? `
+                                <a href="mailto:${escapeHtml(meta.email)}" class="action-btn" title="Email">
+                                    <svg viewBox="0 0 24 24" width="16" height="16">
+                                        <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"></path>
+                                    </svg>
                     </a>
                     ` : ''}
+                        </div>
+                    </div>
                 </div>
             </div>
         `);
 
-        // Add click handler to highlight on map
-        card.on('click', function(e) {
-            if (!$(e.target).closest('a').length) {
+        // Map popup on save icon click
+        $card.find('.save-btn').on('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
                 highlightRestaurantOnMap(restaurant.id);
-            }
         });
 
-        return card;
+        // VR popup on VR icon click if virtual tour exists
+        if (meta.virtual_tour_url) {
+            $card.find('.vr-btn').on('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                openVirtualTourPopup(restaurant);
+            });
+        }
+
+        return $card;
     }
 
 
@@ -882,6 +954,116 @@
         // Scroll to top of right column
         const rightColumn = $('.right-column');
         rightColumn.scrollTop(0);
+    }
+
+    /**
+     * Generate rating bubbles HTML
+     */
+    function generateRatingBubbles(rating) {
+        const fullBubbles = Math.floor(rating);
+        const hasHalfBubble = rating % 1 >= 0.5;
+        const totalBubbles = 5;
+        let html = '';
+
+        for (let i = 0; i < totalBubbles; i++) {
+            if (i < fullBubbles) {
+                html += '<div class="rating-bubble"></div>';
+            } else if (i === fullBubbles && hasHalfBubble) {
+                html += '<div class="rating-bubble half"></div>';
+            } else {
+                html += '<div class="rating-bubble empty"></div>';
+            }
+        }
+
+        return html;
+    }
+
+    /**
+     * Get price range display text
+     */
+    function getPriceRangeDisplay(minPrice, maxPrice) {
+        if (minPrice > 0 && maxPrice > 0) {
+            return `${minPrice}-${maxPrice} MAD`;
+        } else if (minPrice > 0) {
+            return `À partir de ${minPrice} MAD`;
+        } else if (maxPrice > 0) {
+            return `Jusqu'à ${maxPrice} MAD`;
+        }
+        return '';
+    }
+
+    /**
+     * Open virtual tour popup
+     */
+    function openVirtualTourPopup(restaurant) {
+        const meta = restaurant.restaurant_meta || {};
+        const virtualTourUrl = meta.virtual_tour_url;
+        
+        if (!virtualTourUrl) return;
+        
+        // Create popup HTML if it doesn't exist
+        let popup = document.getElementById('virtual-tour-popup');
+        if (!popup) {
+            popup = document.createElement('div');
+            popup.id = 'virtual-tour-popup';
+            popup.className = 'restaurant-popup-modal';
+            popup.innerHTML = `
+                <div class="popup-overlay"></div>
+                <div class="popup-container">
+                    <div class="popup-header">
+                        <h3>Visite Virtuelle - ${escapeHtml(restaurant.title?.rendered || 'Restaurant')}</h3>
+                        <button id="close-virtual-tour" class="popup-close" aria-label="Fermer">
+                            <svg viewBox="0 0 24 24" width="24" height="24">
+                                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="popup-content">
+                        <iframe id="virtual-tour-iframe" src="" frameborder="0" allowfullscreen style="width: 100%; height: 500px; border-radius: 8px;"></iframe>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(popup);
+            
+            // Add event listeners
+            const closeBtn = document.getElementById('close-virtual-tour');
+            const overlay = popup.querySelector('.popup-overlay');
+            
+            if (closeBtn) {
+                closeBtn.addEventListener('click', closeVirtualTourPopup);
+            }
+            
+            if (overlay) {
+                overlay.addEventListener('click', closeVirtualTourPopup);
+            }
+        }
+        
+        // Set iframe source and show popup
+        const iframe = document.getElementById('virtual-tour-iframe');
+        
+        if (iframe) {
+            iframe.src = virtualTourUrl;
+        }
+        
+        popup.classList.add('show');
+        document.body.style.overflow = 'hidden';
+    }
+
+    /**
+     * Close virtual tour popup
+     */
+    function closeVirtualTourPopup() {
+        const popup = document.getElementById('virtual-tour-popup');
+        const iframe = document.getElementById('virtual-tour-iframe');
+        
+        if (popup) {
+            popup.classList.remove('show');
+            document.body.style.overflow = '';
+        }
+        
+        if (iframe) {
+            iframe.src = ''; // Stop the iframe
+        }
     }
 
     /**

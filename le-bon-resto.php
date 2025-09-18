@@ -49,10 +49,13 @@ class LeBonResto {
             }
         }
         
-        // Add rewrite rules for details pages
-        add_action('init', array($this, 'add_rewrite_rules'), 20);
+        // Add rewrite rules for details pages - high priority
+        add_action('init', array($this, 'add_rewrite_rules'), 5);
         add_filter('query_vars', array($this, 'add_query_vars'));
         add_action('template_redirect', array($this, 'handle_details_redirect'));
+        
+        // Prevent WordPress from redirecting /all to /all-restaurants/
+        add_filter('redirect_canonical', array($this, 'prevent_all_redirect'), 10, 2);
         
         // Force add rewrite rules on every init
         add_action('init', array($this, 'force_add_rewrite_rules'), 30);
@@ -90,12 +93,27 @@ class LeBonResto {
     }
     
     /**
-     * Add rewrite rules for details pages
+     * Add rewrite rules for details pages and all restaurants page
      */
     public function add_rewrite_rules() {
+        // Details page rule
         add_rewrite_rule(
             '^details/([^/]+)/?$',
             'index.php?restaurant_slug=$matches[1]',
+            'top'
+        );
+        
+        // All restaurants page rule - high priority to override any page redirects
+        add_rewrite_rule(
+            '^all/?$',
+            'index.php?all_restaurants=1',
+            'top'
+        );
+        
+        // Prevent redirect from /all to /all-restaurants/
+        add_rewrite_rule(
+            '^all$',
+            'index.php?all_restaurants=1',
             'top'
         );
     }
@@ -106,10 +124,24 @@ class LeBonResto {
     public function force_add_rewrite_rules() {
         global $wp_rewrite;
         
-        // Add the rule directly to the rewrite rules array
+        // Add the details rule directly to the rewrite rules array
         $wp_rewrite->add_rule(
             '^details/([^/]+)/?$',
             'index.php?restaurant_slug=$matches[1]',
+            'top'
+        );
+        
+        // Add the all restaurants rule directly to the rewrite rules array
+        $wp_rewrite->add_rule(
+            '^all/?$',
+            'index.php?all_restaurants=1',
+            'top'
+        );
+        
+        // Also add without trailing slash to prevent redirects
+        $wp_rewrite->add_rule(
+            '^all$',
+            'index.php?all_restaurants=1',
             'top'
         );
     }
@@ -119,14 +151,36 @@ class LeBonResto {
      */
     public function add_query_vars($vars) {
         $vars[] = 'restaurant_slug';
+        $vars[] = 'all_restaurants';
         return $vars;
     }
     
     /**
-     * Handle details page redirect
+     * Handle details page redirect and all restaurants page
      */
     public function handle_details_redirect() {
         $restaurant_slug = get_query_var('restaurant_slug');
+        $all_restaurants = get_query_var('all_restaurants');
+        
+        // Handle all restaurants page
+        if ($all_restaurants) {
+            // Set up the query for all restaurants page
+            global $wp_query;
+            $wp_query->is_single = false;
+            $wp_query->is_singular = false;
+            $wp_query->is_page = true;
+            $wp_query->is_home = false;
+            $wp_query->is_archive = false;
+            $wp_query->is_search = false;
+            $wp_query->is_404 = false;
+            
+            // Load the all restaurants template
+            $template_path = LEBONRESTO_PLUGIN_PATH . 'templates/all-restaurants.php';
+            if (file_exists($template_path)) {
+                include $template_path;
+                exit;
+            }
+        }
         
         if ($restaurant_slug) {
             // First try exact slug match
@@ -238,6 +292,17 @@ class LeBonResto {
             
             wp_send_json_success($results);
         }
+    }
+    
+    /**
+     * Prevent WordPress from redirecting /all to /all-restaurants/
+     */
+    public function prevent_all_redirect($redirect_url, $requested_url) {
+        // If the requested URL is /all, don't redirect it
+        if (strpos($requested_url, '/all') !== false && strpos($requested_url, '/all-restaurants') === false) {
+            return false;
+        }
+        return $redirect_url;
     }
     
     /**

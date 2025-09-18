@@ -1179,7 +1179,7 @@ function lebonresto_fetch_google_places_data($place_id, $api_key) {
     $url = 'https://maps.googleapis.com/maps/api/place/details/json';
     $params = array(
         'place_id' => $place_id,
-        'fields' => 'rating,user_ratings_total,reviews,name,formatted_address',
+        'fields' => 'rating,user_ratings_total,reviews,name,formatted_address,opening_hours,current_opening_hours',
         'key' => $api_key
     );
     
@@ -1210,6 +1210,8 @@ function lebonresto_fetch_google_places_data($place_id, $api_key) {
         'review_count' => isset($result['user_ratings_total']) ? intval($result['user_ratings_total']) : null,
         'name' => isset($result['name']) ? $result['name'] : null,
         'address' => isset($result['formatted_address']) ? $result['formatted_address'] : null,
+        'opening_hours' => isset($result['opening_hours']) ? $result['opening_hours'] : null,
+        'current_opening_hours' => isset($result['current_opening_hours']) ? $result['current_opening_hours'] : null,
         'reviews' => array()
     );
     

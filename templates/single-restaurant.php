@@ -182,6 +182,14 @@ wp_enqueue_style(
     LEBONRESTO_PLUGIN_VERSION
 );
 
+// Enqueue all restaurants CSS for card styling
+wp_enqueue_style(
+    'lebonresto-all-restaurants-css',
+    LEBONRESTO_PLUGIN_URL . 'assets/css/all-restaurants.css',
+    array('tailwind-css'),
+    LEBONRESTO_PLUGIN_VERSION
+);
+
 // Add critical inline styles to ensure they're applied
 wp_add_inline_style('lebonresto-single-css', '
 /* Critical inline styles for immediate application */
@@ -2816,95 +2824,105 @@ button:focus {
     50% { transform: scale(1.1); }
 }
 
-/* Restaurant Cards Layout */
+/* Restaurant Cards Layout - Redesigned to match all restaurants page */
 #restaurants-list {
-    overflow-x: auto !important;
-    overflow-y: hidden !important;
-    max-height: none !important;
-    height: auto !important;
-    flex-wrap: nowrap !important;
-    flex-direction: row !important;
-    gap: 12px !important;
-    padding: 12px !important;
-    justify-content: center !important;
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)) !important;
+    gap: 16px !important;
+    padding: 16px !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    max-height: 60vh !important;
 }
 
-/* Desktop Layout: Image left, content right */
+/* Single restaurant page card overrides */
 .restaurant-card {
-    height: 240px !important;
-    min-width: 600px !important;
-    flex-shrink: 0 !important;
-    padding: 16px !important;
-    border-radius: 12px !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
-    transition: all 0.3s ease !important;
-    display: flex !important;
-    align-items: center !important;
-    flex-direction: row !important;
+    background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+    border: 2px solid #ffffff !important;
+    transition: all 0.4s ease !important;
+    overflow: hidden !important;
+    height: auto !important;
+    min-height: 280px !important;
+    width: 100% !important;
+    min-width: auto !important;
+    max-width: none !important;
 }
 
 .restaurant-card:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
-    transform: translateY(-1px) !important;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15) !important;
+    transform: translateY(-4px) scale(1.02) !important;
+    border-color: #fbbf24 !important;
 }
 
-.restaurant-card .flex {
-    width: 100% !important;
+.restaurant-card.current-restaurant {
+    border-color: #fbbf24 !important;
+    box-shadow: 0 8px 25px rgba(251, 191, 36, 0.3) !important;
 }
 
-.restaurant-card img {
-    width: 350px !important;
-    height: 200px !important;
-    object-fit: cover !important;
-    border-radius: 12px !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
-    flex-shrink: 0 !important;
-}
-
-.restaurant-card .flex-shrink-0 {
-    flex-shrink: 0 !important;
-}
-
-.restaurant-card .flex-1 {
-    padding-left: 20px;
-    padding-top: 50px;
-    min-width: 0 !important;
-    height: 100% !important;
+/* Card layout for single restaurant page */
+.restaurant-card .card-layout {
+    display: flex !important;
     flex-direction: column !important;
-    justify-content: flex-start !important;
-    flex: 1 !important;
+    height: 100% !important;
 }
 
-.restaurant-card h4 {
-    font-size: 20px !important;
-    font-weight: 700 !important;
-    margin: 0 0 8px 0 !important;
-    line-height: 1.3 !important;
-    color: #1f2937 !important;
-}
-
-.restaurant-card .space-y-0\.5 > * + * {
-    margin-top: 4px !important;
-}
-
-.restaurant-card p {
-    font-size: 13px !important;
-    margin: 0 0 6px 0 !important;
-    line-height: 1.4 !important;
-    color: #6b7280 !important;
-}
-
-/* Description styling */
-.restaurant-card .description {
-    font-size: 12px !important;
-    color: #9ca3af !important;
-    line-height: 1.4 !important;
-    margin: 8px 0 0 0 !important;
-    display: -webkit-box !important;
-    -webkit-line-clamp: 3 !important;
-    -webkit-box-orient: vertical !important;
+.restaurant-card .card-image {
+    width: 100% !important;
+    height: 140px !important;
+    position: relative !important;
+    border-radius: 12px 12px 0 0 !important;
     overflow: hidden !important;
-    text-overflow: ellipsis !important;
+    background: #f3f4f6 !important;
+}
+
+.restaurant-card .restaurant-image {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    transition: transform 0.3s ease !important;
+}
+
+.restaurant-card .card-content {
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    padding: 16px !important;
+    justify-content: space-between !important;
+}
+
+.restaurant-card .card-actions {
+    display: flex !important;
+    gap: 8px !important;
+    align-items: center !important;
+    margin-top: auto !important;
+}
+
+/* Mobile responsive overrides for single restaurant cards */
+@media (max-width: 768px) {
+    #restaurants-list {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+        padding: 12px !important;
+        max-height: 50vh !important;
+    }
+    
+    .restaurant-card {
+        min-height: 220px !important;
+    }
+    
+    .restaurant-card .card-image {
+        height: 120px !important;
+        border-radius: 12px 12px 0 0 !important;
+    }
+}
+
+/* Current restaurant highlighting */
+.restaurant-card.current-restaurant .restaurant-name a {
+    color: #fbbf24 !important;
+    font-weight: 700 !important;
 }
 
 .restaurant-card .text-xs {

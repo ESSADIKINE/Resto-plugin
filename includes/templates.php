@@ -34,8 +34,8 @@ add_filter('single_template', 'lebonresto_single_template');
 function lebonresto_all_restaurants_template($template) {
     global $post;
 
-    // Check if this is the "All Restaurants" page
-    if (is_page() && $post && $post->post_name === 'all-restaurants') {
+    // Check if this is the "All Restaurants" page or /all route
+    if (is_page() && $post && ($post->post_name === 'all-restaurants' || $post->post_name === 'all')) {
         $plugin_template = LEBONRESTO_PLUGIN_PATH . 'templates/all-restaurants.php';
         
         if (file_exists($plugin_template)) {

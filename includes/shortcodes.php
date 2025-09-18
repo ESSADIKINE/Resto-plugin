@@ -599,3 +599,50 @@ add_shortcode('lebonresto_details_page', 'lebonresto_restaurant_details_page_sho
 add_shortcode('lebonresto_map_only', 'lebonresto_map_only_shortcode');
 add_shortcode('lebonresto_gallery_only', 'lebonresto_gallery_only_shortcode');
 add_shortcode('lebonresto_detail', 'lebonresto_restaurant_detail_shortcode');
+add_shortcode('lebonresto_all_restaurants_new', 'lebonresto_all_restaurants_new_shortcode');
+
+/**
+ * New All Restaurants Shortcode with Advanced Layout
+ * [lebonresto_all_restaurants_new]
+ */
+function lebonresto_all_restaurants_new_shortcode($atts) {
+    // Parse shortcode attributes
+    $atts = shortcode_atts(
+        array(
+            'per_page' => 12,
+            'show_pagination' => 'true',
+            'show_sorting' => 'true',
+            'show_filters' => 'true',
+        ),
+        $atts,
+        'lebonresto_all_restaurants_new'
+    );
+
+    // Enqueue required styles and scripts
+    wp_enqueue_style('tailwind-css', 'https://cdn.tailwindcss.com', array(), '3.4.0');
+    wp_enqueue_style('font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css', array(), '6.0.0');
+    wp_enqueue_style('lebonresto-all-restaurants-css', LEBONRESTO_PLUGIN_URL . 'assets/css/all-restaurants.css', array('tailwind-css'), LEBONRESTO_PLUGIN_VERSION);
+    wp_enqueue_script('lebonresto-all-restaurants-js', LEBONRESTO_PLUGIN_URL . 'assets/js/all-restaurants.js', array('jquery', 'wp-api'), LEBONRESTO_PLUGIN_VERSION, true);
+
+    // Start output buffering
+    ob_start();
+
+    // Include the all restaurants template
+    $template_path = LEBONRESTO_PLUGIN_PATH . 'templates/all-restaurants.php';
+    if (file_exists($template_path)) {
+        // Remove get_header() and get_footer() calls from template when used as shortcode
+        $template_content = file_get_contents($template_path);
+        
+        // Remove PHP tags that call get_header() and get_footer()
+        $template_content = preg_replace('/get_header\(\);?\s*/', '', $template_content);
+        $template_content = preg_replace('/get_footer\(\);?\s*/', '', $template_content);
+        
+        // Execute the modified template
+        eval('?>' . $template_content);
+    } else {
+        echo '<div class="lebonresto-error">All restaurants template not found.</div>';
+    }
+
+    // Return the output
+    return ob_get_clean();
+}

@@ -71,6 +71,16 @@ function lebonresto_register_api_endpoints() {
                 'sanitize_callback' => 'absint',
                 'default' => 12,
             ),
+            'min_price' => array(
+                'description' => 'Minimum price filter',
+                'type' => 'number',
+                'sanitize_callback' => function($value) { return floatval($value); },
+            ),
+            'max_price' => array(
+                'description' => 'Maximum price filter',
+                'type' => 'number',
+                'sanitize_callback' => function($value) { return floatval($value); },
+            ),
         ),
     ));
 }
@@ -148,6 +158,31 @@ function lebonresto_get_restaurants_endpoint($request) {
             'compare' => '='
         );
     }
+
+    // Filter by price range
+    if (!empty($params['min_price']) || !empty($params['max_price'])) {
+        $price_query = array('relation' => 'AND');
+        
+        if (!empty($params['min_price'])) {
+            $price_query[] = array(
+                'key' => '_restaurant_min_price',
+                'value' => $params['min_price'],
+                'compare' => '>=',
+                'type' => 'NUMERIC'
+            );
+        }
+        
+        if (!empty($params['max_price'])) {
+            $price_query[] = array(
+                'key' => '_restaurant_max_price',
+                'value' => $params['max_price'],
+                'compare' => '<=',
+                'type' => 'NUMERIC'
+            );
+        }
+        
+        $args['meta_query'][] = $price_query;
+    }
     
     // Filter featured only
     if (!empty($params['featured_only'])) {
@@ -169,6 +204,61 @@ function lebonresto_get_restaurants_endpoint($request) {
             
             $post_id = get_the_ID();
             $restaurant_data = lebonresto_prepare_restaurant_data($post_id);
+            
+            // Fetch Google Places data if Place ID exists
+            $google_place_id = $restaurant_data['restaurant_meta']['google_place_id'] ?? '';
+            $google_api_reviews = $restaurant_data['restaurant_meta']['google_api_reviews'] ?? array();
+            
+            
+            if ($google_place_id) {
+                $api_key = lebonresto_get_google_maps_api_key();
+                if ($api_key) {
+                    // Clear cache first to ensure fresh data
+                    $cache_key = 'google_places_' . md5($google_place_id);
+                    delete_transient($cache_key);
+                    
+                    $places_data = lebonresto_fetch_google_places_data($google_place_id, $api_key);
+                    
+                    if ($places_data) {
+                        // Update rating and review count
+                        if (isset($places_data['rating'])) {
+                            update_post_meta($post_id, '_restaurant_google_rating', $places_data['rating']);
+                            $restaurant_data['restaurant_meta']['google_rating'] = $places_data['rating'];
+                        }
+                        if (isset($places_data['review_count'])) {
+                            update_post_meta($post_id, '_restaurant_google_review_count', $places_data['review_count']);
+                            $restaurant_data['restaurant_meta']['google_review_count'] = $places_data['review_count'];
+                        }
+                        
+                        // Store opening hours if available
+                        if (isset($places_data['opening_hours'])) {
+                            update_post_meta($post_id, '_restaurant_google_opening_hours', $places_data['opening_hours']);
+                            $restaurant_data['restaurant_meta']['google_opening_hours'] = $places_data['opening_hours'];
+                        }
+                        if (isset($places_data['current_opening_hours'])) {
+                            update_post_meta($post_id, '_restaurant_google_current_opening_hours', $places_data['current_opening_hours']);
+                            $restaurant_data['restaurant_meta']['google_current_opening_hours'] = $places_data['current_opening_hours'];
+                        }
+                        
+                        // Store individual reviews if available
+                        if (isset($places_data['reviews']) && !empty($places_data['reviews'])) {
+                            $api_reviews = array();
+                            foreach ($places_data['reviews'] as $review) {
+                                $api_reviews[] = array(
+                                    'name' => $review['author_name'],
+                                    'rating' => $review['rating'],
+                                    'text' => $review['text'],
+                                    'date' => date('Y-m-d', $review['time']),
+                                    'source' => 'google_api'
+                                );
+                            }
+                            // Store API reviews
+                            update_post_meta($post_id, '_restaurant_google_api_reviews', $api_reviews);
+                            $restaurant_data['restaurant_meta']['google_api_reviews'] = $api_reviews;
+                        }
+                    }
+                }
+            }
             
             // Apply distance filter if specified
             if (!empty($params['distance']) && !empty($params['lat']) && !empty($params['lng'])) {
@@ -192,6 +282,7 @@ function lebonresto_get_restaurants_endpoint($request) {
                     $restaurant_data['distance'] = round($distance, 2);
                 }
             }
+            
             
             $restaurants[] = $restaurant_data;
         }
@@ -272,7 +363,16 @@ function lebonresto_prepare_restaurant_data($post_id) {
         '_restaurant_principal_image',
         '_restaurant_gallery',
         '_restaurant_video_url',
-        '_restaurant_virtual_tour_url'
+        '_restaurant_virtual_tour_url',
+        '_restaurant_min_price',
+        '_restaurant_max_price',
+        '_restaurant_google_place_id',
+        '_restaurant_google_rating',
+        '_restaurant_google_review_count',
+        '_restaurant_google_price_level',
+        '_restaurant_google_api_reviews',
+        '_restaurant_google_opening_hours',
+        '_restaurant_google_current_opening_hours'
     );
     
     $meta_data = get_post_meta($post_id);
@@ -280,7 +380,12 @@ function lebonresto_prepare_restaurant_data($post_id) {
     
     // Extract meta values
     foreach ($meta_keys as $key) {
-        $restaurant_meta[str_replace('_restaurant_', '', $key)] = isset($meta_data[$key][0]) ? $meta_data[$key][0] : '';
+        if ($key === '_restaurant_google_api_reviews' || $key === '_restaurant_google_opening_hours' || $key === '_restaurant_google_current_opening_hours') {
+            // Handle arrays
+            $restaurant_meta[str_replace('_restaurant_', '', $key)] = isset($meta_data[$key][0]) ? maybe_unserialize($meta_data[$key][0]) : array();
+        } else {
+            $restaurant_meta[str_replace('_restaurant_', '', $key)] = isset($meta_data[$key][0]) ? $meta_data[$key][0] : '';
+        }
     }
     
     // Get principal image URLs (only if needed)
@@ -332,6 +437,12 @@ function lebonresto_prepare_restaurant_data($post_id) {
             'gallery_images' => $gallery_urls,
             'video_url' => $restaurant_meta['video_url'],
             'virtual_tour_url' => $restaurant_meta['virtual_tour_url'],
+            'min_price' => $restaurant_meta['min_price'],
+            'max_price' => $restaurant_meta['max_price'],
+            'google_place_id' => $restaurant_meta['google_place_id'],
+            'google_rating' => $restaurant_meta['google_rating'],
+            'google_review_count' => $restaurant_meta['google_review_count'],
+            'google_price_level' => $restaurant_meta['google_price_level'],
         ),
     );
 }
@@ -405,3 +516,137 @@ function lebonresto_get_cuisine_types_endpoint($request) {
     $cuisine_types = lebonresto_get_cuisine_types();
     return rest_ensure_response($cuisine_types);
 }
+
+/**
+ * REST endpoint for Google Places data
+ */
+function lebonresto_register_google_places_endpoint() {
+    register_rest_route('lebonresto/v1', '/google-places', array(
+        'methods' => 'GET',
+        'callback' => 'lebonresto_get_google_places_data',
+        'permission_callback' => '__return_true',
+        'args' => array(
+            'place_id' => array(
+                'description' => 'Google Place ID',
+                'type' => 'string',
+                'required' => true,
+                'sanitize_callback' => 'sanitize_text_field',
+            ),
+        ),
+    ));
+    
+}
+add_action('rest_api_init', 'lebonresto_register_google_places_endpoint');
+
+/**
+ * Google Places data endpoint callback
+ */
+function lebonresto_get_google_places_data($request) {
+    $place_id = $request->get_param('place_id');
+    
+    if (empty($place_id)) {
+        return new WP_Error('missing_place_id', 'Place ID is required', array('status' => 400));
+    }
+    
+    // Check if we have cached data
+    $cache_key = 'lebonresto_google_places_' . md5($place_id);
+    $cached_data = get_transient($cache_key);
+    
+    if ($cached_data !== false) {
+        return rest_ensure_response($cached_data);
+    }
+    
+    // Get Google API key from options
+    $options = get_option('lebonresto_options', array());
+    $api_key = isset($options['google_api_key']) ? $options['google_api_key'] : '';
+    
+    if (empty($api_key)) {
+        // Return mock data if no API key is configured
+        $mock_data = array(
+            'place_id' => $place_id,
+            'rating' => 4.5,
+            'user_ratings_total' => 150,
+            'price_level' => 2,
+            'reviews' => array(
+                array(
+                    'author_name' => 'John Doe',
+                    'rating' => 5,
+                    'text' => 'Excellent restaurant with great food and service!',
+                    'time' => time() - 86400
+                ),
+                array(
+                    'author_name' => 'Jane Smith',
+                    'rating' => 4,
+                    'text' => 'Good food, nice atmosphere.',
+                    'time' => time() - 172800
+                )
+            )
+        );
+        
+        // Cache for 1 hour
+        set_transient($cache_key, $mock_data, 3600);
+        return rest_ensure_response($mock_data);
+    }
+    
+    // Call Google Places API
+    $api_url = 'https://maps.googleapis.com/maps/api/place/details/json';
+    $params = array(
+        'place_id' => $place_id,
+        'fields' => 'rating,user_ratings_total,reviews,price_level,name,formatted_address',
+        'key' => $api_key
+    );
+    
+    $url = $api_url . '?' . http_build_query($params);
+    
+    $response = wp_remote_get($url, array(
+        'timeout' => 30,
+        'headers' => array(
+            'User-Agent' => 'WordPress/LeBonResto'
+        )
+    ));
+    
+    if (is_wp_error($response)) {
+        error_log('Google Places API Error: ' . $response->get_error_message());
+        return new WP_Error('api_error', 'Failed to fetch Google Places data', array('status' => 500));
+    }
+    
+    $body = wp_remote_retrieve_body($response);
+    $data = json_decode($body, true);
+    
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        error_log('Google Places API JSON Error: ' . json_last_error_msg());
+        return new WP_Error('json_error', 'Invalid JSON response from Google Places API', array('status' => 500));
+    }
+    
+    if ($data['status'] !== 'OK') {
+        error_log('Google Places API Status Error: ' . $data['status']);
+        return new WP_Error('api_status_error', 'Google Places API returned error: ' . $data['status'], array('status' => 400));
+    }
+    
+    $result = $data['result'];
+    $places_data = array(
+        'place_id' => $place_id,
+        'rating' => isset($result['rating']) ? floatval($result['rating']) : 0,
+        'user_ratings_total' => isset($result['user_ratings_total']) ? intval($result['user_ratings_total']) : 0,
+        'price_level' => isset($result['price_level']) ? intval($result['price_level']) : 0,
+        'reviews' => array()
+    );
+    
+    // Process reviews
+    if (isset($result['reviews']) && is_array($result['reviews'])) {
+        foreach ($result['reviews'] as $review) {
+            $places_data['reviews'][] = array(
+                'author_name' => isset($review['author_name']) ? $review['author_name'] : 'Anonymous',
+                'rating' => isset($review['rating']) ? intval($review['rating']) : 0,
+                'text' => isset($review['text']) ? $review['text'] : '',
+                'time' => isset($review['time']) ? intval($review['time']) : time()
+            );
+        }
+    }
+    
+    // Cache for 1 hour
+    set_transient($cache_key, $places_data, 3600);
+    
+    return rest_ensure_response($places_data);
+}
+
