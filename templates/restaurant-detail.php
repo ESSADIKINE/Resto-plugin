@@ -253,13 +253,18 @@ if ($google_place_id && $api_key) {
         if (isset($places_data['reviews']) && !empty($places_data['reviews'])) {
             $api_reviews = array();
             foreach ($places_data['reviews'] as $review) {
-                $api_reviews[] = array(
-                    'name' => $review['author_name'],
-                    'rating' => $review['rating'],
-                    'text' => $review['text'],
-                    'date' => date('Y-m-d', $review['time']),
-                    'source' => 'google_api'
-                );
+                // Ensure we have valid review data before adding
+                if (isset($review['author_name']) || isset($review['text']) || isset($review['rating'])) {
+                    $api_reviews[] = array(
+                        'name' => isset($review['author_name']) ? $review['author_name'] : 'Utilisateur anonyme',
+                        'author_name' => isset($review['author_name']) ? $review['author_name'] : 'Utilisateur anonyme', // Backup field
+                        'rating' => isset($review['rating']) ? intval($review['rating']) : 0,
+                        'text' => isset($review['text']) ? $review['text'] : '',
+                        'date' => isset($review['time']) ? date('Y-m-d', $review['time']) : date('Y-m-d'),
+                        'time' => isset($review['time']) ? $review['time'] : time(),
+                        'source' => 'google_api'
+                    );
+                }
             }
             // Store API reviews as a separate meta field
             update_post_meta($restaurant_id, '_restaurant_google_api_reviews', $api_reviews);
@@ -737,6 +742,32 @@ html.lebonresto-detail-page {
     .section-switcher .section-btn.active span {
         margin-left: 60px;
     }
+    
+    /* Social sharing responsive adjustments */
+    .social-sharing-section {
+        align-items: center !important;
+        margin-top: 1.5rem !important;
+    }
+    
+    .social-share-icons {
+        flex-wrap: wrap !important;
+        justify-content: center !important;
+        gap: 0.75rem !important;
+    }
+    
+    .social-share-btn {
+        width: 45px !important;
+        height: 45px !important;
+    }
+    
+    .social-share-btn i {
+        font-size: 1.3rem !important;
+    }
+    
+    .print-pdf-btn {
+        font-size: 0.85rem !important;
+        padding: 0.6rem 1.2rem !important;
+    }
 }
 
 /* Star Rating Styles */
@@ -925,6 +956,69 @@ html.lebonresto-detail-page {
                                 <?php echo esc_html(ucfirst($cuisine_type)); ?>
                             </span>
                             <?php endif; ?>
+                            
+                            <!-- Social Sharing & Print Section -->
+                            <div class="social-sharing-section" style="display: flex; flex-direction: column; align-items: flex-end; gap: 0.75rem; margin-top: 1rem;">
+                                <!-- Social Share Icons -->
+                                <div class="social-share-icons" style="display: flex; gap: 0.5rem; align-items: center;">
+                                    <span style="color: var(--text-secondary); font-size: 0.9rem; font-weight: 500; margin-right: 0.5rem;">Partager:</span>
+                                    
+                                    <!-- WhatsApp Share -->
+                                    <a href="https://wa.me/?text=<?php echo urlencode('Découvrez ' . ($blog_title ?: get_the_title()) . ' - ' . $seo_description . ' ' . get_permalink()); ?>" 
+                                       target="_blank" 
+                                       class="social-share-btn whatsapp-share" 
+                                       title="Partager sur WhatsApp"
+                                       style="display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; background: #25D366; color: white; border-radius: 50%; text-decoration: none; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(37, 211, 102, 0.3);"
+                                       onmouseover="this.style.transform='scale(1.1)'; this.style.boxShadow='0 4px 12px rgba(37, 211, 102, 0.5)'"
+                                       onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 2px 8px rgba(37, 211, 102, 0.3)'">
+                                        <i class="fab fa-whatsapp" style="font-size: 1.2rem;"></i>
+                                    </a>
+                                    
+                                    <!-- Facebook Share -->
+                                    <a href="https://www.facebook.com/sharer/sharer.php?u=<?php echo urlencode(get_permalink()); ?>&quote=<?php echo urlencode($seo_description); ?>" 
+                                       target="_blank" 
+                                       class="social-share-btn facebook-share" 
+                                       title="Partager sur Facebook"
+                                       style="display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; background: #1877F2; color: white; border-radius: 50%; text-decoration: none; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(24, 119, 242, 0.3);"
+                                       onmouseover="this.style.transform='scale(1.1)'; this.style.boxShadow='0 4px 12px rgba(24, 119, 242, 0.5)'"
+                                       onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 2px 8px rgba(24, 119, 242, 0.3)'">
+                                        <i class="fab fa-facebook-f" style="font-size: 1.2rem;"></i>
+                                    </a>
+                                    
+                                    <!-- Twitter Share -->
+                                    <a href="https://twitter.com/intent/tweet?url=<?php echo urlencode(get_permalink()); ?>&text=<?php echo urlencode($seo_description); ?>&hashtags=restaurant,maroc,<?php echo urlencode(str_replace(' ', '', $city)); ?>" 
+                                       target="_blank" 
+                                       class="social-share-btn twitter-share" 
+                                       title="Partager sur Twitter"
+                                       style="display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; background: #1DA1F2; color: white; border-radius: 50%; text-decoration: none; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(29, 161, 242, 0.3);"
+                                       onmouseover="this.style.transform='scale(1.1)'; this.style.boxShadow='0 4px 12px rgba(29, 161, 242, 0.5)'"
+                                       onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 2px 8px rgba(29, 161, 242, 0.3)'">
+                                        <i class="fab fa-twitter" style="font-size: 1.2rem;"></i>
+                                    </a>
+                                    
+                                    <!-- Print/PDF Icon -->
+                                    <a href="#" 
+                                       class="social-share-btn print-share" 
+                                       title="Imprimer/PDF"
+                                       onclick="printRestaurantPage(); return false;"
+                                       style="display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; background: linear-gradient(135deg, #fedc00 0%, #fbbf24 100%); color: #1f2937; border-radius: 50%; text-decoration: none; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(254, 220, 0, 0.3);"
+                                       onmouseover="this.style.transform='scale(1.1)'; this.style.boxShadow='0 4px 12px rgba(254, 220, 0, 0.5)'"
+                                       onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 2px 8px rgba(254, 220, 0, 0.3)'">
+                                        <i class="fas fa-print" style="font-size: 1.2rem;"></i>
+                                    </a>
+                                </div>
+                                
+                                <!-- Print/PDF Button (Alternative) -->
+                                <a href="#" 
+                                   class="print-pdf-btn" 
+                                   onclick="printRestaurantPage(); return false;"
+                                   style="display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1.5rem; background: rgba(255, 255, 255, 0.1); color: var(--text-primary); text-decoration: none; border-radius: var(--radius-full); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); transition: all 0.3s ease; font-size: 0.9rem; font-weight: 500;"
+                                   onmouseover="this.style.background='rgba(254, 220, 0, 0.2)'; this.style.borderColor='#fedc00'; this.style.transform='translateY(-2px)'"
+                                   onmouseout="this.style.background='rgba(255, 255, 255, 0.1)'; this.style.borderColor='rgba(255, 255, 255, 0.2)'; this.style.transform='translateY(0)'">
+                                    <i class="fas fa-print" style="color: var(--primary-color);"></i>
+                                    <span>Imprimer / PDF</span>
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1086,10 +1180,11 @@ html.lebonresto-detail-page {
                                     </div>
                                     <div class="slider-controls" style="position: absolute; bottom: 1rem; left: 50%; transform: translateX(-50%); display: flex; gap: 0.5rem;">
                                         <?php foreach ($gallery_images as $index => $image): ?>
-                                            <button class="slider-dot <?php echo $index === 0 ? 'active' : ''; ?>" 
-                                                    data-slide="<?php echo $index; ?>" 
-                                                    style="width: 12px; height: 12px; border-radius: 50%; border: none; background: <?php echo $index === 0 ? 'var(--primary-color)' : 'rgba(255,255,255,0.5)'; ?>; cursor: pointer; transition: all var(--transition-normal);">
-                                            </button>
+                                            <a href="#" class="slider-dot <?php echo $index === 0 ? 'active' : ''; ?>" 
+                                               data-slide="<?php echo $index; ?>" 
+                                               style="width: 12px; height: 12px; border-radius: 50%; background: <?php echo $index === 0 ? 'var(--primary-color)' : 'rgba(255,255,255,0.5)'; ?>; cursor: pointer; transition: all var(--transition-normal); display: flex; align-items: center; justify-content: center; text-decoration: none;">
+                                                <div style="width: 100%; height: 100%; border-radius: 50%;"></div>
+                                            </a>
                                         <?php endforeach; ?>
                                     </div>
                                 </div>
@@ -1317,21 +1412,33 @@ html.lebonresto-detail-page {
                                             <h4 style="margin: 0 0 1rem 0; color: var(--text-primary); font-size: 1.1rem; font-weight: 600;">Avis récents Google</h4>
                                             <div style="display: grid; gap: 1rem;">
                                                 <?php foreach (array_slice($google_api_reviews, 0, 3) as $review): ?>
+                                                    <?php 
+                                                    // Validate review data and provide fallbacks
+                                                    $review_name = isset($review['name']) ? $review['name'] : (isset($review['author_name']) ? $review['author_name'] : 'Utilisateur anonyme');
+                                                    $review_rating = isset($review['rating']) ? intval($review['rating']) : 0;
+                                                    $review_text = isset($review['text']) ? $review['text'] : '';
+                                                    $review_date = isset($review['date']) ? $review['date'] : date('Y-m-d');
+                                                    
+                                                    // Skip reviews with invalid data
+                                                    if (empty($review_name) && empty($review_text) && $review_rating === 0) {
+                                                        continue;
+                                                    }
+                                                    ?>
                                                 <div class="review-item" style="background: white; padding: 1rem; border-radius: var(--radius-md); border: 1px solid #e5e7eb; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
                                                     <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
                                                         <div>
-                                                            <strong style="color: var(--text-primary); font-size: 0.9rem;"><?php echo esc_html($review['name']); ?></strong>
+                                                            <strong style="color: var(--text-primary); font-size: 0.9rem;"><?php echo esc_html($review_name); ?></strong>
                                                             <div style="display: flex; align-items: center; margin-top: 0.25rem;">
                                                                 <?php for ($i = 1; $i <= 5; $i++): ?>
-                                                                <span style="color: <?php echo $i <= $review['rating'] ? '#fbbf24' : '#d1d5db'; ?>; font-size: 0.9rem;">★</span>
+                                                                <span style="color: <?php echo $i <= $review_rating ? '#fbbf24' : '#d1d5db'; ?>; font-size: 0.9rem;">★</span>
                                                                 <?php endfor; ?>
                                                             </div>
                                                         </div>
-                                                        <span style="color: var(--text-secondary); font-size: 0.8rem;"><?php echo esc_html($review['date']); ?></span>
+                                                        <span style="color: var(--text-secondary); font-size: 0.8rem;"><?php echo esc_html($review_date); ?></span>
                                                     </div>
-                                                    <?php if (!empty($review['text'])): ?>
+                                                    <?php if (!empty($review_text)): ?>
                                                     <p style="margin: 0; color: var(--text-secondary); font-size: 0.9rem; line-height: 1.4;">
-                                                        <?php echo esc_html(wp_trim_words($review['text'], 30)); ?>
+                                                        <?php echo esc_html(wp_trim_words($review_text, 30)); ?>
                                                     </p>
                                                     <?php endif; ?>
                                                 </div>
@@ -1686,7 +1793,8 @@ html.lebonresto-detail-page {
         let currentSlide = 0;
         
         sliderDots.forEach((dot, index) => {
-            dot.addEventListener('click', function() {
+            dot.addEventListener('click', function(e) {
+                e.preventDefault();
                 // Update dots
                 sliderDots.forEach(d => {
                     d.classList.remove('active');
@@ -2463,6 +2571,637 @@ document.addEventListener('keydown', function(e) {
                 content.style.display = 'none';
                 arrow.style.transform = 'rotate(0deg)';
             }
+        }
+
+        // Print Restaurant Page as PDF
+        function printRestaurantPage() {
+            // Create a new window for printing
+            const printWindow = window.open('', '_blank', 'width=1200,height=800');
+            
+            // Get the current page content
+            const currentContent = document.documentElement.innerHTML;
+            
+            // Create print-optimized HTML
+            const printHTML = `
+                <!DOCTYPE html>
+                <html lang="fr">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title><?php echo esc_html($blog_title ?: get_the_title()); ?> - Restaurant Details</title>
+                    <style>
+                        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+                        
+                        * {
+                            margin: 0;
+                            padding: 0;
+                            box-sizing: border-box;
+                        }
+                        
+                        body {
+                            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                            line-height: 1.7;
+                            color: #1a202c;
+                            background: #ffffff;
+                            padding: 0;
+                            font-size: 14px;
+                        }
+                        
+                        .print-container {
+                            max-width: 210mm;
+                            margin: 0 auto;
+                            background: white;
+                            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+                        }
+                        
+                        .print-header {
+                            background: linear-gradient(135deg, #fedc00 0%, #fbbf24 100%);
+                            color: #1a202c;
+                            padding: 40px 30px;
+                            text-align: center;
+                            position: relative;
+                            overflow: hidden;
+                        }
+                        
+                        .print-header::before {
+                            content: '';
+                            position: absolute;
+                            top: 0;
+                            left: 0;
+                            right: 0;
+                            bottom: 0;
+                            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="75" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="50" cy="10" r="0.5" fill="rgba(255,255,255,0.1)"/><circle cx="10" cy="60" r="0.5" fill="rgba(255,255,255,0.1)"/><circle cx="90" cy="40" r="0.5" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+                            opacity: 0.3;
+                        }
+                        
+                        .print-title {
+                            font-size: 3.2rem;
+                            font-weight: 800;
+                            margin-bottom: 15px;
+                            position: relative;
+                            z-index: 1;
+                            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                        }
+                        
+                        .print-subtitle {
+                            font-size: 1.3rem;
+                            margin-bottom: 20px;
+                            position: relative;
+                            z-index: 1;
+                            opacity: 0.9;
+                            font-weight: 500;
+                        }
+                        
+                        .print-info {
+                            display: flex;
+                            justify-content: center;
+                            gap: 40px;
+                            flex-wrap: wrap;
+                            font-size: 1rem;
+                            position: relative;
+                            z-index: 1;
+                            background: rgba(255,255,255,0.2);
+                            padding: 15px 25px;
+                            border-radius: 50px;
+                            backdrop-filter: blur(10px);
+                            margin: 0 auto;
+                            max-width: 600px;
+                        }
+                        
+                        .print-info span {
+                            font-weight: 600;
+                            display: flex;
+                            align-items: center;
+                            gap: 8px;
+                        }
+                        
+                        .print-content {
+                            padding: 40px 30px;
+                        }
+                        
+                        .print-section {
+                            margin-bottom: 50px;
+                            page-break-inside: avoid;
+                        }
+                        
+                        .print-section h2 {
+                            font-size: 2rem;
+                            font-weight: 700;
+                            color: #1a202c;
+                            margin-bottom: 25px;
+                            padding-bottom: 12px;
+                            border-bottom: 3px solid #fedc00;
+                            position: relative;
+                        }
+                        
+                        .print-section h2::after {
+                            content: '';
+                            position: absolute;
+                            bottom: -3px;
+                            left: 0;
+                            width: 60px;
+                            height: 3px;
+                            background: #1a202c;
+                        }
+                        
+                        .print-section h3 {
+                            font-size: 1.4rem;
+                            font-weight: 600;
+                            color: #2d3748;
+                            margin-bottom: 15px;
+                        }
+                        
+                        .print-section h4 {
+                            font-size: 1.2rem;
+                            font-weight: 600;
+                            color: #2d3748;
+                            margin-bottom: 10px;
+                        }
+                        
+                        .print-grid {
+                            display: grid;
+                            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+                            gap: 25px;
+                            margin-bottom: 25px;
+                        }
+                        
+                        .print-card {
+                            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+                            padding: 25px;
+                            border-radius: 12px;
+                            border-left: 5px solid #fedc00;
+                            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+                            transition: transform 0.2s ease;
+                        }
+                        
+                        .print-details {
+                            display: grid;
+                            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                            gap: 20px;
+                        }
+                        
+                        .print-detail-item {
+                            display: flex;
+                            justify-content: space-between;
+                            align-items: center;
+                            padding: 15px 0;
+                            border-bottom: 1px solid #e2e8f0;
+                            transition: background-color 0.2s ease;
+                        }
+                        
+                        .print-detail-item:hover {
+                            background-color: #f8fafc;
+                            padding-left: 10px;
+                            padding-right: 10px;
+                            border-radius: 8px;
+                        }
+                        
+                        .print-detail-label {
+                            font-weight: 700;
+                            color: #2d3748;
+                            font-size: 1rem;
+                        }
+                        
+                        .print-detail-value {
+                            color: #4a5568;
+                            font-weight: 500;
+                            text-align: right;
+                        }
+                        
+                        .print-rating {
+                            display: flex;
+                            align-items: center;
+                            gap: 12px;
+                            margin-bottom: 15px;
+                        }
+                        
+                        .print-stars {
+                            color: #fbbf24;
+                            font-size: 1.4rem;
+                            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+                        }
+                        
+                        .print-rating-text {
+                            font-weight: 700;
+                            color: #1a202c;
+                            font-size: 1.1rem;
+                        }
+                        
+                        .print-images {
+                            display: grid;
+                            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                            gap: 20px;
+                            margin-bottom: 30px;
+                        }
+                        
+                        .print-image {
+                            width: 100%;
+                            height: 250px;
+                            object-fit: cover;
+                            border-radius: 12px;
+                            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+                            transition: transform 0.3s ease;
+                        }
+                        
+                        .print-image:hover {
+                            transform: scale(1.02);
+                        }
+                        
+                        .print-menu {
+                            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+                            padding: 25px;
+                            border-radius: 12px;
+                            margin-bottom: 20px;
+                            border-left: 5px solid #fedc00;
+                            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+                        }
+                        
+                        .print-menu h4 {
+                            color: #1a202c;
+                            margin-bottom: 15px;
+                            font-size: 1.3rem;
+                        }
+                        
+                        .print-menu p {
+                            color: #4a5568;
+                            margin-bottom: 15px;
+                            line-height: 1.6;
+                        }
+                        
+                        .print-menu-image {
+                            width: 100%;
+                            max-width: 500px;
+                            height: 300px;
+                            object-fit: cover;
+                            border-radius: 12px;
+                            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+                            margin: 15px 0;
+                        }
+                        
+                        .print-contact {
+                            display: grid;
+                            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                            gap: 20px;
+                        }
+                        
+                        .print-contact-item {
+                            display: flex;
+                            align-items: center;
+                            gap: 15px;
+                            padding: 20px;
+                            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+                            border-radius: 12px;
+                            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+                            border-left: 5px solid #fedc00;
+                        }
+                        
+                        .print-contact-item strong {
+                            font-size: 1.1rem;
+                            color: #1a202c;
+                        }
+                        
+                        .print-links {
+                            display: grid;
+                            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                            gap: 20px;
+                            margin-top: 20px;
+                        }
+                        
+                        .print-link-item {
+                            background: linear-gradient(135deg, #e6fffa 0%, #f0fff4 100%);
+                            padding: 20px;
+                            border-radius: 12px;
+                            border-left: 5px solid #38b2ac;
+                            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+                        }
+                        
+                        .print-link-item h4 {
+                            color: #1a202c;
+                            margin-bottom: 10px;
+                            font-size: 1.2rem;
+                        }
+                        
+                        .print-link-item p {
+                            color: #4a5568;
+                            margin-bottom: 10px;
+                        }
+                        
+                        .print-url {
+                            color: #38b2ac;
+                            text-decoration: none;
+                            font-weight: 600;
+                            word-break: break-all;
+                        }
+                        
+                        .print-footer {
+                            margin-top: 60px;
+                            padding: 30px;
+                            background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
+                            color: white;
+                            text-align: center;
+                            border-radius: 12px 12px 0 0;
+                        }
+                        
+                        .print-footer h3 {
+                            color: #fedc00;
+                            margin-bottom: 15px;
+                            font-size: 1.5rem;
+                        }
+                        
+                        .print-footer p {
+                            margin-bottom: 8px;
+                            opacity: 0.9;
+                        }
+                        
+                        .print-footer .print-url {
+                            color: #fedc00;
+                        }
+                        
+                        .print-badge {
+                            display: inline-block;
+                            background: #fedc00;
+                            color: #1a202c;
+                            padding: 8px 16px;
+                            border-radius: 20px;
+                            font-weight: 600;
+                            font-size: 0.9rem;
+                            margin: 5px;
+                        }
+                        
+                        .print-highlight {
+                            background: linear-gradient(135deg, #fedc00 0%, #fbbf24 100%);
+                            color: #1a202c;
+                            padding: 20px;
+                            border-radius: 12px;
+                            margin: 20px 0;
+                            text-align: center;
+                            font-weight: 600;
+                        }
+                        
+                        @media print {
+                            body {
+                                padding: 0;
+                                margin: 0;
+                            }
+                            
+                            .print-container {
+                                box-shadow: none;
+                                max-width: none;
+                            }
+                            
+                            .print-section {
+                                page-break-inside: avoid;
+                            }
+                            
+                            .print-images {
+                                page-break-inside: avoid;
+                            }
+                            
+                            .print-header {
+                                -webkit-print-color-adjust: exact;
+                                color-adjust: exact;
+                            }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="print-container">
+                        <div class="print-header">
+                            <h1 class="print-title"><?php echo esc_html($blog_title ?: get_the_title()); ?></h1>
+                            <p class="print-subtitle"><?php echo esc_html($seo_description); ?></p>
+                            <div class="print-info">
+                                <span>🏙️ <strong>Ville:</strong> <?php echo esc_html($city); ?></span>
+                                <span>🍽️ <strong>Cuisine:</strong> <?php echo esc_html(ucfirst($cuisine_type)); ?></span>
+                                <span>📅 <strong>Date:</strong> ${new Date().toLocaleDateString('fr-FR')}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="print-content">
+                            <div class="print-section">
+                                <h2>📋 Informations du Restaurant</h2>
+                                <div class="print-details">
+                                    <div class="print-detail-item">
+                                        <span class="print-detail-label">Nom du Restaurant:</span>
+                                        <span class="print-detail-value"><?php echo esc_html($blog_title ?: get_the_title()); ?></span>
+                                    </div>
+                                    <div class="print-detail-item">
+                                        <span class="print-detail-label">Type de Cuisine:</span>
+                                        <span class="print-detail-value"><?php echo esc_html(ucfirst($cuisine_type)); ?></span>
+                                    </div>
+                                    <div class="print-detail-item">
+                                        <span class="print-detail-label">Ville:</span>
+                                        <span class="print-detail-value"><?php echo esc_html($city); ?></span>
+                                    </div>
+                                    <?php if ($address): ?>
+                                    <div class="print-detail-item">
+                                        <span class="print-detail-label">Adresse Complète:</span>
+                                        <span class="print-detail-value"><?php echo esc_html($address); ?></span>
+                                    </div>
+                                    <?php endif; ?>
+                                    <?php if ($phone): ?>
+                                    <div class="print-detail-item">
+                                        <span class="print-detail-label">Téléphone:</span>
+                                        <span class="print-detail-value"><?php echo esc_html($phone); ?></span>
+                                    </div>
+                                    <?php endif; ?>
+                                    <?php if ($email): ?>
+                                    <div class="print-detail-item">
+                                        <span class="print-detail-label">Email:</span>
+                                        <span class="print-detail-value"><?php echo esc_html($email); ?></span>
+                                    </div>
+                                    <?php endif; ?>
+                                    <?php if ($min_price || $max_price): ?>
+                                    <div class="print-detail-item">
+                                        <span class="print-detail-label">Fourchette de Prix:</span>
+                                        <span class="print-detail-value">
+                                            <?php 
+                                            if ($min_price && $max_price) {
+                                                echo number_format($min_price, 2) . ' - ' . number_format($max_price, 2) . ' ' . lebonresto_get_currency_symbol($currency) . ' /personne';
+                                            } elseif ($min_price) {
+                                                echo 'À partir de ' . number_format($min_price, 2) . ' ' . lebonresto_get_currency_symbol($currency) . ' /personne';
+                                            } elseif ($max_price) {
+                                                echo 'Jusqu\'à ' . number_format($max_price, 2) . ' ' . lebonresto_get_currency_symbol($currency) . ' /personne';
+                                            }
+                                            ?>
+                                        </span>
+                                    </div>
+                                    <?php endif; ?>
+                                    <?php if ($google_rating): ?>
+                                    <div class="print-detail-item">
+                                        <span class="print-detail-label">Note Google:</span>
+                                        <span class="print-detail-value">
+                                            <div class="print-rating">
+                                                <span class="print-stars">★★★★★</span>
+                                                <span class="print-rating-text"><?php echo number_format($google_rating, 1); ?>/5</span>
+                                                <?php if ($google_review_count): ?>
+                                                <span>(<?php echo esc_html($google_review_count); ?> avis)</span>
+                                                <?php endif; ?>
+                                            </div>
+                                        </span>
+                                    </div>
+                                    <?php endif; ?>
+                                    <?php if ($is_featured === '1'): ?>
+                                    <div class="print-highlight">
+                                        ⭐ Restaurant Recommandé - Établissement de Qualité Exceptionnelle
+                                    </div>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                            
+                            <?php if ($blog_content): ?>
+                            <div class="print-section">
+                                <h2>👨‍🍳 Le Mot du Chef</h2>
+                                <div class="print-card">
+                                    <?php echo wpautop($blog_content); ?>
+                                </div>
+                            </div>
+                            <?php endif; ?>
+                            
+                            <?php if (!empty($selected_options)): ?>
+                            <div class="print-section">
+                                <h2>✨ Options et Services</h2>
+                                <div class="print-grid">
+                                    <?php foreach ($selected_options as $option): ?>
+                                    <div class="print-card">
+                                        <h3>✓ <?php echo esc_html($option); ?></h3>
+                                    </div>
+                                    <?php endforeach; ?>
+                                </div>
+                            </div>
+                            <?php endif; ?>
+                            
+                            <?php if (!empty($gallery_images)): ?>
+                            <div class="print-section">
+                                <h2>📸 Galerie d'Images</h2>
+                                <div class="print-images">
+                                    <?php foreach ($gallery_images as $image): ?>
+                                    <img src="<?php echo esc_url($image['url']); ?>" 
+                                         alt="<?php echo esc_attr($image['alt'] ?: ($blog_title ?: get_the_title())); ?>" 
+                                         class="print-image" />
+                                    <?php endforeach; ?>
+                                </div>
+                            </div>
+                            <?php endif; ?>
+                            
+                            <?php if (!empty($menus) || $menu_image): ?>
+                            <div class="print-section">
+                                <h2>🍽️ Menus et Carte</h2>
+                                <?php if (!empty($menus)): ?>
+                                    <?php foreach ($menus as $index => $menu): ?>
+                                    <div class="print-menu">
+                                        <h4>📋 <?php echo esc_html($menu['name']); ?></h4>
+                                        <?php if (!empty($menu['description'])): ?>
+                                        <p><?php echo esc_html($menu['description']); ?></p>
+                                        <?php endif; ?>
+                                        <?php if (!empty($menu['file_url'])): ?>
+                                        <p><strong>📄 Fichier Menu:</strong> <a href="<?php echo esc_url($menu['file_url']); ?>" class="print-url">Télécharger le menu complet</a></p>
+                                        <?php endif; ?>
+                                    </div>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                                
+                                <?php if ($menu_image): ?>
+                                <div class="print-menu">
+                                    <h4>📋 Menu Principal</h4>
+                                    <?php 
+                                    $menu_image_url = wp_get_attachment_image_url($menu_image, 'full');
+                                    if ($menu_image_url): ?>
+                                        <img src="<?php echo esc_url($menu_image_url); ?>" 
+                                             alt="Menu du restaurant <?php echo esc_attr($blog_title ?: get_the_title()); ?>" 
+                                             class="print-menu-image" />
+                                    <?php endif; ?>
+                                </div>
+                                <?php endif; ?>
+                            </div>
+                            <?php endif; ?>
+                            
+                            <div class="print-section">
+                                <h2>📞 Informations de Contact</h2>
+                                <div class="print-contact">
+                                    <?php if ($address): ?>
+                                    <div class="print-contact-item">
+                                        <strong>📍 Adresse:</strong>
+                                        <span><?php echo esc_html($address); ?>, <?php echo esc_html($city); ?></span>
+                                    </div>
+                                    <?php endif; ?>
+                                    <?php if ($phone): ?>
+                                    <div class="print-contact-item">
+                                        <strong>📞 Téléphone:</strong>
+                                        <span><?php echo esc_html($phone); ?></span>
+                                    </div>
+                                    <?php endif; ?>
+                                    <?php if ($email): ?>
+                                    <div class="print-contact-item">
+                                        <strong>✉️ Email:</strong>
+                                        <span><?php echo esc_html($email); ?></span>
+                                    </div>
+                                    <?php endif; ?>
+                                </div>
+                                
+                                <div class="print-links">
+                                    <?php if ($google_maps_link): ?>
+                                    <div class="print-link-item">
+                                        <h4>🗺️ Google Maps</h4>
+                                        <p>Voir l'emplacement exact du restaurant sur Google Maps</p>
+                                        <a href="<?php echo esc_url($google_maps_link); ?>" class="print-url"><?php echo esc_url($google_maps_link); ?></a>
+                                    </div>
+                                    <?php elseif ($latitude && $longitude): ?>
+                                    <div class="print-link-item">
+                                        <h4>🗺️ Coordonnées GPS</h4>
+                                        <p>Latitude: <?php echo esc_html($latitude); ?>, Longitude: <?php echo esc_html($longitude); ?></p>
+                                        <a href="https://www.google.com/maps?q=<?php echo esc_attr($latitude); ?>,<?php echo esc_attr($longitude); ?>" class="print-url">Ouvrir dans Google Maps</a>
+                                    </div>
+                                    <?php endif; ?>
+                                    
+                                    <?php if ($virtual_tour_url): ?>
+                                    <div class="print-link-item">
+                                        <h4>🥽 Visite Virtuelle 360°</h4>
+                                        <p>Découvrez l'intérieur du restaurant en visite virtuelle immersive</p>
+                                        <a href="<?php echo esc_url($virtual_tour_url); ?>" class="print-url"><?php echo esc_url($virtual_tour_url); ?></a>
+                                    </div>
+                                    <?php endif; ?>
+                                    
+                                    <?php if ($video_url): ?>
+                                    <div class="print-link-item">
+                                        <h4>🎥 Vidéo du Restaurant</h4>
+                                        <p>Regardez la vidéo de présentation du restaurant</p>
+                                        <a href="<?php echo esc_url($video_url); ?>" class="print-url"><?php echo esc_url($video_url); ?></a>
+                                    </div>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                            
+                            <div class="print-footer">
+                                <h3>📄 Document Officiel</h3>
+                                <p>Document généré le ${new Date().toLocaleString('fr-FR')}</p>
+                                <p>URL Originale: <a href="<?php echo get_permalink(); ?>" class="print-url"><?php echo get_permalink(); ?></a></p>
+                                <p>© <?php echo date('Y'); ?> <?php bloginfo('name'); ?> - Tous droits réservés</p>
+                                <div style="margin-top: 15px;">
+                                    <span class="print-badge">Restaurant Maroc</span>
+                                    <span class="print-badge">Gastronomie</span>
+                                    <span class="print-badge">Guide Culinaire</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </body>
+                </html>
+            `;
+            
+            // Write content to print window
+            printWindow.document.write(printHTML);
+            printWindow.document.close();
+            
+            // Wait for content to load, then print
+            printWindow.onload = function() {
+                printWindow.focus();
+                printWindow.print();
+                
+                // Close the window after printing (optional)
+                setTimeout(function() {
+                    printWindow.close();
+                }, 1000);
+            };
         }
 </script>
 

@@ -24,13 +24,13 @@
                 }
             }
         });
+        
     });
 
     /**
      * Initialize the updated single restaurant page
      */
     function initializeSingleRestaurantUpdated() {
-        console.log('Initializing single restaurant page...');
         
         // Check if Tailwind is loaded
         if (!document.querySelector('[href*="tailwindcss"]')) {
@@ -63,14 +63,12 @@
         // Load all restaurants
         loadAllRestaurants();
         
-        console.log('Single restaurant page initialization complete');
     }
 
     /**
      * Initialize the map centered on current restaurant
      */
     function initializeMap() {
-        console.log('🗺️ Initializing map...');
         
         const mapContainer = document.getElementById('restaurants-map');
         if (!mapContainer) {
@@ -80,11 +78,9 @@
 
         // Get map center from current restaurant or default
         const center = lebonrestoSingle?.mapCenter || { lat: 33.5731, lng: -7.5898 }; // Casablanca default
-        console.log('Map center:', center);
         
         // Initialize map centered on current restaurant
         map = L.map('restaurants-map').setView([center.lat, center.lng], 10);
-        console.log('Map initialized:', !!map);
 
         // Add tile layer
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -93,12 +89,10 @@
 
         // Create markers layer
         markersLayer = L.layerGroup().addTo(map);
-        console.log('Markers layer created:', !!markersLayer);
 
         // Add map controls
         addMapControls();
         
-        console.log('Map initialization complete');
     }
 
     /**
@@ -123,21 +117,241 @@
      * Initialize filter functionality
      */
     function initializeFilters() {
-        // Search inputs with debounce
+        // Desktop filter elements
         $('#restaurant-name-filter').on('input', debounce(handleFilterChange, 500));
         $('#city-filter').on('input', debounce(handleFilterChange, 500));
-        
-        // Immediate filter changes
         $('#cuisine-filter').on('change', handleFilterChange);
         $('#distance-filter').on('change', handleFilterChange);
         $('#featured-only').on('change', handleFilterChange);
-        
-        // Sort dropdown
         $('#sort-restaurants').on('change', handleSortChange);
-        
-        // Button actions
         $('#search-restaurants').on('click', handleFilterChange);
         $('#clear-filters').on('click', clearAllFilters);
+        
+        // Mobile filter elements
+        initializeMobileFilters();
+    }
+    
+    /**
+     * Initialize mobile filter functionality
+     */
+    function initializeMobileFilters() {
+        
+        // Mobile filter toggle
+        const mobileFilterToggle = document.getElementById('mobile-filter-btn');
+        const mobileFilterOverlay = document.getElementById('mobile-filter-overlay');
+        const mobileFilterPanel = document.querySelector('.mobile-filter-panel');
+        
+        
+        if (mobileFilterToggle) {
+            mobileFilterToggle.addEventListener('click', function() {
+                if (mobileFilterOverlay && mobileFilterPanel) {
+                    mobileFilterOverlay.style.display = 'block';
+                    mobileFilterPanel.classList.remove('-translate-x-full');
+                    document.body.style.overflow = 'hidden';
+                }
+            });
+        }
+        
+        // Close mobile filter
+        const closeMobileFilters = document.getElementById('close-mobile-filters');
+        if (closeMobileFilters) {
+            closeMobileFilters.addEventListener('click', closeMobileFilter);
+        }
+        
+        // Close on overlay click
+        if (mobileFilterOverlay) {
+            mobileFilterOverlay.addEventListener('click', function(e) {
+                if (e.target === mobileFilterOverlay) {
+                    closeMobileFilter();
+                }
+            });
+        }
+        
+        // Mobile filter form elements
+        const mobileRestaurantName = document.getElementById('mobile-restaurant-name');
+        const mobileCity = document.getElementById('mobile-city');
+        const mobileCuisine = document.getElementById('mobile-cuisine');
+        const mobileDistance = document.getElementById('mobile-distance');
+        const mobileSort = document.getElementById('mobile-sort');
+        const mobileFeaturedOnly = document.getElementById('mobile-featured-only');
+        
+        // Mobile filter inputs with debounce
+        if (mobileRestaurantName) {
+            mobileRestaurantName.addEventListener('input', debounce(handleMobileFilterChange, 500));
+        }
+        if (mobileCity) {
+            mobileCity.addEventListener('input', debounce(handleMobileFilterChange, 500));
+        }
+        
+        // Mobile filter immediate changes
+        if (mobileCuisine) {
+            mobileCuisine.addEventListener('change', handleMobileFilterChange);
+        }
+        if (mobileDistance) {
+            mobileDistance.addEventListener('change', function() {
+                handleMobileFilterChange();
+            });
+        }
+        if (mobileSort) {
+            mobileSort.addEventListener('change', handleMobileSortChange);
+        }
+        if (mobileFeaturedOnly) {
+            mobileFeaturedOnly.addEventListener('change', handleMobileFilterChange);
+        }
+        
+        // Mobile filter buttons
+        const mobileApplyFilters = document.getElementById('mobile-apply-filters');
+        const mobileClearAll = document.getElementById('mobile-clear-all');
+        
+        if (mobileApplyFilters) {
+            mobileApplyFilters.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Apply the filters first
+                handleMobileFilterChange();
+                
+                // Close the panel after applying filters
+                closeMobileFilter();
+                
+                // Additional direct close as backup
+                setTimeout(() => {
+                    const panel = document.querySelector('.mobile-filter-panel');
+                    const overlay = document.getElementById('mobile-filter-overlay');
+                    if (panel && overlay) {
+                        panel.classList.add('-translate-x-full');
+                        overlay.style.display = 'none';
+                        document.body.style.overflow = '';
+                    }
+                }, 100);
+                
+            });
+        } else {
+            console.error('Mobile apply filters button not found!');
+        }
+        
+        if (mobileClearAll) {
+            mobileClearAll.addEventListener('click', function() {
+                clearMobileFilters();
+            });
+        }
+    }
+    
+    /**
+     * Close mobile filter panel
+     */
+    function closeMobileFilter() {
+        const mobileFilterOverlay = document.getElementById('mobile-filter-overlay');
+        const mobileFilterPanel = document.querySelector('.mobile-filter-panel');
+        
+        
+        if (mobileFilterOverlay && mobileFilterPanel) {
+            
+            // Add the translate class to slide the panel out (this hides it)
+            mobileFilterPanel.classList.add('-translate-x-full');
+            
+            // Hide the overlay after a short delay to allow animation
+            setTimeout(() => {
+                mobileFilterOverlay.style.display = 'none';
+            }, 300); // Match the CSS transition duration
+            
+            // Restore body scroll
+            document.body.style.overflow = '';
+            
+        } else {
+            console.error('Could not find mobile filter elements to close');
+        }
+    }
+    
+    /**
+     * Handle mobile filter changes
+     */
+    function handleMobileFilterChange() {
+        
+        // Get mobile filter values
+        const mobileRestaurantName = document.getElementById('mobile-restaurant-name');
+        const mobileCity = document.getElementById('mobile-city');
+        const mobileCuisine = document.getElementById('mobile-cuisine');
+        const mobileDistance = document.getElementById('mobile-distance');
+        const mobileFeaturedOnly = document.getElementById('mobile-featured-only');
+        
+        
+        // Update desktop filter values to match mobile
+        if (mobileRestaurantName) {
+            const desktopName = document.getElementById('restaurant-name-filter');
+            if (desktopName) {
+                desktopName.value = mobileRestaurantName.value;
+            }
+        }
+        
+        if (mobileCity) {
+            const desktopCity = document.getElementById('city-filter');
+            if (desktopCity) {
+                desktopCity.value = mobileCity.value;
+            }
+        }
+        
+        if (mobileCuisine) {
+            const desktopCuisine = document.getElementById('cuisine-filter');
+            if (desktopCuisine) {
+                desktopCuisine.value = mobileCuisine.value;
+            }
+        }
+        
+        if (mobileDistance) {
+            const desktopDistance = document.getElementById('distance-filter');
+            if (desktopDistance) {
+                desktopDistance.value = mobileDistance.value;
+            }
+        }
+        
+        if (mobileFeaturedOnly) {
+            const desktopFeatured = document.getElementById('featured-only');
+            if (desktopFeatured) {
+                desktopFeatured.checked = mobileFeaturedOnly.checked;
+            }
+        }
+        
+        // Apply the filters
+        handleFilterChange();
+    }
+    
+    /**
+     * Handle mobile sort changes
+     */
+    function handleMobileSortChange() {
+        const mobileSort = document.getElementById('mobile-sort');
+        const desktopSort = document.getElementById('sort-restaurants');
+        
+        if (mobileSort && desktopSort) {
+            desktopSort.value = mobileSort.value;
+            handleSortChange();
+        }
+    }
+    
+    /**
+     * Clear all mobile filters
+     */
+    function clearMobileFilters() {
+        
+        // Clear mobile filter inputs
+        const mobileRestaurantName = document.getElementById('mobile-restaurant-name');
+        const mobileCity = document.getElementById('mobile-city');
+        const mobileCuisine = document.getElementById('mobile-cuisine');
+        const mobileDistance = document.getElementById('mobile-distance');
+        const mobileSort = document.getElementById('mobile-sort');
+        const mobileFeaturedOnly = document.getElementById('mobile-featured-only');
+        
+        if (mobileRestaurantName) mobileRestaurantName.value = '';
+        if (mobileCity) mobileCity.value = '';
+        if (mobileCuisine) mobileCuisine.value = '';
+        if (mobileDistance) mobileDistance.value = '';
+        if (mobileSort) mobileSort.value = 'featured';
+        if (mobileFeaturedOnly) mobileFeaturedOnly.checked = false;
+        
+        
+        // Clear desktop filters too
+        clearAllFilters();
     }
 
     /**
@@ -154,11 +368,22 @@
                     
                     // Enable distance filter
                     $('#distance-filter').prop('disabled', false);
-                    console.log('Location enabled for distance filtering');
+                    
+                    // Enable mobile distance filter
+                    const mobileDistance = document.getElementById('mobile-distance');
+                    if (mobileDistance) {
+                        mobileDistance.disabled = false;
+                    }
+                    
                 },
                 function(error) {
-                    console.log('Location access denied');
                     $('#distance-filter').prop('disabled', true);
+                    
+                    // Disable mobile distance filter
+                    const mobileDistance = document.getElementById('mobile-distance');
+                    if (mobileDistance) {
+                        mobileDistance.disabled = true;
+                    }
                 }
             );
         }
@@ -399,11 +624,13 @@
             // Create popup content
             const popupContent = createMarkerPopup(restaurant, isCurrentRestaurant);
             marker.bindPopup(popupContent, {
-                maxWidth: window.innerWidth <= 768 ? 250 : 300,
+                maxWidth: window.innerWidth <= 768 ? 280 : 320,
+                minWidth: 280,
                 className: `restaurant-popup ${isCurrentRestaurant ? 'current-popup' : ''}`,
                 closeButton: true,
                 autoClose: false,
-                keepInView: true
+                keepInView: true,
+                offset: [0, -10]
             });
 
             // Add click handler
@@ -477,10 +704,7 @@
         const principalImage = meta.principal_image || {};
 
         // Debug logging
-        console.log('🔥 SINGLE-RESTAURANT-UPDATED.JS IS RUNNING!');
-        console.log('Restaurant data for popup:', restaurant);
-        console.log('Principal image data:', principalImage);
-        console.log('Meta data:', meta);
+        console.log('Creating popup for restaurant:', restaurant);
 
         // Create restaurant slug for URL
         const restaurantSlug = title.toLowerCase()
@@ -493,79 +717,111 @@
         const homeUrl = window.lebonrestoSingle?.homeUrl || window.location.origin;
         const restaurantUrl = `${homeUrl}details/${restaurantSlug}`;
         
-        let content = `<div class="restaurant-popup-content" style="padding: 0; margin: 0; cursor: pointer;" onclick="window.open('${restaurantUrl}', '_blank')">`;
+        // Start popup content with proper structure
+        let content = `<div class="restaurant-popup-content" style="min-width: 280px; max-width: 320px;">`;
         
-        // Mobile responsive layout
-        content += `<div style="display: flex; gap: 8px; align-items: flex-start; padding: 0; margin: 0;">`;
+        // Header section with restaurant name
+        content += `<div style="margin-bottom: 1rem;">`;
+        content += `<h3 style="margin: 0 0 0.5rem 0; font-size: 1.1rem; font-weight: 700; color: #1f2937; line-height: 1.3;">${escapeHtml(title)}</h3>`;
         
-        // Left column: Principal image (responsive size)
-        content += `<div style="flex-shrink: 0; padding: 0; margin: 0;">`;
+        // Rating section (if available) - use same logic as restaurant cards
+        const googleRating = parseFloat(meta.google_rating) || 0;
+        const localRating = parseFloat(meta.average_rating) || 0;
+        const rating = googleRating > 0 ? googleRating : localRating;
         
-        // Try different possible image sources
-        let imageUrl = null;
-        if (principalImage.thumbnail) {
-            imageUrl = principalImage.thumbnail;
-        } else if (principalImage.medium) {
-            imageUrl = principalImage.medium;
-        } else if (principalImage.full) {
-            imageUrl = principalImage.full;
-        } else if (typeof principalImage === 'string' && principalImage) {
-            imageUrl = principalImage;
-        }
+        const googleReviewCount = parseInt(meta.google_review_count) || 0;
+        const localReviewCount = parseInt(meta.review_count) || 0;
+        const reviewCount = googleReviewCount > 0 ? googleReviewCount : localReviewCount;
         
-        // Show image or placeholder (smaller on mobile)
-        if (imageUrl) {
-            content += `<img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(title)}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); padding: 0; margin: 0;" class="popup-image" />`;
+        console.log('Rating data for popup:', {
+            googleRating: googleRating,
+            localRating: localRating,
+            finalRating: rating,
+            googleReviewCount: googleReviewCount,
+            localReviewCount: localReviewCount,
+            finalReviewCount: reviewCount,
+            meta: meta
+        });
+        
+        // Show rating if we have actual data
+        if (rating && rating > 0) {
+            content += `<div class="rating-section" style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">`;
+            content += `<div class="rating-stars" style="display: flex; gap: 1px;">`;
+            
+            // Generate star rating
+            for (let i = 1; i <= 5; i++) {
+                const starColor = i <= Math.floor(rating) ? '#fbbf24' : '#d1d5db';
+                content += `<span style="color: ${starColor}; font-size: 0.9rem;">★</span>`;
+            }
+            
+            content += `</div>`;
+            content += `<span class="rating-value" style="font-weight: 600; color: #1f2937; font-size: 0.9rem;">${rating.toFixed(1)}</span>`;
+            if (reviewCount && reviewCount > 0) {
+                content += `<span class="review-count" style="color: #6b7280; font-size: 0.8rem;">(${reviewCount} avis)</span>`;
+            }
+            content += `</div>`;
         } else {
-            content += `<div style="width: 80px; height: 80px; background-color: #e5e7eb; border-radius: 8px; display: flex; align-items: center; justify-content: center; border: 2px solid #d1d5db; padding: 0; margin: 0;" class="popup-placeholder">`;
-            content += `<svg style="width: 24px; height: 24px; color: #9ca3af;" fill="currentColor" viewBox="0 0 24 24">`;
-            content += `<path d="M8.1 13.34l2.83-2.83L3.91 3.5c-1.56 1.56-1.56 4.09 0 5.66l4.19 4.18zm6.78-1.81c1.53.71 3.68.21 5.27-1.38 1.91-1.91 2.28-4.65.81-6.12-1.46-1.46-4.2-1.1-6.12.81-1.59 1.59-2.09 3.74-1.38 5.27L3.7 19.87l1.41 1.41L12 14.41l6.88 6.88 1.41-1.41L13.41 12l1.47-1.47z"/>`;
-            content += `</svg>`;
+            // Show "No rating available" message
+            content += `<div class="rating-section" style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">`;
+            content += `<span style="color: #6b7280; font-size: 0.85rem; font-style: italic;">Aucune note disponible</span>`;
             content += `</div>`;
         }
         
-        content += `</div>`; // End left column
+        content += `</div>`; // End header section
         
-        // Right column: Restaurant information
-        content += `<div style="flex: 1; min-width: 0; padding: 0; margin: 0;">`;
+        // Details section
+        content += `<div style="margin-bottom: 1rem;">`;
         
-        // Restaurant name with click indicator
-        content += `<h3 style="font-size: 14px; font-weight: 600; color: #1f2937; margin: 0 0 6px 0; padding: 0; line-height: 1.3;">${escapeHtml(title)}</h3>`;
+        // Cuisine type
+        if (meta.cuisine_type) {
+            content += `<div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">`;
+            content += `<svg viewBox="0 0 24 24" width="14" height="14" style="color: #6b7280;">`;
+            content += `<path fill="currentColor" d="M14.051 6.549v.003l1.134 1.14 3.241-3.25.003-.002 1.134 1.136-3.243 3.252 1.134 1.14a1 1 0 0 0 .09-.008c.293-.05.573-.324.72-.474l.005-.006 2.596-2.603L22 8.016l-2.597 2.604a3.73 3.73 0 0 1-1.982 1.015 4.3 4.3 0 0 1-3.162-.657l-.023-.016-.026-.018-1.366 1.407 8.509 8.512L20.219 22l-.002-.002-6.654-6.663-2.597 2.76-7.3-7.315C1.967 8.948 1.531 6.274 2.524 4.198c.241-.504.566-.973.978-1.386l8.154 8.416 1.418-1.423-.039-.045c-.858-1.002-1.048-2.368-.62-3.595a4.15 4.15 0 0 1 .983-1.561L16 2l1.135 1.138-2.598 2.602-.047.045c-.16.151-.394.374-.433.678zM3.809 5.523c-.362 1.319-.037 2.905 1.06 4.103L10.93 15.7l1.408-1.496zM2.205 20.697 3.34 21.84l4.543-4.552-1.135-1.143z"></path>`;
+            content += `</svg>`;
+            content += `<span style="font-size: 0.85rem; color: #374151;">${escapeHtml(meta.cuisine_type)}</span>`;
+        content += `</div>`;
+        }
         
-        // Click to view details indicator
-        content += `<div style="display: flex; align-items: center; background-color: #fedc00; border-radius: 4px; padding: 4px 6px; margin-bottom: 6px; font-size: 10px; color:rgb(0, 0, 0);">`;
-        content += `<i class="fas fa-external-link-alt" style="margin-right: 4px; font-size: 8px;"></i>`;
-        content += `<span style="font-weight: 500;">Cliquez pour voir les détails</span>`;
+        // Price range
+        if (meta.price_range) {
+            content += `<div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">`;
+            content += `<svg viewBox="0 0 24 24" width="14" height="14" style="color: #6b7280;">`;
+            content += `<path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05.82 1.87 2.65 1.87 1.96 0 2.4-.98 2.4-1.59 0-.83-.44-1.61-2.67-2.14-2.48-.6-4.18-1.62-4.18-3.67 0-1.72 1.39-2.84 3.11-3.21V4h2.67v1.95c1.86.45 2.79 1.86 2.85 3.39H14.3c-.05-1.11-.64-1.87-2.22-1.87-1.5 0-2.4.68-2.4 1.64 0 .84.65 1.39 2.67 1.91s4.18 1.39 4.18 3.91c-.01 1.83-1.38 2.83-3.12 3.16z"></path>`;
+            content += `</svg>`;
+            content += `<span style="font-size: 0.85rem; color: #374151;">${escapeHtml(meta.price_range)}</span>`;
+            content += `</div>`;
+        }
+        
+        // Address
+        if (meta.address) {
+            content += `<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(meta.address)}" target="_blank" rel="noopener" style="display: flex; align-items: flex-start; gap: 0.5rem; margin-bottom: 0.25rem; text-decoration: none;">`;
+            content += `<svg viewBox="0 0 24 24" width="14" height="14" style="color: #6b7280; margin-top: 0.1rem;">`;
+            content += `<path fill="currentColor" d="M4.25 9.799c0-4.247 3.488-7.707 7.75-7.707s7.75 3.46 7.75 7.707c0 2.28-1.138 4.477-2.471 6.323-1.31 1.813-2.883 3.388-3.977 4.483l-.083.083-.002.002-1.225 1.218-1.213-1.243-.03-.03-.012-.013c-1.1-1.092-2.705-2.687-4.035-4.53-1.324-1.838-2.452-4.024-2.452-6.293"></path>`;
+            content += `</svg>`;
+            content += `<span style="font-size: 0.85rem; color: #2563eb; line-height: 1.3;">${escapeHtml(meta.address)}</span>`;
+            content += `</a>`;
+        }
+        
+        // Phone number
+        if (meta.phone) {
+            content += `<div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">`;
+            content += `<svg viewBox="0 0 24 24" width="14" height="14" style="color: #6b7280;">`;
+            content += `<path fill="currentColor" d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"></path>`;
+            content += `</svg>`;
+            content += `<a href="tel:${escapeHtml(meta.phone)}" style="font-size: 0.85rem; color: #3b82f6; text-decoration: none;">${escapeHtml(meta.phone)}</a>`;
+            content += `</div>`;
+        }
+        
+        content += `</div>`; // End details section
+        
+        // Action section
+        content += `<div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #e5e7eb;">`;
+        content += `<a href="${restaurantUrl}" class="popup-link" style="display: inline-block; width: 100%; text-align: center; background-color: #fedc00; color: #1f2937; padding: 0.5rem 1rem; border-radius: 0.375rem; text-decoration: none; font-weight: 600; transition: background-color 0.2s;" onmouseover="this.style.backgroundColor='#f59e0b'" onmouseout="this.style.backgroundColor='#fedc00'">`;
+        content += `Voir tous les détails`;
+        content += `</a>`;
         content += `</div>`;
         
-        // Restaurant details as cards (smaller on mobile)
-        if (meta.city) {
-            content += `<div style="display: flex; align-items: center; background-color: #f9fafb; border-radius: 4px; padding: 4px 6px; margin-bottom: 3px; font-size: 10px;">`;
-            content += `<i class="fas fa-map-marker-alt" style="margin-right: 4px; color: #fedc00; font-size: 8px;"></i>`;
-            content += `<span style="color: #374151; font-weight: 500;">${escapeHtml(meta.city)}</span>`;
-            content += `</div>`;
-        }
-        
-        if (meta.cuisine_type) {
-            content += `<div style="display: flex; align-items: center; background-color: #f9fafb; border-radius: 4px; padding: 4px 6px; margin-bottom: 3px; font-size: 10px;">`;
-            content += `<i class="fas fa-utensils" style="margin-right: 4px; color: #fedc00; font-size: 8px;"></i>`;
-            content += `<span style="color: #374151; font-weight: 500;">${escapeHtml(meta.cuisine_type.charAt(0).toUpperCase() + meta.cuisine_type.slice(1))}</span>`;
-            content += `</div>`;
-        }
-        
-        if (restaurant.distance) {
-            content += `<div style="display: flex; align-items: center; background-color: #f0fdf4; border-radius: 4px; padding: 4px 6px; margin-bottom: 3px; font-size: 10px;">`;
-            content += `<i class="fas fa-route" style="margin-right: 4px; color: #10b981; font-size: 8px;"></i>`;
-            content += `<span style="color: #065f46; font-weight: 500;">${restaurant.distance} km</span>`;
-            content += `</div>`;
-        }
-        
-        content += `</div>`; // End right column
-        content += `</div>`; // End flex container
         content += `</div>`; // End popup content
-        
-        // Debug: Log the complete HTML
-        console.log('Complete popup HTML:', content);
         
         return content;
     }
@@ -667,17 +923,21 @@
                     <div class="card-image">
                         <img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(title)}" class="restaurant-image" loading="lazy">
                         <div class="image-overlay">
-                            <button class="save-btn" aria-label="Ouvrir la carte">
+                            <a href="#" class="save-btn" aria-label="Ouvrir la carte">
+                                <div>
                                 <svg viewBox="0 0 24 24" width="16" height="16">
                                     <path fill-rule="evenodd" clip-rule="evenodd" d="M4.25 9.799c0-4.247 3.488-7.707 7.75-7.707s7.75 3.46 7.75 7.707c0 2.28-1.138 4.477-2.471 6.323-1.31 1.813-2.883 3.388-3.977 4.483l-.083.083-.002.002-1.225 1.218-1.213-1.243-.03-.03-.012-.013c-1.1-1.092-2.705-2.687-4.035-4.53-1.324-1.838-2.452-4.024-2.452-6.293M12 3.592c-3.442 0-6.25 2.797-6.25 6.207 0 1.796.907 3.665 2.17 5.415 1.252 1.736 2.778 3.256 3.886 4.357l.043.042.16.164.148-.149.002-.002.061-.06c1.103-1.105 2.605-2.608 3.843-4.322 1.271-1.76 2.187-3.64 2.187-5.445 0-3.41-2.808-6.207-6.25-6.207m1.699 5.013a1.838 1.838 0 1 0-3.397 1.407A1.838 1.838 0 0 0 13.7 8.605m-2.976-2.38a3.338 3.338 0 1 1 2.555 6.168 3.338 3.338 0 0 1-2.555-6.169"></path>
                                 </svg>
-                            </button>
+                                </div>
+                            </a>
                             ${meta.virtual_tour_url ? `
-                                <button class="vr-btn" aria-label="Visite virtuelle">
+                                <a href="#" class="vr-btn" aria-label="Visite virtuelle">
+                                    <div>
                                     <svg viewBox="0 0 24 24" width="16" height="16">
                                         <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zM7 9c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm5 9c-4 0-6-3-6-3s2-3 6-3 6 3 6 3-2 3-6 3zm5-9c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1z"/>
                                     </svg>
-                                </button>
+                                    </div>
+                                </a>
                             ` : ''}
                             ${isFeatured ? `
                                 <div class="award-badge">
@@ -773,21 +1033,6 @@
             </div>
         `);
 
-        // Map popup on save icon click
-        $card.find('.save-btn').on('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-                highlightRestaurantOnMap(restaurant.id);
-        });
-
-        // VR popup on VR icon click if virtual tour exists
-        if (meta.virtual_tour_url) {
-            $card.find('.vr-btn').on('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                openVirtualTourPopup(restaurant);
-            });
-        }
 
         return $card;
     }

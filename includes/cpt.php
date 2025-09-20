@@ -1194,13 +1194,21 @@ function lebonresto_fetch_google_places_data($place_id, $api_key) {
     ));
     
     if (is_wp_error($response)) {
+        error_log('LeBonResto: Google Places API request failed: ' . $response->get_error_message());
         return false;
     }
     
     $body = wp_remote_retrieve_body($response);
     $data = json_decode($body, true);
     
-    if (!$data || $data['status'] !== 'OK') {
+    if (!$data) {
+        error_log('LeBonResto: Google Places API response could not be decoded');
+        return false;
+    }
+    
+    if ($data['status'] !== 'OK') {
+        error_log('LeBonResto: Google Places API returned status: ' . $data['status'] . 
+                  (isset($data['error_message']) ? ' - ' . $data['error_message'] : ''));
         return false;
     }
     
@@ -1218,13 +1226,16 @@ function lebonresto_fetch_google_places_data($place_id, $api_key) {
     // Extract individual reviews if available
     if (isset($result['reviews']) && is_array($result['reviews'])) {
         foreach ($result['reviews'] as $review) {
-            $places_data['reviews'][] = array(
-                'author_name' => isset($review['author_name']) ? $review['author_name'] : 'Anonymous',
-                'rating' => isset($review['rating']) ? intval($review['rating']) : 0,
-                'text' => isset($review['text']) ? $review['text'] : '',
-                'time' => isset($review['time']) ? intval($review['time']) : 0,
-                'relative_time_description' => isset($review['relative_time_description']) ? $review['relative_time_description'] : ''
-            );
+            // Validate review data before adding
+            if (is_array($review) && (!empty($review['author_name']) || !empty($review['text']) || isset($review['rating']))) {
+                $places_data['reviews'][] = array(
+                    'author_name' => isset($review['author_name']) && !empty($review['author_name']) ? sanitize_text_field($review['author_name']) : 'Anonymous',
+                    'rating' => isset($review['rating']) && is_numeric($review['rating']) ? intval($review['rating']) : 0,
+                    'text' => isset($review['text']) && !empty($review['text']) ? sanitize_textarea_field($review['text']) : '',
+                    'time' => isset($review['time']) && is_numeric($review['time']) ? intval($review['time']) : time(),
+                    'relative_time_description' => isset($review['relative_time_description']) ? sanitize_text_field($review['relative_time_description']) : ''
+                );
+            }
         }
     }
     

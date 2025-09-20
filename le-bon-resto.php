@@ -54,7 +54,7 @@ class LeBonResto {
         add_filter('query_vars', array($this, 'add_query_vars'));
         add_action('template_redirect', array($this, 'handle_details_redirect'));
         
-        // Prevent WordPress from redirecting /all to /all-restaurants/
+        // Prevent WordPress from redirecting /all to other URLs
         add_filter('redirect_canonical', array($this, 'prevent_all_redirect'), 10, 2);
         
         // Force add rewrite rules on every init
@@ -110,7 +110,7 @@ class LeBonResto {
             'top'
         );
         
-        // Prevent redirect from /all to /all-restaurants/
+        // Prevent redirect from /all to other URLs
         add_rewrite_rule(
             '^all$',
             'index.php?all_restaurants=1',
@@ -261,6 +261,11 @@ class LeBonResto {
      */
     public function flush_rewrite_rules_action() {
         if (current_user_can('manage_options')) {
+            // Force add rewrite rules first
+            $this->add_rewrite_rules();
+            $this->force_add_rewrite_rules();
+            
+            // Then flush
             flush_rewrite_rules();
             set_transient('lebonresto_rewrite_notice', true, 30);
             wp_redirect(admin_url('edit.php?post_type=restaurant&rewrite_flushed=1'));
@@ -294,12 +299,13 @@ class LeBonResto {
         }
     }
     
+    
     /**
-     * Prevent WordPress from redirecting /all to /all-restaurants/
+     * Prevent WordPress from redirecting /all to other URLs
      */
     public function prevent_all_redirect($redirect_url, $requested_url) {
         // If the requested URL is /all, don't redirect it
-        if (strpos($requested_url, '/all') !== false && strpos($requested_url, '/all-restaurants') === false) {
+        if (strpos($requested_url, '/all') !== false) {
             return false;
         }
         return $redirect_url;
@@ -317,13 +323,13 @@ class LeBonResto {
             lebonresto_register_restaurant_cpt();
         }
         
-        // Flush rewrite rules to ensure custom post type URLs work
-        flush_rewrite_rules();
-        
-        // Create the all-restaurants page if it doesn't exist
+        // Create the all restaurants page if it doesn't exist
         if (function_exists('lebonresto_create_all_restaurants_page_now')) {
             lebonresto_create_all_restaurants_page_now();
         }
+        
+        // Flush rewrite rules to ensure custom post type URLs work
+        flush_rewrite_rules();
         
         // Set a flag to show activation success
         set_transient('lebonresto_activation_notice', true, 30);

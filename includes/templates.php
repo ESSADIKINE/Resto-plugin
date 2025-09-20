@@ -35,7 +35,7 @@ function lebonresto_all_restaurants_template($template) {
     global $post;
 
     // Check if this is the "All Restaurants" page or /all route
-    if (is_page() && $post && ($post->post_name === 'all-restaurants' || $post->post_name === 'all')) {
+    if (is_page() && $post && $post->post_name === 'all') {
         $plugin_template = LEBONRESTO_PLUGIN_PATH . 'templates/all-restaurants.php';
         
         if (file_exists($plugin_template)) {
@@ -307,14 +307,25 @@ add_action('init', 'lebonresto_create_detail_js');
  * Create All Restaurants page on plugin activation
  */
 function lebonresto_create_all_restaurants_page() {
+    // First, check if there's an old page with 'all-restaurants' slug and update it
+    $old_page = get_page_by_path('all-restaurants');
+    if ($old_page) {
+        // Update the old page to use the new slug
+        wp_update_post(array(
+            'ID' => $old_page->ID,
+            'post_name' => 'all'
+        ));
+        return;
+    }
+    
     // Check if the page already exists
-    $page = get_page_by_path('all-restaurants');
+    $page = get_page_by_path('all');
     
     if (!$page) {
         // Create the page
         $page_data = array(
             'post_title'    => __('All Restaurants', 'le-bon-resto'),
-            'post_name'     => 'all-restaurants',
+            'post_name'     => 'all',
             'post_content'  => '[lebonresto_all_page]',
             'post_status'   => 'publish',
             'post_type'     => 'page',
@@ -340,14 +351,25 @@ add_action('lebonresto_plugin_activated', 'lebonresto_create_all_restaurants_pag
  * Create All Restaurants page immediately (for manual creation)
  */
 function lebonresto_create_all_restaurants_page_now() {
+    // First, check if there's an old page with 'all-restaurants' slug and update it
+    $old_page = get_page_by_path('all-restaurants');
+    if ($old_page) {
+        // Update the old page to use the new slug
+        wp_update_post(array(
+            'ID' => $old_page->ID,
+            'post_name' => 'all'
+        ));
+        return $old_page->ID;
+    }
+    
     // Check if the page already exists
-    $page = get_page_by_path('all-restaurants');
+    $page = get_page_by_path('all');
     
     if (!$page) {
         // Create the page
         $page_data = array(
             'post_title'    => __('All Restaurants', 'le-bon-resto'),
-            'post_name'     => 'all-restaurants',
+            'post_name'     => 'all',
             'post_content'  => '[lebonresto_all_page]',
             'post_status'   => 'publish',
             'post_type'     => 'page',
@@ -365,6 +387,7 @@ function lebonresto_create_all_restaurants_page_now() {
     
     return false;
 }
+
 
 /**
  * Add custom color CSS to the page

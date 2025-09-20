@@ -170,7 +170,7 @@ wp_enqueue_script(
     'lebonresto-single-js',
     LEBONRESTO_PLUGIN_URL . 'assets/js/single-restaurant.js',
     array('jquery', 'leaflet-js', 'wp-api'),
-    LEBONRESTO_PLUGIN_VERSION,
+    LEBONRESTO_PLUGIN_VERSION . '.debug' . time(), // Force cache invalidation
     true
 );
 
@@ -193,8 +193,30 @@ wp_enqueue_style(
 // Add critical inline styles to ensure they're applied
 wp_add_inline_style('lebonresto-single-css', '
 /* Critical inline styles for immediate application */
+:root {
+    --primary-color: #fedc00;
+    --primary-dark: #e6c200;
+    --text-primary: #1a1a1a;
+    --text-secondary: #4a4a4a;
+    --text-muted: #767676;
+    --border-color: #e0e0e0;
+    --border-light: #f0f0f0;
+    --bg-white: #ffffff;
+    --bg-gray-50: #fafafa;
+    --bg-gray-100: #f5f5f5;
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --transition: all 0.2s ease;
+    --success-color: #10b981;
+    --error-color: #ef4444;
+}
+
 .lebonresto-single-layout {
-    background: linear-gradient(135deg, #f9fafb 0%, #e5e7eb 100%) !important;
+    background: linear-gradient(135deg, var(--bg-gray-50) 0%, var(--border-color) 100%) !important;
     min-height: 100vh !important;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif !important;
 }
@@ -214,21 +236,21 @@ wp_add_inline_style('lebonresto-single-css', '
 #restaurants-map {
     border-radius: 0px !important;
     width: 100% !important;
-    background-color:rgb(255, 255, 255) !important;
-    border-right: 3px solid rgb(255, 255, 255) !important;
+    background-color: var(--bg-white) !important;
+    border-right: 3px solid var(--bg-white) !important;
 }
 
 @media (max-width: 1023px) {
     #restaurants-map {
         border-right: none !important;
-        border-bottom: 3px solid rgb(255, 255, 255) !important;
+        border-bottom: 3px solid var(--bg-white) !important;
     }
 }
 
 .virtual-tour-section {
     height: 64vh !important;
-    border-bottom: 3px solid rgb(255, 255, 255) !important;
-    background: linear-gradient(135deg, rgb(255, 255, 255) 0%, rgb(255, 255, 255) 100%) !important;
+    border-bottom: 3px solid var(--bg-white) !important;
+    background: linear-gradient(135deg, var(--bg-white) 0%, var(--bg-white) 100%) !important;
     position: relative !important;
     overflow: hidden !important;
 }
@@ -245,9 +267,9 @@ wp_add_inline_style('lebonresto-single-css', '
 }
 
 /* MOBILE FILTER STYLES - INLINE FOR IMMEDIATE APPLICATION */
-.mobile-filter-toggle {
+.mobile-filter-toggle1 {
     position: fixed !important;
-    top: 60px !important;
+    buttom: 70px !important;
     right: 20px !important;
     z-index: 50 !important;
     display: block !important;
@@ -255,42 +277,30 @@ wp_add_inline_style('lebonresto-single-css', '
 }
 
 /* When filter is open, move icon to top-right */
-.mobile-filter-toggle.filter-open {
-    top: 60px !important;
+.mobile-filter-toggle1.filter-open {
+    buttom: 70px !important;
     left: auto !important;
     right: 20px !important;
 }
 
-.mobile-filter-toggle button {
+.mobile-filter-toggle1 button {
     background: rgba(255, 255, 255, 0.95) !important;
-    border: 2px solid #fedc00 !important;
-    border-radius: 12px !important;
+    border: 2px solid var(--primary-color) !important;
+    border-radius: var(--radius-lg) !important;
     padding: 12px !important;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
-    transition: all 0.3s ease !important;
+    transition: var(--transition) !important;
     cursor: pointer !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    width: 48px !important;
+    width: 120px !important;
     height: 48px !important;
 }
 
-.mobile-filter-toggle button:hover {
-    background: #fedc00 !important;
+.mobile-filter-toggle1 button:hover {
+    background: var(--primary-color) !important;
     transform: scale(1.05) !important;
-}
-
-.mobile-filter-toggle button::before {
-    content: "🔽" !important;
-    display: block !important;
-    font-size: 18px !important;
-    font-weight: bold !important;
-    color: #1f2937 !important;
-}
-
-.mobile-filter-toggle button:hover::before {
-    color: #ffffff !important;
 }
 
 .filter-icon {
@@ -308,55 +318,731 @@ wp_add_inline_style('lebonresto-single-css', '
     right: 0 !important;
     bottom: 0 !important;
     background: rgba(0, 0, 0, 0.5) !important;
-    z-index: 40 !important;
+    z-index: 999 !important;
     display: none !important;
+    opacity: 0 !important;
+    transition: opacity 0.3s ease !important;
+}
+
+.mobile-filter-overlay.show {
+    display: block !important;
+    opacity: 1 !important;
 }
 
 .mobile-filter-overlay:not(.hidden) {
     display: block !important;
+    opacity: 1 !important;
 }
 
+/* Mobile Filter Panel - Essential Styles Only */
 .mobile-filter-panel {
-    position: absolute !important;
-    top: 0 !important;
-    left: 0 !important;
-    bottom: 0 !important;
-    width: 320px !important;
-    background: white !important;
-    transform: translateX(-100%) !important;
-    transition: transform 0.3s ease !important;
-    overflow-y: auto !important;
-    z-index: 41 !important;
-    justify-items: center !important;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
 }
 
-.mobile-filter-panel:not(.-translate-x-full) {
-    transform: translateX(0) !important;
+.mobile-filter-panel .space-y-4 > div {
+    margin-bottom: 20px !important;
+}
+
+.mobile-filter-panel input,
+.mobile-filter-panel select {
+    background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%) !important;
+    border: 2px solid #e5e7eb !important;
+    border-radius: 12px !important;
+    padding: 14px 16px !important;
+    font-size: 15px !important;
+    font-weight: 500 !important;
+    color: #1f2937 !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+}
+
+.mobile-filter-panel input:focus,
+.mobile-filter-panel select:focus {
+    outline: none !important;
+    border-color: #fedc00 !important;
+    box-shadow: 0 0 0 4px rgba(254, 220, 0, 0.15), 0 4px 12px rgba(254, 220, 0, 0.1) !important;
+    background: #ffffff !important;
+    transform: translateY(-1px) !important;
+}
+
+.mobile-filter-panel input::placeholder {
+    color: #9ca3af !important;
+    font-weight: 400 !important;
+}
+
+.mobile-filter-panel input:hover,
+.mobile-filter-panel select:hover {
+    border-color: #fbbf24 !important;
+    box-shadow: 0 2px 8px rgba(254, 220, 0, 0.1) !important;
+}
+
+.mobile-filter-panel input[type="checkbox"] {
+    width: 20px !important;
+    height: 20px !important;
+    accent-color: #fedc00 !important;
+    margin-right: 12px !important;
+    cursor: pointer !important;
+}
+
+.mobile-filter-panel .flex.items-center {
+    padding: 12px 0 !important;
+}
+
+.mobile-filter-panel .flex.items-center span {
+    font-size: 15px !important;
+    font-weight: 500 !important;
+    color: #374151 !important;
+}
+
+.mobile-filter-panel button {
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    border-radius: 12px !important;
+    font-size: 14px !important;
+    padding: 16px 20px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+}
+
+.mobile-filter-panel button:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15) !important;
+}
+
+.mobile-filter-panel button:active {
+    transform: translateY(0) !important;
+}
+
+.mobile-filter-panel button[style*="background-color: #fedc00"] {
+    background: linear-gradient(135deg, #fedc00 0%, #f59e0b 100%) !important;
+    color: #1f2937 !important;
+    border: none !important;
+}
+
+.mobile-filter-panel button[style*="background-color: #fedc00"]:hover {
+    background: linear-gradient(135deg, #f59e0b 0%, #fedc00 100%) !important;
+    box-shadow: 0 4px 16px rgba(254, 220, 0, 0.3) !important;
+}
+
+.mobile-filter-panel .bg-gray-200 {
+    background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%) !important;
+    color: #4b5563 !important;
+    border: 2px solid #d1d5db !important;
+}
+
+.mobile-filter-panel .bg-gray-200:hover {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+    color: white !important;
+    border-color: #ef4444 !important;
+}
+
+.mobile-filter-panel .flex.items-center.justify-between {
+    background: linear-gradient(135deg, #fedc00 0%, #f59e0b 100%) !important;
+    padding: 20px !important;
+    border-bottom: 2px solid rgba(0, 0, 0, 0.1) !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 10 !important;
+    display: flex;
+    gap: 170px;
+}
+
+.mobile-filter-panel h3 {
+    color: #1f2937 !important;
+    font-size: 18px !important;
+    font-weight: 700 !important;
+    margin: 0 !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+}
+
+#close-mobile-filters {
+    width: 44px !important;
+    height: 44px !important;
+    border-radius: 50% !important;
+    background: rgba(255, 255, 255, 0.2) !important;
+    border: 2px solid rgba(255, 255, 255, 0.3) !important;
+    color: #1f2937 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    backdrop-filter: blur(10px) !important;
+}
+
+#close-mobile-filters:hover {
+    background: rgba(255, 255, 255, 0.3) !important;
+    border-color: rgba(255, 255, 255, 0.5) !important;
+    transform: scale(1.1) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+}
+
+#close-mobile-filters:active {
+    transform: scale(0.95) !important;
+}
+
+#close-mobile-filters svg {
+    width: 24px !important;
+    height: 24px !important;
+    stroke: currentColor !important;
+    stroke-width: 2.5 !important;
+    fill: none !important;
+}
+
+.mobile-filter-panel .p-4 {
+    padding: 24px !important;
+    background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%) !important;
+}
+
+.mobile-filter-panel .space-y-4 > div {
+    animation: slideInUp 0.3s ease-out !important;
+    animation-fill-mode: both !important;
+}
+
+.mobile-filter-panel .space-y-4 > div:nth-child(1) { animation-delay: 0.1s !important; }
+.mobile-filter-panel .space-y-4 > div:nth-child(2) { animation-delay: 0.15s !important; }
+.mobile-filter-panel .space-y-4 > div:nth-child(3) { animation-delay: 0.2s !important; }
+.mobile-filter-panel .space-y-4 > div:nth-child(4) { animation-delay: 0.25s !important; }
+.mobile-filter-panel .space-y-4 > div:nth-child(5) { animation-delay: 0.3s !important; }
+.mobile-filter-panel .space-y-4 > div:nth-child(6) { animation-delay: 0.35s !important; }
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.mobile-filter-panel::-webkit-scrollbar {
+    width: 6px !important;
+}
+
+.mobile-filter-panel::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05) !important;
+    border-radius: 3px !important;
+}
+
+.mobile-filter-panel::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #fedc00 0%, #f59e0b 100%) !important;
+    border-radius: 3px !important;
+}
+
+.mobile-filter-panel::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #f59e0b 0%, #fedc00 100%) !important;
+}
+
+.mobile-filter-panel .space-y-4 > div {
+    margin-bottom: 20px !important;
+}
+
+.mobile-filter-panel input,
+.mobile-filter-panel select {
+    background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%) !important;
+    border: 2px solid #e5e7eb !important;
+    border-radius: 12px !important;
+    padding: 14px 16px !important;
+    font-size: 15px !important;
+    font-weight: 500 !important;
+    color: #1f2937 !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+}
+
+.mobile-filter-panel input:focus,
+.mobile-filter-panel select:focus {
+    outline: none !important;
+    border-color: #fedc00 !important;
+    box-shadow: 0 0 0 4px rgba(254, 220, 0, 0.15), 0 4px 12px rgba(254, 220, 0, 0.1) !important;
+    background: #ffffff !important;
+    transform: translateY(-1px) !important;
+}
+
+.mobile-filter-panel input::placeholder {
+    color: #9ca3af !important;
+    font-weight: 400 !important;
+}
+
+.mobile-filter-panel select {
+    cursor: pointer !important;
+    background-position: right 12px center !important;
+    background-repeat: no-repeat !important;
+    background-size: 16px !important;
+    padding-right: 40px !important;
+}
+
+.mobile-filter-panel input:hover,
+.mobile-filter-panel select:hover {
+    border-color: #fbbf24 !important;
+    box-shadow: 0 2px 8px rgba(254, 220, 0, 0.1) !important;
+}
+
+/* Checkbox styling */
+.mobile-filter-panel input[type="checkbox"] {
+    width: 20px !important;
+    height: 20px !important;
+    accent-color: #fedc00 !important;
+    margin-right: 12px !important;
+    cursor: pointer !important;
+}
+
+.mobile-filter-panel .flex.items-center {
+    padding: 12px 0 !important;
+}
+
+.mobile-filter-panel .flex.items-center span {
+    font-size: 15px !important;
+    font-weight: 500 !important;
+    color: #374151 !important;
+}
+
+/* Button styling */
+.mobile-filter-panel button {
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    border-radius: 12px !important;
+    font-size: 14px !important;
+    padding: 16px 20px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+}
+
+.mobile-filter-panel button:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15) !important;
+}
+
+.mobile-filter-panel button:active {
+    transform: translateY(0) !important;
+}
+
+/* Apply button specific styling */
+.mobile-filter-panel button[style*="background-color: #fedc00"] {
+    background: linear-gradient(135deg, #fedc00 0%, #f59e0b 100%) !important;
+    color: #1f2937 !important;
+    border: none !important;
+}
+
+.mobile-filter-panel button[style*="background-color: #fedc00"]:hover {
+    background: linear-gradient(135deg, #f59e0b 0%, #fedc00 100%) !important;
+    box-shadow: 0 4px 16px rgba(254, 220, 0, 0.3) !important;
+}
+
+/* Clear button specific styling */
+.mobile-filter-panel .bg-gray-200 {
+    background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%) !important;
+    color: #4b5563 !important;
+    border: 2px solid #d1d5db !important;
+}
+
+.mobile-filter-panel .bg-gray-200:hover {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+    color: white !important;
+    border-color: #ef4444 !important;
+}
+
+/* Mobile Filter Panel Header */
+.mobile-filter-panel .flex.items-center.justify-between {
+    background: linear-gradient(135deg, #fedc00 0%, #f59e0b 100%) !important;
+    padding: 20px !important;
+    border-bottom: 2px solid rgba(0, 0, 0, 0.1) !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 10 !important;
+    display: flex;
+    gap: 170px;
+}
+
+.mobile-filter-panel h3 {
+    color: #1f2937 !important;
+    font-size: 18px !important;
+    font-weight: 700 !important;
+    margin: 0 !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Close button styling */
+#close-mobile-filters {
+    width: 40px !important;
+    height: 40px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+#close-mobile-filters:hover {
+    background: rgba(255, 255, 255, 0.2) !important;
+    transform: scale(1.1) !important;
+}
+
+/* Mobile Filter Panel - Essential Styles Only */
+.mobile-filter-panel {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+}
+
+.mobile-filter-panel .space-y-4 > div {
+    margin-bottom: 20px !important;
+}
+
+.mobile-filter-panel input,
+.mobile-filter-panel select {
+    background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%) !important;
+    border: 2px solid #e5e7eb !important;
+    border-radius: 12px !important;
+    padding: 14px 16px !important;
+    font-size: 15px !important;
+    font-weight: 500 !important;
+    color: #1f2937 !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+}
+
+.mobile-filter-panel input:focus,
+.mobile-filter-panel select:focus {
+    outline: none !important;
+    border-color: #fedc00 !important;
+    box-shadow: 0 0 0 4px rgba(254, 220, 0, 0.15), 0 4px 12px rgba(254, 220, 0, 0.1) !important;
+    background: #ffffff !important;
+    transform: translateY(-1px) !important;
+}
+
+.mobile-filter-panel input::placeholder {
+    color: #9ca3af !important;
+    font-weight: 400 !important;
+}
+
+.mobile-filter-panel select {
+    cursor: pointer !important;
+    background-position: right 12px center !important;
+    background-repeat: no-repeat !important;
+    background-size: 16px !important;
+    padding-right: 40px !important;
+}
+
+.mobile-filter-panel input:hover,
+.mobile-filter-panel select:hover {
+    border-color: #fbbf24 !important;
+    box-shadow: 0 2px 8px rgba(254, 220, 0, 0.1) !important;
+}
+
+.mobile-filter-panel input[type="checkbox"] {
+    width: 20px !important;
+    height: 20px !important;
+    accent-color: #fedc00 !important;
+    margin-right: 12px !important;
+    cursor: pointer !important;
+}
+
+.mobile-filter-panel .flex.items-center {
+    padding: 12px 0 !important;
+}
+
+.mobile-filter-panel .flex.items-center span {
+    font-size: 15px !important;
+    font-weight: 500 !important;
+    color: #374151 !important;
+}
+
+.mobile-filter-panel button {
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    border-radius: 12px !important;
+    font-size: 14px !important;
+    padding: 16px 20px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+}
+
+.mobile-filter-panel button:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15) !important;
+}
+
+.mobile-filter-panel button:active {
+    transform: translateY(0) !important;
+}
+
+.mobile-filter-panel button[style*="background-color: #fedc00"] {
+    background: linear-gradient(135deg, #fedc00 0%, #f59e0b 100%) !important;
+    color: #1f2937 !important;
+    border: none !important;
+}
+
+.mobile-filter-panel button[style*="background-color: #fedc00"]:hover {
+    background: linear-gradient(135deg, #f59e0b 0%, #fedc00 100%) !important;
+    box-shadow: 0 4px 16px rgba(254, 220, 0, 0.3) !important;
+}
+
+.mobile-filter-panel .bg-gray-200 {
+    background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%) !important;
+    color: #4b5563 !important;
+    border: 2px solid #d1d5db !important;
+}
+
+.mobile-filter-panel .bg-gray-200:hover {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+    color: white !important;
+    border-color: #ef4444 !important;
+}
+
+.mobile-filter-panel .flex.items-center.justify-between {
+    background: linear-gradient(135deg, #fedc00 0%, #f59e0b 100%) !important;
+    padding: 20px !important;
+    border-bottom: 2px solid rgba(0, 0, 0, 0.1) !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 10 !important;
+    display: flex;
+    gap: 170px;
+}
+
+.mobile-filter-panel h3 {
+    color: #1f2937 !important;
+    font-size: 18px !important;
+    font-weight: 700 !important;
+    margin: 0 !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+}
+
+#close-mobile-filters {
+    width: 44px !important;
+    height: 44px !important;
+    border-radius: 50% !important;
+    background: rgba(255, 255, 255, 0.2) !important;
+    border: 2px solid rgba(255, 255, 255, 0.3) !important;
+    color: #1f2937 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    backdrop-filter: blur(10px) !important;
+}
+
+#close-mobile-filters:hover {
+    background: rgba(255, 255, 255, 0.3) !important;
+    border-color: rgba(255, 255, 255, 0.5) !important;
+    transform: scale(1.1) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+}
+
+#close-mobile-filters:active {
+    transform: scale(0.95) !important;
+}
+
+#close-mobile-filters svg {
+    width: 24px !important;
+    height: 24px !important;
+    stroke: currentColor !important;
+    stroke-width: 2.5 !important;
+    fill: none !important;
+}
+
+.mobile-filter-panel .p-4 {
+    padding: 24px !important;
+    background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%) !important;
+}
+
+.mobile-filter-panel .space-y-4 > div {
+    animation: slideInUp 0.3s ease-out !important;
+    animation-fill-mode: both !important;
+}
+
+.mobile-filter-panel .space-y-4 > div:nth-child(1) { animation-delay: 0.1s !important; }
+.mobile-filter-panel .space-y-4 > div:nth-child(2) { animation-delay: 0.15s !important; }
+.mobile-filter-panel .space-y-4 > div:nth-child(3) { animation-delay: 0.2s !important; }
+.mobile-filter-panel .space-y-4 > div:nth-child(4) { animation-delay: 0.25s !important; }
+.mobile-filter-panel .space-y-4 > div:nth-child(5) { animation-delay: 0.3s !important; }
+.mobile-filter-panel .space-y-4 > div:nth-child(6) { animation-delay: 0.35s !important; }
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.mobile-filter-panel::-webkit-scrollbar {
+    width: 6px !important;
+}
+
+.mobile-filter-panel::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05) !important;
+    border-radius: 3px !important;
+}
+
+.mobile-filter-panel::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #fedc00 0%, #f59e0b 100%) !important;
+    border-radius: 3px !important;
+}
+
+.mobile-filter-panel::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #f59e0b 0%, #fedc00 100%) !important;
+}
+
+.mobile-filter-panel .space-y-4 > div {
+    margin-bottom: 20px !important;
+}
+
+.mobile-filter-panel input,
+.mobile-filter-panel select {
+    background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%) !important;
+    border: 2px solid #e5e7eb !important;
+    border-radius: 12px !important;
+    padding: 14px 16px !important;
+    font-size: 15px !important;
+    font-weight: 500 !important;
+    color: #1f2937 !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+}
+
+.mobile-filter-panel input:focus,
+.mobile-filter-panel select:focus {
+    outline: none !important;
+    border-color: #fedc00 !important;
+    box-shadow: 0 0 0 4px rgba(254, 220, 0, 0.15), 0 4px 12px rgba(254, 220, 0, 0.1) !important;
+    background: #ffffff !important;
+    transform: translateY(-1px) !important;
+}
+
+.mobile-filter-panel input::placeholder {
+    color: #9ca3af !important;
+    font-weight: 400 !important;
+}
+
+.mobile-filter-panel select {
+    cursor: pointer !important;
+    background-position: right 12px center !important;
+    background-repeat: no-repeat !important;
+    background-size: 16px !important;
+    padding-right: 40px !important;
+}
+
+.mobile-filter-panel input:hover,
+.mobile-filter-panel select:hover {
+    border-color: #fbbf24 !important;
+    box-shadow: 0 2px 8px rgba(254, 220, 0, 0.1) !important;
+}
+
+/* Checkbox styling */
+.mobile-filter-panel input[type="checkbox"] {
+    width: 20px !important;
+    height: 20px !important;
+    accent-color: #fedc00 !important;
+    margin-right: 12px !important;
+    cursor: pointer !important;
+}
+
+.mobile-filter-panel .flex.items-center {
+    padding: 12px 0 !important;
+}
+
+.mobile-filter-panel .flex.items-center span {
+    font-size: 15px !important;
+    font-weight: 500 !important;
+    color: #374151 !important;
+}
+
+/* Button styling */
+.mobile-filter-panel button {
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    border-radius: 12px !important;
+    font-size: 14px !important;
+    padding: 16px 20px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+}
+
+.mobile-filter-panel button:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15) !important;
+}
+
+.mobile-filter-panel button:active {
+    transform: translateY(0) !important;
+}
+
+/* Apply button specific styling */
+.mobile-filter-panel button[style*="background-color: #fedc00"] {
+    background: linear-gradient(135deg, #fedc00 0%, #f59e0b 100%) !important;
+    color: #1f2937 !important;
+    border: none !important;
+}
+
+.mobile-filter-panel button[style*="background-color: #fedc00"]:hover {
+    background: linear-gradient(135deg, #f59e0b 0%, #fedc00 100%) !important;
+    box-shadow: 0 4px 16px rgba(254, 220, 0, 0.3) !important;
+}
+
+/* Clear button specific styling */
+.mobile-filter-panel .bg-gray-200 {
+    background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%) !important;
+    color: #4b5563 !important;
+    border: 2px solid #d1d5db !important;
+}
+
+.mobile-filter-panel .bg-gray-200:hover {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+    color: white !important;
+    border-color: #ef4444 !important;
+}
+
+/* Mobile Filter Panel Header */
+.mobile-filter-panel .flex.items-center.justify-between {
+    background: linear-gradient(135deg, #fedc00 0%, #f59e0b 100%) !important;
+    padding: 20px !important;
+    border-bottom: 2px solid rgba(0, 0, 0, 0.1) !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 10 !important;
+    display: flex;
+    gap: 170px;
+}
+
+.mobile-filter-panel h3 {
+    color: #1f2937 !important;
+    font-size: 18px !important;
+    font-weight: 700 !important;
+    margin: 0 !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
 }
 
 .mobile-filter-header {
-    background: linear-gradient(135deg, #f9fafb 0%, #e5e7eb 100%) !important;
-    border-bottom: 2px solid #e5e7eb !important;
+    background: linear-gradient(135deg, var(--bg-gray-50) 0%, var(--border-color) 100%) !important;
+    border-bottom: 2px solid var(--border-color) !important;
     padding: 20px !important;
     display: flex !important;
     justify-content: space-between !important;
     align-items: center !important;
-    border-radius: 16px 16px 0 0 !important;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0 !important;
 }
 
 .mobile-filter-title {
     font-size: 18px !important;
     font-weight: 700 !important;
     margin: 0 !important;
-    color: #1f2937 !important;
+    color: var(--text-primary) !important;
     display: flex !important;
     align-items: center !important;
 }
 
 .mobile-filter-close {
-    background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%) !important;
-    border: 2px solid #d1d5db !important;
-    color: #374151 !important;
+    background: linear-gradient(135deg, var(--bg-gray-100) 0%, var(--border-color) 100%) !important;
+    border: 2px solid var(--border-color) !important;
+    color: var(--text-secondary) !important;
     font-size: 18px !important;
     cursor: pointer !important;
     padding: 8px !important;
@@ -365,20 +1051,20 @@ wp_add_inline_style('lebonresto-single-css', '
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    border-radius: 12px !important;
-    transition: all 0.3s ease !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+    border-radius: var(--radius-lg) !important;
+    transition: var(--transition) !important;
+    box-shadow: var(--shadow-md) !important;
 }
 
 .mobile-filter-close:hover {
-    background: linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%) !important;
+    background: linear-gradient(135deg, var(--border-color) 0%, var(--border-color) 100%) !important;
     transform: translateY(-1px) !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+    box-shadow: var(--shadow-lg) !important;
 }
 
 .mobile-filter-content {
     padding: 20px !important;
-    background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%) !important;
+    background: linear-gradient(135deg, var(--bg-white) 0%, var(--bg-gray-50) 100%) !important;
     display: flex !important;
     flex-direction: column !important;
     justify-content: center !important;
@@ -392,144 +1078,9 @@ wp_add_inline_style('lebonresto-single-css', '
 .mobile-filter-label {
     display: block !important;
     font-weight: 600 !important;
-    color: #374151 !important;
+    color: var(--text-secondary) !important;
     margin-bottom: 8px !important;
     font-size: 14px !important;
-}
-
-/* Mobile filter form styling - centered with no padding */
-.mobile-filter-panel input[type="text"],
-.mobile-filter-panel input[type="email"],
-.mobile-filter-panel select {
-    width: 90% !important;
-    border: 2px solid #d1d5db !important;
-    border-radius: 12px !important;
-    font-size: 16px !important;
-    font-weight: 500 !important;
-    background-color: #ffffff !important;
-    color: #1f2937 !important;
-    transition: all 0.3s ease !important;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05) !important;
-    min-height: 48px !important;
-    padding: 0px !important;
-    text-align: center !important;
-}
-
-.mobile-filter-panel input[type="text"]:focus,
-.mobile-filter-panel input[type="email"]:focus,
-.mobile-filter-panel select:focus {
-    border-color: #fedc00 !important;
-    box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.1), 0 4px 8px rgba(0, 0, 0, 0.1) !important;
-    outline: none !important;
-    transform: translateY(-1px) !important;
-}
-
-.mobile-filter-panel input[type="checkbox"] {
-    width: 1.125rem !important;
-    height: 1.125rem !important;
-    accent-color: #fedc00 !important;
-    border-radius: 0.25rem !important;
-    border: 2px solid #d1d5db !important;
-}
-
-.mobile-filter-panel input[type="checkbox"]:checked {
-    background-color: #fedc00 !important;
-    border-color: #fedc00 !important;
-}
-
-.mobile-filter-panel button {
-    height: 48px !important;
-    border-radius: 12px !important;
-    font-size: 16px !important;
-    font-weight: 600 !important;
-    padding: 14px 24px !important;
-    transition: all 0.3s ease !important;
-    border: none !important;
-    cursor: pointer !important;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-}
-
-.mobile-filter-panel button:hover {
-    transform: translateY(-2px) !important;
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15) !important;
-}
-
-.mobile-filter-panel button:active {
-    transform: translateY(0) !important;
-}
-
-/* Search button styling - match desktop */
-.mobile-filter-panel #mobile-search-restaurants {
-    background: linear-gradient(135deg, #fedc00 0%, #fedc00 100%) !important;
-    color: #1f2937 !important;
-    font-weight: 700 !important;
-}
-
-.mobile-filter-panel #mobile-search-restaurants:hover {
-    background: linear-gradient(135deg, #fedc00 0%, #fedc00 100%) !important;
-    box-shadow: 0 6px 16px rgba(251, 191, 36, 0.4) !important;
-}
-
-/* Clear button styling - match desktop */
-.mobile-filter-panel #mobile-clear-filters {
-    background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%) !important;
-    color: #374151 !important;
-    border: 2px solid #ffffff !important;
-}
-
-.mobile-filter-panel #mobile-clear-filters:hover {
-    background: linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%) !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
-}
-
-/* Hide labels - match desktop */
-.mobile-filter-panel label {
-    display: none !important;
-}
-
-/* Form groups spacing - exact match with desktop */
-.mobile-filter-panel .space-y-4 > * + * {
-    margin-top: 16px !important;
-}
-
-.mobile-filter-panel .space-y-3 > * + * {
-    margin-top: 12px !important;
-}
-
-/* Individual form field spacing */
-.mobile-filter-panel .space-y-4 > div {
-    margin-bottom: 0 !important;
-}
-
-.mobile-filter-panel .space-y-4 > div:not(:last-child) {
-    margin-bottom: 16px !important;
-}
-
-/* Checkbox container - match desktop */
-.mobile-filter-panel .flex.items-center {
-    display: flex !important;
-    align-items: center !important;
-    gap: 8px !important;
-    margin-top: 12px !important;
-}
-
-/* Disabled select styling - match desktop */
-.mobile-filter-panel select:disabled {
-    background-color: #f9fafb !important;
-    color: #9ca3af !important;
-    cursor: not-allowed !important;
-    border-color: #e5e7eb !important;
-}
-
-/* Panel overall styling - match desktop filter form */
-.mobile-filter-panel {
-    background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%) !important;
-    border-radius: 16px !important;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1) !important;
-    border: 2px solid rgba(251, 191, 36, 0.1) !important;
 }
 
 /* Form container styling - match desktop filter form */
@@ -541,87 +1092,124 @@ wp_add_inline_style('lebonresto-single-css', '
     border: 2px solid rgba(251, 191, 36, 0.1) !important;
 }
 
-/* Hide mobile filter on desktop */
+/* IMPORTANT: Hide mobile filter button completely on desktop */
 @media (min-width: 1024px) {
-    .mobile-filter-toggle {
+    .mobile-filter-toggle1,
+    .mobile-filter-toggle1.lg\:hidden,
+    div.mobile-filter-toggle1 {
         display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+    }
+}
+
+/* Show mobile filter button only on mobile/tablet */
+@media (max-width: 1023px) {
+    .mobile-filter-toggle1 {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        position: fixed !important;
+        bottom: 70px !important;
+        right: 20px !important;
+        z-index: 1000 !important;
+        pointer-events: auto !important;
+    }
+    
+    .mobile-filter-toggle1 button {
+        background: var(--primary-color) !important;
+        color: var(--text-primary) !important;
+        border: none !important;
+        height: 50px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        box-shadow: 0 4px 12px rgba(254, 220, 0, 0.4) !important;
+        cursor: pointer !important;
+        transition: all 0.3s ease !important;
+    }
+    
+    .mobile-filter-toggle1 button:hover {
+        transform: scale(1.1) !important;
+        box-shadow: 0 6px 16px rgba(254, 220, 0, 0.6) !important;
     }
 }
 
 .filter-form {
-    background: linear-gradient(135deg, #ffffff 0%, rgb(255, 255, 255) 100%) !important;
-    border-radius: 16px !important;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1) !important;
+    background: linear-gradient(135deg, var(--bg-white) 0%, var(--bg-white) 100%) !important;
+    border-radius: var(--radius-lg) !important;
+    box-shadow: var(--shadow-lg) !important;
     padding: 20px !important;
-    border: 2px solid rgba(251, 191, 36, 0.1) !important;
+    border: 2px solid rgba(254, 220, 0, 0.1) !important;
 }
 
 .filter-form input,
 .filter-form select {
     height: 48px !important;
-    border: 2px solid #d1d5db !important;
-    border-radius: 12px !important;
+    border: 2px solid var(--border-color) !important;
+    border-radius: var(--radius-lg) !important;
     font-size: 16px !important;
     padding: 12px 16px !important;
-    transition: all 0.3s ease !important;
-    background-color: #ffffff !important;
+    transition: var(--transition) !important;
+    background-color: #fdffb9 !important;
 }
 
 .filter-form input:focus,
 .filter-form select:focus {
-    border-color: #fedc00 !important;
-    box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.1) !important;
+    border-color: var(--primary-color) !important;
+    box-shadow: 0 0 0 3px rgba(254, 220, 0, 0.1) !important;
     outline: none !important;
 }
 
 .filter-form button {
     height: 48px !important;
-    border-radius: 12px !important;
+    border-radius: var(--radius-lg) !important;
     font-size: 16px !important;
     font-weight: 600 !important;
     padding: 14px 24px !important;
-    transition: all 0.3s ease !important;
+    transition: var(--transition) !important;
     border: none !important;
     cursor: pointer !important;
 }
 
 #search-restaurants {
-    background: linear-gradient(135deg, #fedc00 0%, #fedc00 100%) !important;
-    color: #1f2937 !important;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-color) 100%) !important;
+    color: var(--text-primary) !important;
     font-weight: 700 !important;
 }
 
 #search-restaurants:hover {
-    background: linear-gradient(135deg, #fedc00 0%, #fedc00 100%) !important;
+    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-dark) 100%) !important;
     transform: translateY(-2px) !important;
-    box-shadow: 0 6px 16px rgba(251, 191, 36, 0.4) !important;
+    box-shadow: 0 6px 16px rgba(254, 220, 0, 0.4) !important;
 }
 
 #clear-filters {
-    background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%) !important;
-    color: #374151 !important;
-    border: 2px solid #d1d5db !important;
+    background: linear-gradient(135deg, var(--bg-gray-100) 0%, var(--border-color) 100%) !important;
+    color: var(--text-secondary) !important;
+    border: 2px solid var(--border-color) !important;
 }
 
 .restaurant-card {
-    background: linear-gradient(135deg, #ffffff 0%, rgb(255, 255, 255) 100%) !important;
-    border-radius: 16px !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+    background: linear-gradient(135deg, var(--bg-white) 0%, var(--bg-white) 100%) !important;
+    border-radius: var(--radius-lg) !important;
+    box-shadow: var(--shadow-md) !important;
     margin-bottom: 16px !important;
-    border: 2px solid rgb(255, 255, 255) !important;
+    border: 2px solid var(--bg-white) !important;
     transition: all 0.4s ease !important;
 }
 
 .restaurant-card:hover {
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15) !important;
+    box-shadow: var(--shadow-lg) !important;
     transform: translateY(-4px) scale(1.02) !important;
-    border-color: #fedc00 !important;
+    border-color: var(--primary-color) !important;
 }
 
 .loading-spinner {
-    border: 4px solid rgb(255, 255, 255) !important;
-    border-top: 4px solid #fedc00 !important;
-    border-right: 4px solid #fedc00 !important;
+    border: 4px solid var(--bg-white) !important;
+    border-top: 4px solid var(--primary-color) !important;
+    border-right: 4px solid var(--primary-color) !important;
     border-radius: 50% !important;
     width: 32px !important;
     height: 32px !important;
@@ -631,6 +1219,20 @@ wp_add_inline_style('lebonresto-single-css', '
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --text-primary: #ffffff;
+        --text-secondary: #d1d5db;
+        --text-muted: #9ca3af;
+        --bg-white:rgb(255, 255, 255);
+        --bg-gray-50: #111827;
+        --bg-gray-100: #374151;
+        --border-color: #374151;
+        --border-light: #4b5563;
+    }
 }
 
 @media (max-width: 768px) {
@@ -653,7 +1255,7 @@ wp_add_inline_style('lebonresto-single-css', '
 
 ?>
 
-<div class="lebonresto-single-layout min-h-screen bg-gray-50">
+<div class="lebonresto-single-layout single-restaurant-template min-h-screen bg-gray-50">
     <?php while (have_posts()) : the_post(); ?>
         
         <?php
@@ -699,113 +1301,206 @@ wp_add_inline_style('lebonresto-single-css', '
 
         // Get cuisine types for filter
         $cuisine_types = lebonresto_get_cuisine_types();
+        
+        // Get Google API reviews for the current restaurant
+        error_log('LEBONRESTO REVIEWS LOG: Starting review data fetching for restaurant ID: ' . $current_restaurant_id);
+        
+        $google_api_reviews = get_post_meta($current_restaurant_id, '_restaurant_google_api_reviews', true);
+        error_log('LEBONRESTO REVIEWS LOG: Stored reviews from meta: ' . (is_array($google_api_reviews) ? count($google_api_reviews) . ' reviews found' : 'no reviews or not array'));
+        
+        if (!is_array($google_api_reviews)) {
+            $google_api_reviews = array();
+            error_log('LEBONRESTO REVIEWS LOG: Initialized empty reviews array');
+        }
+        
+        // Try to get fresh Google Places data if needed
+        $google_place_id = get_post_meta($current_restaurant_id, '_restaurant_google_place_id', true);
+        $api_key = function_exists('lebonresto_get_google_maps_api_key') ? lebonresto_get_google_maps_api_key() : '';
+        
+        error_log('LEBONRESTO REVIEWS LOG: Google Place ID: ' . ($google_place_id ?: 'NOT SET'));
+        error_log('LEBONRESTO REVIEWS LOG: API Key available: ' . (!empty($api_key) ? 'YES' : 'NO'));
+        error_log('LEBONRESTO REVIEWS LOG: fetch function available: ' . (function_exists('lebonresto_fetch_google_places_data') ? 'YES' : 'NO'));
+        
+        if ($google_place_id && $api_key && function_exists('lebonresto_fetch_google_places_data')) {
+            error_log('LEBONRESTO REVIEWS LOG: Attempting to fetch fresh Google Places data...');
+            $places_data = lebonresto_fetch_google_places_data($google_place_id, $api_key);
+            
+            if ($places_data) {
+                error_log('LEBONRESTO REVIEWS LOG: Google Places API returned data: ' . print_r(array_keys($places_data), true));
+                
+                if (isset($places_data['reviews']) && !empty($places_data['reviews'])) {
+                    error_log('LEBONRESTO REVIEWS LOG: Found ' . count($places_data['reviews']) . ' reviews in API response');
+                    
+                    $fresh_api_reviews = array();
+                    foreach ($places_data['reviews'] as $index => $review) {
+                        error_log('LEBONRESTO REVIEWS LOG: Processing review ' . ($index + 1) . ': ' . print_r($review, true));
+                        
+                        // Ensure we have valid review data before adding
+                        if (isset($review['author_name']) || isset($review['text']) || isset($review['rating'])) {
+                            $processed_review = array(
+                                'name' => isset($review['author_name']) ? $review['author_name'] : 'Utilisateur anonyme',
+                                'author_name' => isset($review['author_name']) ? $review['author_name'] : 'Utilisateur anonyme',
+                                'rating' => isset($review['rating']) ? intval($review['rating']) : 0,
+                                'text' => isset($review['text']) ? $review['text'] : '',
+                                'date' => isset($review['time']) ? date('Y-m-d', $review['time']) : date('Y-m-d'),
+                                'time' => isset($review['time']) ? $review['time'] : time(),
+                                'source' => 'google_api'
+                            );
+                            
+                            $fresh_api_reviews[] = $processed_review;
+                            error_log('LEBONRESTO REVIEWS LOG: Added processed review: ' . print_r($processed_review, true));
+                        } else {
+                            error_log('LEBONRESTO REVIEWS LOG: Skipped review ' . ($index + 1) . ' - invalid data');
+                        }
+                    }
+                    
+                    if (!empty($fresh_api_reviews)) {
+                        $google_api_reviews = $fresh_api_reviews;
+                        update_post_meta($current_restaurant_id, '_restaurant_google_api_reviews', $fresh_api_reviews);
+                        error_log('LEBONRESTO REVIEWS LOG: Updated meta with ' . count($fresh_api_reviews) . ' fresh reviews');
+                    } else {
+                        error_log('LEBONRESTO REVIEWS LOG: No valid reviews to save after processing');
+                    }
+                } else {
+                    error_log('LEBONRESTO REVIEWS LOG: No reviews found in API response or reviews array is empty');
+                }
+            } else {
+                error_log('LEBONRESTO REVIEWS LOG: Google Places API returned no data or failed');
+            }
+        } else {
+            error_log('LEBONRESTO REVIEWS LOG: Cannot fetch fresh data - missing requirements');
+        }
+        
+        error_log('LEBONRESTO REVIEWS LOG: Final reviews count for display: ' . count($google_api_reviews));
         ?>
 
         <!-- Mobile Filter Toggle Button -->
-        <div class="mobile-filter-toggle lg:hidden fixed top-4 left-4 z-50">
-            <button 
-                id="mobile-filter-btn"
-                class="bg-yellow-400 hover:bg-yellow-500 text-gray-800 p-3 rounded-full shadow-lg transition-all duration-300 transform hover:scale-105"
-                style="background-color: #fedc00;"
-                title="Open Filters"
-            >
-            </button>
+        <div class="mobile-filter-toggle1 lg:hidden fixed z-9999">
+        <button type="button" id="mobile-filter-btn" class="mobile-filter-button">
+            <svg viewBox="0 0 24 24" width="20" height="20" class="filter-icon">
+                <path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"></path>
+            </svg>
+            <span class="filter-text">Filtres</span>
+        </button>
         </div>
 
-        <!-- Mobile Filter Overlay -->
-        <div id="mobile-filter-overlay" class="mobile-filter-overlay fixed inset-0 bg-black bg-opacity-50 z-40 hidden lg:hidden">
-            <div class="mobile-filter-panel bg-white h-full w-80 transform -translate-x-full transition-transform duration-300">
-                <div class="p-4">
-                   
-                    <!-- Mobile Filter Form -->
-                    <div class="space-y-4">
-                        <!-- Restaurant Name Search -->
-                        <div>
-                            <input 
-                                type="text" 
-                                id="mobile-restaurant-name-filter" 
-                                placeholder="<?php _e('Search restaurants...', 'le-bon-resto'); ?>"
-                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
-                            />
-                        </div>
+    <!-- Mobile Filter Overlay -->
+    <div id="mobile-filter-overlay" class="mobile-filter-overlay fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden" style="display: none;">
+        <div class="mobile-filter-panel bg-white h-full w-80 max-w-[85vw] transform -translate-x-full transition-transform duration-300">
+            <!-- Filter Header with Close Button -->
+            <div class="flex items-center justify-between p-4 border-b border-gray-200 bg-gradient-to-r from-yellow-400 to-yellow-500">
+                <h3 class="text-lg font-semibold text-gray-800"><?php _e('Filtres', 'le-bon-resto'); ?></h3>
+                <button type="button" id="close-mobile-filters" class="text-gray-600 hover:text-gray-800 p-2 rounded-full hover:bg-white hover:bg-opacity-20 transition-all">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="p-4 overflow-y-auto">
+                <!-- Mobile Filter Form -->
+                <div class="space-y-4">
+                    <!-- Restaurant Name Search -->
+                    <div>
+                        <input 
+                            type="text" 
+                            id="mobile-restaurant-name" 
+                            placeholder="<?php _e('Nom du restaurant...', 'le-bon-resto'); ?>"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
+                        />
+                    </div>
+                    
+                    <!-- City Filter -->
+                    <div>
+                        <input 
+                            type="text" 
+                            id="mobile-city" 
+                            placeholder="<?php _e('Ville...', 'le-bon-resto'); ?>"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
+                        />
+                    </div>
+                    
+                    <!-- Cuisine Filter -->
+                    <div>
+                        <select 
+                            id="mobile-cuisine"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
+                        >
+                            <option value=""><?php _e('Toutes les cuisines', 'le-bon-resto'); ?></option>
+                            <option value="française"><?php _e('Française', 'le-bon-resto'); ?></option>
+                            <option value="italienne"><?php _e('Italienne', 'le-bon-resto'); ?></option>
+                            <option value="asiatique"><?php _e('Asiatique', 'le-bon-resto'); ?></option>
+                            <option value="méditerranéenne"><?php _e('Méditerranéenne', 'le-bon-resto'); ?></option>
+                            <option value="mexicaine"><?php _e('Mexicaine', 'le-bon-resto'); ?></option>
+                            <option value="indienne"><?php _e('Indienne', 'le-bon-resto'); ?></option>
+                        </select>
+                    </div>
+                    
+                    <!-- Distance Filter -->
+                    <div>
+                        <select 
+                            id="mobile-distance-filter"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
+                            disabled
+                        >
+                            <option value=""><?php _e('Sélectionner la distance', 'le-bon-resto'); ?></option>
+                            <option value="5">5 km</option>
+                            <option value="10">10 km</option>
+                            <option value="25">25 km</option>
+                            <option value="50">50 km</option>
+                            <option value="100">100 km</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Sort Filter -->
+                    <div>
+                        <select 
+                            id="mobile-sort"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
+                        >
+                            <option value="featured"><?php _e('Recommandés en premier', 'le-bon-resto'); ?></option>
+                            <option value="newest"><?php _e('Plus récents', 'le-bon-resto'); ?></option>
+                            <option value="distance"><?php _e('Distance', 'le-bon-resto'); ?></option>
+                            <option value="name"><?php _e('Nom A-Z', 'le-bon-resto'); ?></option>
+                        </select>
+                    </div>
+                    
+                    <!-- Featured Only Toggle -->
+                    <div class="flex items-center">
+                        <input 
+                            type="checkbox" 
+                            id="mobile-featured-only" 
+                            class="rounded border-gray-300 text-yellow-600 focus:ring-yellow-500 focus:ring-2"
+                        />
+                        <span class="ml-2 text-sm text-gray-600">
+                            <?php _e('Seulement les recommandés', 'le-bon-resto'); ?>
+                        </span>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="space-y-3 pt-4">
+                        <button 
+                            id="mobile-apply-filters"
+                            class="w-full px-4 py-3 bg-yellow-400 hover:bg-yellow-500 text-gray-800 font-semibold rounded-lg transition duration-200 text-sm"
+                            style="background-color: #fedc00;"
+                        >
+                            <?php _e('Appliquer les filtres', 'le-bon-resto'); ?>
+                        </button>
                         
-                        <!-- City Filter -->
-                        <div>
-                            <input 
-                                type="text" 
-                                id="mobile-city-filter" 
-                                placeholder="<?php _e('City...', 'le-bon-resto'); ?>"
-                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
-                            />
-                        </div>
-                        
-                        <!-- Cuisine Filter -->
-                        <div>
-                            <select 
-                                id="mobile-cuisine-filter"
-                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
-                            >
-                                <option value=""><?php _e('All Cuisines', 'le-bon-resto'); ?></option>
-                                <?php foreach ($cuisine_types as $cuisine): ?>
-                                    <option value="<?php echo esc_attr($cuisine); ?>">
-                                        <?php echo esc_html(ucfirst($cuisine)); ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                        
-                        <!-- Distance Filter -->
-                        <div>
-                            <select 
-                                id="mobile-distance-filter"
-                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
-                                disabled
-                            >
-                                <option value=""><?php _e('Select distance', 'le-bon-resto'); ?></option>
-                                <option value="5">5 km</option>
-                                <option value="10">10 km</option>
-                                <option value="25">25 km</option>
-                                <option value="50">50 km</option>
-                                <option value="100">100 km</option>
-                            </select>
-                        </div>
-                        
-                        <!-- Featured Only Toggle -->
-                        <div class="flex items-center">
-                            <input 
-                                type="checkbox" 
-                                id="mobile-featured-only" 
-                                class="rounded border-gray-300 text-yellow-600 focus:ring-yellow-500 focus:ring-2"
-                            />
-                            <span class="ml-2 text-sm text-gray-700">
-                                <?php _e('Featured Only', 'le-bon-resto'); ?>
-                            </span>
-                        </div>
-                        
-                        <!-- Action Buttons -->
-                        <div class="space-y-3 pt-4">
-                            <button 
-                                id="mobile-search-restaurants"
-                                class="w-full px-4 py-3 bg-yellow-400 hover:bg-yellow-500 text-gray-800 font-semibold rounded-lg transition duration-200 text-sm"
-                                style="background-color: #fedc00;"
-                            >
-                                <?php _e('Apply Filters', 'le-bon-resto'); ?>
-                            </button>
-                            
-                            <button 
-                                id="mobile-clear-filters"
-                                class="w-full px-4 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium rounded-lg transition duration-200 text-sm"
-                            >
-                                <?php _e('Clear All', 'le-bon-resto'); ?>
-                            </button>
-                        </div>
+                        <button 
+                            id="mobile-clear-all"
+                            class="w-full px-4 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium rounded-lg transition duration-200 text-sm"
+                        >
+                            <?php _e('Effacer tout', 'le-bon-resto'); ?>
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 
         <!-- Desktop Filter Header (Hidden on Mobile, Tablet, and iPad) -->
-        <div class="filter-header w-full bg-gray-100 border-b border-gray-200 sticky top-0 z-50">
+        <div class="filter-header1 w-full bg-gray-100 border-b border-gray-200 sticky top-0 z-50">
             <div class="filter-container container mx-auto px-4 py-4">
                 <div class="filter-form bg-white rounded-lg shadow-md p-2">
                     <div class="flex flex-col lg:flex-row items-center gap-4">
@@ -814,7 +1509,7 @@ wp_add_inline_style('lebonresto-single-css', '
                             <input 
                                 type="text" 
                                 id="restaurant-name-filter" 
-                                placeholder="<?php _e('Search restaurants...', 'le-bon-resto'); ?>"
+                                placeholder="<?php _e('Rechercher des restaurants...', 'le-bon-resto'); ?>"
                                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
                             />
                         </div>
@@ -824,7 +1519,7 @@ wp_add_inline_style('lebonresto-single-css', '
                             <input 
                                 type="text" 
                                 id="city-filter" 
-                                placeholder="<?php _e('City...', 'le-bon-resto'); ?>"
+                                placeholder="<?php _e('Ville...', 'le-bon-resto'); ?>"
                                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
                             />
                         </div>
@@ -835,7 +1530,7 @@ wp_add_inline_style('lebonresto-single-css', '
                                 id="cuisine-filter"
                                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
                             >
-                                <option value=""><?php _e('All Cuisines', 'le-bon-resto'); ?></option>
+                                <option value=""><?php _e('Toutes les cuisines', 'le-bon-resto'); ?></option>
                                 <?php foreach ($cuisine_types as $cuisine): ?>
                                     <option value="<?php echo esc_attr($cuisine); ?>">
                                         <?php echo esc_html(ucfirst($cuisine)); ?>
@@ -868,9 +1563,9 @@ wp_add_inline_style('lebonresto-single-css', '
                                     id="featured-only" 
                                     class="rounded border-gray-300 text-yellow-600 focus:ring-yellow-500 focus:ring-2"
                                 />
-                                <span class="text-sm text-gray-700 whitespace-nowrap">
+                                <span class="text-sm text-yellow-600 whitespace-nowrap">
                                     <i class="fas fa-star mr-1" style="color: #fedc00;"></i>
-                                    <?php _e('Featured', 'le-bon-resto'); ?>
+                                    <?php _e('Recommandé', 'le-bon-resto'); ?>
                             </span>
                             </label>
                         </div>
@@ -881,7 +1576,7 @@ wp_add_inline_style('lebonresto-single-css', '
                             class="w-full lg:w-auto px-6 py-2 bg-yellow-400 hover:bg-yellow-500 text-gray-800 font-semibold rounded-lg transition duration-200"
                             style="background-color: #fedc00;"
                         >
-                            <i class="fas fa-search mr-2"></i><?php _e('Search', 'le-bon-resto'); ?>
+                            <i class="fas fa-search mr-2"></i><?php _e('Rechercher', 'le-bon-resto'); ?>
                         </button>
                         
                         <!-- Clear Button -->
@@ -889,7 +1584,7 @@ wp_add_inline_style('lebonresto-single-css', '
                             id="clear-filters"
                             class="w-full lg:w-auto px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium rounded-lg transition duration-200"
                         >
-                            <?php _e('Clear', 'le-bon-resto'); ?>
+                            <?php _e('Effacer', 'le-bon-resto'); ?>
                         </button>
                     </div>
                 </div>
@@ -905,7 +1600,7 @@ wp_add_inline_style('lebonresto-single-css', '
                     data-tab="vr"
                 >
                     <i class="fas fa-vr-cardboard"></i>
-                    <span class="tab-text"><?php _e('Virtual Tour', 'le-bon-resto'); ?></span>
+                    <span class="tab-text"><?php _e('Visite virtuelle', 'le-bon-resto'); ?></span>
                 </button>
                 <button 
                     id="mobile-tab-map" 
@@ -913,7 +1608,7 @@ wp_add_inline_style('lebonresto-single-css', '
                     data-tab="map"
                 >
                     <i class="fas fa-map-marker-alt"></i>
-                    <span class="tab-text"><?php _e('Map', 'le-bon-resto'); ?></span>
+                    <span class="tab-text"><?php _e('Carte', 'le-bon-resto'); ?></span>
                 </button>
                         </div>
                 </div>
@@ -931,16 +1626,16 @@ wp_add_inline_style('lebonresto-single-css', '
                         id="center-current-restaurant"
                         class="px-3 py-2 bg-yellow-400 hover:bg-yellow-500 text-gray-800 font-medium rounded text-sm transition duration-200"
                         style="background-color: #fedc00;"
-                        title="<?php _e('Center on current restaurant', 'le-bon-resto'); ?>"
+                        title="<?php _e('Centrer sur le restaurant actuel', 'le-bon-resto'); ?>"
                     >
-                        <i class="fas fa-crosshairs mr-1"></i><?php _e('Center', 'le-bon-resto'); ?>
+                        <i class="fas fa-crosshairs mr-1"></i><?php _e('Centrer', 'le-bon-resto'); ?>
                     </button>
                     </div>
                 
                 <!-- Results Counter -->
                 <div class="results-counter">
                     <span id="map-results-count" class="px-3 py-2 bg-yellow-400 hover:bg-yellow-500 text-gray-800 font-medium rounded text-sm">
-                        <?php _e('Loading restaurants...', 'le-bon-resto'); ?>
+                        <?php _e('Chargement des restaurants...', 'le-bon-resto'); ?>
                     </span>
                 </div>
 
@@ -966,8 +1661,8 @@ wp_add_inline_style('lebonresto-single-css', '
                         <div class="h-full flex items-center justify-center bg-gray-100">
                             <div class="text-center p-8">
                                 <i class="fas fa-vr-cardboard text-5xl text-gray-400 mb-4"></i>
-                                <h3 class="text-xl font-semibold text-gray-600 mb-2"><?php _e('Virtual Tour', 'le-bon-resto'); ?></h3>
-                                <p class="text-gray-500 mb-4"><?php _e('No virtual tour available for this restaurant', 'le-bon-resto'); ?></p>
+                                <h3 class="text-xl font-semibold text-gray-600 mb-2"><?php _e('Visite virtuelle', 'le-bon-resto'); ?></h3>
+                                <p class="text-gray-500 mb-4"><?php _e('Aucune visite virtuelle disponible pour ce restaurant', 'le-bon-resto'); ?></p>
                             </div>
             </div>
                     <?php endif; ?>
@@ -978,29 +1673,188 @@ wp_add_inline_style('lebonresto-single-css', '
                 
         <!-- Current Restaurant Info (Hidden, used by JS) -->
         <script type="application/json" id="current-restaurant-data">
-        {
-            "id": <?php echo intval($current_restaurant_id); ?>,
-            "title": <?php echo wp_json_encode(get_the_title()); ?>,
-            "address": <?php echo wp_json_encode($address); ?>,
-            "city": <?php echo wp_json_encode($city); ?>,
-            "cuisine_type": <?php echo wp_json_encode($cuisine_type); ?>,
-            "description": <?php echo wp_json_encode($description); ?>,
-            "phone": <?php echo wp_json_encode($phone); ?>,
-            "email": <?php echo wp_json_encode($email); ?>,
-            "latitude": <?php echo wp_json_encode($latitude); ?>,
-            "longitude": <?php echo wp_json_encode($longitude); ?>,
-            "is_featured": <?php echo wp_json_encode($is_featured === '1'); ?>,
-            "virtual_tour_url": <?php echo wp_json_encode($virtual_tour_url); ?>,
-            "link": <?php echo wp_json_encode(get_permalink()); ?>,
-            "gallery_images": <?php echo wp_json_encode($gallery_images); ?>
-        }
+        <?php
+        $restaurant_data = array(
+            'id' => intval($current_restaurant_id),
+            'title' => get_the_title(),
+            'address' => $address ?: '',
+            'city' => $city ?: '',
+            'cuisine_type' => $cuisine_type ?: '',
+            'description' => $description ?: '',
+            'phone' => $phone ?: '',
+            'email' => $email ?: '',
+            'latitude' => $latitude ?: '',
+            'longitude' => $longitude ?: '',
+            'is_featured' => ($is_featured === '1'),
+            'virtual_tour_url' => $virtual_tour_url ?: '',
+            'link' => get_permalink(),
+            'gallery_images' => $gallery_images ?: array()
+        );
+        
+        echo wp_json_encode($restaurant_data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        ?>
         </script>
         
 
 
     <?php endwhile; ?>
 </div>
-<div>
+<!-- Two Column Layout: Restaurant Cards + Reviews -->
+<div class="flex flex-col lg:flex-row gap-4 lg:gap-0">
+    
+    <!-- Right Column: Google Reviews (30%) -->
+    <div class="w-full lg:w-3/10 bg-white rounded-lg shadow-lg overflow-hidden order-2 lg:order-2">
+        
+        <div id="google-reviews-container">
+            <?php 
+            // Debug information (remove in production)
+            error_log('LEBONRESTO REVIEWS LOG: DISPLAY SECTION - Starting display logic');
+            error_log('LEBONRESTO REVIEWS LOG: DISPLAY SECTION - Reviews array: ' . print_r($google_api_reviews, true));
+            
+            if (WP_DEBUG) {
+                echo '<!-- DEBUG: google_api_reviews count: ' . (is_array($google_api_reviews) ? count($google_api_reviews) : 'not array') . ' -->';
+                echo '<!-- DEBUG: google_place_id: ' . esc_html($google_place_id) . ' -->';
+                echo '<!-- DEBUG: api_key available: ' . (!empty($api_key) ? 'yes' : 'no') . ' -->';
+                if (!empty($google_api_reviews)) {
+                    echo '<!-- DEBUG: First review data: ' . esc_html(print_r($google_api_reviews[0], true)) . ' -->';
+                }
+            }
+            
+            if (!empty($google_api_reviews)) {
+                error_log('LEBONRESTO REVIEWS LOG: DISPLAY SECTION - Will display real reviews');
+            } else {
+                error_log('LEBONRESTO REVIEWS LOG: DISPLAY SECTION - Will display fallback/test review');
+            }
+            ?>
+            <?php if (!empty($google_api_reviews)): ?>
+                <?php 
+                $review_count = 0;
+                foreach (array_slice($google_api_reviews, 0, 5) as $index => $review): 
+                    error_log('LEBONRESTO REVIEWS LOG: DISPLAY SECTION - Processing review ' . ($index + 1) . ': ' . print_r($review, true));
+                ?>
+                    <?php 
+                    // Validate review data and provide fallbacks
+                    $review_name = isset($review['name']) ? $review['name'] : (isset($review['author_name']) ? $review['author_name'] : 'Utilisateur anonyme');
+                    $review_rating = isset($review['rating']) ? intval($review['rating']) : 0;
+                    $review_text = isset($review['text']) ? $review['text'] : '';
+                    $review_date = isset($review['date']) ? $review['date'] : date('Y-m-d');
+                    
+                    error_log('LEBONRESTO REVIEWS LOG: DISPLAY SECTION - Review ' . ($index + 1) . ' processed data: name=' . $review_name . ', rating=' . $review_rating . ', text_length=' . strlen($review_text));
+                    
+                    // Skip reviews with invalid data
+                    if (empty($review_name) && empty($review_text) && $review_rating === 0) {
+                        error_log('LEBONRESTO REVIEWS LOG: DISPLAY SECTION - Skipping review ' . ($index + 1) . ' - invalid data');
+                        continue;
+                    }
+                    
+                    $review_count++;
+                    error_log('LEBONRESTO REVIEWS LOG: DISPLAY SECTION - Will display review ' . ($index + 1) . ' (display count: ' . $review_count . ')');
+                    
+                    // Get first letter of author name for avatar
+                    $author_initial = !empty($review_name) ? strtoupper(substr($review_name, 0, 1)) : 'A';
+                    
+                    // Rating badge text
+                    $rating_text = $review_rating >= 4 ? 'Excellent' : ($review_rating >= 3 ? 'Bien' : 'Moyen');
+                    
+                    // Format date
+                    $formatted_date = date('j M Y', strtotime($review_date));
+                    ?>
+                    <div class="review-item">
+                        <div class="review-header">
+                            <div class="review-author-section">
+                                <div class="review-author-avatar"><?php echo esc_html($author_initial); ?></div>
+                                <div class="review-author-info">
+                                    <div class="review-author"><?php echo esc_html($review_name); ?></div>
+                                    <div class="review-restaurant"><?php echo esc_html(get_the_title()); ?></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="review-rating">
+                            <?php for ($i = 1; $i <= 5; $i++): ?>
+                                <svg class="w-3 h-3 <?php echo $i <= $review_rating ? 'text-yellow-400' : 'text-gray-300'; ?>" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                </svg>
+                            <?php endfor; ?>
+                        </div>
+                        
+                        <div class="review-content">
+                            <?php if (!empty($review_text)): ?>
+                                <div class="review-text"><?php echo esc_html(wp_trim_words($review_text, 30)); ?></div>
+                            <?php endif; ?>
+                        </div>
+                        
+                        <div class="review-footer">
+                            <div class="review-date"><?php echo esc_html($formatted_date); ?></div>
+                            <div class="review-badge"><?php echo esc_html($rating_text); ?></div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+                <?php error_log('LEBONRESTO REVIEWS LOG: DISPLAY SECTION - Completed real reviews display. Total displayed: ' . (isset($review_count) ? $review_count : 0)); ?>
+            <?php else: ?>
+                <?php
+                error_log('LEBONRESTO REVIEWS LOG: DISPLAY SECTION - Showing test review (no real reviews available)');
+                // Show a test review to verify the display is working (temporary for debugging)
+                $test_review = array(
+                    'name' => 'Test User',
+                    'rating' => 5,
+                    'text' => 'Ceci est un avis de test pour vérifier que l\'affichage fonctionne correctement.',
+                    'date' => date('Y-m-d')
+                );
+                $review_name = $test_review['name'];
+                $review_rating = $test_review['rating'];
+                $review_text = $test_review['text'];
+                $review_date = $test_review['date'];
+                $author_initial = strtoupper(substr($review_name, 0, 1));
+                $rating_text = $review_rating >= 4 ? 'Excellent' : ($review_rating >= 3 ? 'Bien' : 'Moyen');
+                $formatted_date = date('j M Y', strtotime($review_date));
+                ?>
+                
+                <!-- Test review for debugging -->
+                <div class="review-item">
+                    <div class="review-header">
+                        <div class="review-author-section">
+                            <div class="review-author-avatar"><?php echo esc_html($author_initial); ?></div>
+                            <div class="review-author-info">
+                                <div class="review-author"><?php echo esc_html($review_name); ?></div>
+                                <div class="review-restaurant"><?php echo esc_html(get_the_title()); ?></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="review-rating">
+                        <?php for ($i = 1; $i <= 5; $i++): ?>
+                            <svg class="w-3 h-3 <?php echo $i <= $review_rating ? 'text-yellow-400' : 'text-gray-300'; ?>" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                            </svg>
+                        <?php endfor; ?>
+                    </div>
+                    
+                    <div class="review-content">
+                        <div class="review-text"><?php echo esc_html($review_text); ?></div>
+                    </div>
+                    
+                    <div class="review-footer">
+                        <div class="review-date"><?php echo esc_html($formatted_date); ?></div>
+                        <div class="review-badge"><?php echo esc_html($rating_text); ?></div>
+                    </div>
+                </div>
+                
+                <div class="text-center py-4 mt-4 border-t border-gray-200">
+                    <p class="text-gray-500 text-sm"><?php _e('Aucun avis réel disponible pour ce restaurant', 'le-bon-resto'); ?></p>
+                    <?php if (empty($google_place_id)): ?>
+                        <p class="text-xs text-gray-400 mt-2"><?php _e('Configurez un Google Place ID pour afficher les avis automatiquement', 'le-bon-resto'); ?></p>
+                    <?php elseif (empty($api_key)): ?>
+                        <p class="text-xs text-gray-400 mt-2"><?php _e('Configurez une clé API Google Maps pour récupérer les avis', 'le-bon-resto'); ?></p>
+                    <?php else: ?>
+                        <p class="text-xs text-gray-400 mt-2"><?php _e('Les avis seront récupérés automatiquement', 'le-bon-resto'); ?></p>
+                    <?php endif; ?>
+                </div>
+            <?php endif; ?>
+        </div>
+    </div>
+    <!-- Left Column: Restaurant Cards (70%) -->
+    <div class="w-full lg:w-7/10 flex flex-col order-1 lg:order-1">
                                  <!-- Filter Section -->
                 <div class="filter-section p-4 bg-gradient-to-r border-b border-gray-200">
                     <div class="flex items-center justify-between mb-4">
@@ -1009,21 +1863,21 @@ wp_add_inline_style('lebonresto-single-css', '
                                 id="sort-restaurants"
                                 class="px-2 py-1 border border-gray-300 rounded-md text-xs focus:outline-none focus:ring-1 focus:ring-yellow-400 bg-white shadow-sm" style="width: 100%;"
                             >
-                                <option value="featured"><?php _e('Featured First', 'le-bon-resto'); ?></option>
-                                <option value="newest"><?php _e('Newest', 'le-bon-resto'); ?></option>
+                        <option value="featured"><?php _e('Recommandés en premier', 'le-bon-resto'); ?></option>
+                        <option value="newest"><?php _e('Plus récents', 'le-bon-resto'); ?></option>
                                 <option value="distance"><?php _e('Distance', 'le-bon-resto'); ?></option>
-                                <option value="name"><?php _e('Name A-Z', 'le-bon-resto'); ?></option>
+                        <option value="name"><?php _e('Nom A-Z', 'le-bon-resto'); ?></option>
                             </select>
                         </div>
                         </div>
 </div>
 
                 <!-- Restaurant Cards Container -->
-                <div id="restaurants-container" class="flex-1 p-4 overflow-y-auto align-items-center mobile-cards-section">
+        <div id="restaurants-container" class="flex-1 overflow-y-auto">
                         <!-- Restaurant cards will be loaded here via JavaScript -->
                         <div class="text-center py-8">
                             <div class="loading-spinner mx-auto mb-3"></div>
-                            <p class="text-gray-500"><?php _e('Loading restaurants...', 'le-bon-resto'); ?></p>
+                <p class="text-gray-500"><?php _e('Chargement des restaurants...', 'le-bon-resto'); ?></p>
                         </div>
                     </div>
                 
@@ -1031,7 +1885,7 @@ wp_add_inline_style('lebonresto-single-css', '
                 <div id="pagination-container" class="p-4 border-t border-gray-200 bg-gray-50">
                     <div class="flex items-center justify-between">
                         <div class="text-sm text-gray-600">
-                            <span id="pagination-info"><?php _e('Loading...', 'le-bon-resto'); ?></span>
+                    <span id="pagination-info"><?php _e('Chargement...', 'le-bon-resto'); ?></span>
                         </div>
                         <div id="pagination-controls" class="flex items-center space-x-2">
                             <!-- Pagination buttons will be generated here by JavaScript -->
@@ -1039,17 +1893,21 @@ wp_add_inline_style('lebonresto-single-css', '
                     </div>
                 </div>   
                     </div>
-
+</div>
 
 
 
                 
 <script>
-// Essential inline functions only - main functionality moved to external JS
+// Essential inline functions - main functionality moved to external JS
+(function() {
+    'use strict';
+    
+    // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize mobile filters
-    if (typeof initializeMobileFilters === 'function') {
-        initializeMobileFilters();
+        if (typeof initializeMobileFilterHandlers === 'function') {
+            initializeMobileFilterHandlers();
     }
     
     // Initialize mobile tabs
@@ -1059,148 +1917,141 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize location detection for distance filtering
     const distanceFilter = document.getElementById('distance-filter');
-    if (distanceFilter && navigator.geolocation) {
+    const mobileDistanceFilter = document.getElementById('mobile-distance-filter');
+    
+    if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
             function(position) {
                 window.userLocation = {
                     lat: position.coords.latitude,
                     lng: position.coords.longitude
                 };
-                distanceFilter.disabled = false;
+                
+                // Enable desktop distance filter
+                if (distanceFilter) {
+                    distanceFilter.disabled = false;
+                    console.log('✅ Desktop distance filter enabled (first init)');
+                }
+                
+                // Enable mobile distance filter
+                if (mobileDistanceFilter) {
+                    mobileDistanceFilter.disabled = false;
+                    console.log('✅ Mobile distance filter enabled (first init)');
+                }
             },
             function(error) {
-                distanceFilter.disabled = true;
+                console.log('❌ Geolocation error (first init):', error);
+                
+                // Disable both distance filters on error
+                if (distanceFilter) {
+                    distanceFilter.disabled = true;
+                }
+                if (mobileDistanceFilter) {
+                    mobileDistanceFilter.disabled = true;
+                }
             }
         );
+    } else {
+        console.log('❌ Geolocation not supported (first init)');
+        
+        // Disable both distance filters if geolocation not supported
+        if (distanceFilter) {
+            distanceFilter.disabled = true;
+        }
+        if (mobileDistanceFilter) {
+            mobileDistanceFilter.disabled = true;
+        }
     }
 });
+})();
+
+// Mobile filter functionality
+function initializeMobileFilterHandlers() {
+    console.log('Initializing mobile filter handlers...');
     
     const mobileFilterBtn = document.getElementById('mobile-filter-btn');
     const mobileFilterOverlay = document.getElementById('mobile-filter-overlay');
-    const closeMobileFilters = document.getElementById('close-mobile-filters');
     const mobileFilterPanel = document.querySelector('.mobile-filter-panel');
     
-    // Debug element detection
-    console.log('🔧 [MOBILE DEBUG] Elements found:');
-    console.log('  - mobileFilterBtn:', mobileFilterBtn);
-    console.log('  - mobileFilterOverlay:', mobileFilterOverlay);
-    console.log('  - closeMobileFilters:', closeMobileFilters);
-    console.log('  - mobileFilterPanel:', mobileFilterPanel);
+    console.log('Elements found:', {
+        btn: !!mobileFilterBtn,
+        overlay: !!mobileFilterOverlay,
+        panel: !!mobileFilterPanel
+    });
     
-    // Check if custom filter icon is working, show fallback if not
-    setTimeout(() => {
-        console.log('🔧 [MOBILE DEBUG] Checking filter icon...');
-        const filterIcon = document.querySelector('.filter-icon');
-        const filterText = document.querySelector('.filter-text');
-        
-        console.log('  - filterIcon:', filterIcon);
-        console.log('  - filterText:', filterText);
-        
-        if (filterIcon && filterText) {
-            const computedStyle = window.getComputedStyle(filterIcon);
-            console.log('  - filterIcon computed style:', computedStyle.display);
-            console.log('  - filterIcon offsetHeight:', filterIcon.offsetHeight);
-            
-            if (computedStyle.display === 'none' || filterIcon.offsetHeight === 0) {
-                console.log('🔧 [MOBILE DEBUG] Showing fallback text icon');
-                filterIcon.style.display = 'none';
-                filterText.style.display = 'block';
-                filterText.style.fontSize = '18px';
-                filterText.style.fontWeight = 'bold';
-            } else {
-                console.log('🔧 [MOBILE DEBUG] Custom filter icon is working');
-            }
-        } else {
-            console.log('🔧 [MOBILE DEBUG] Filter icon elements not found');
-        }
-    }, 100);
+    // Check if elements exist
+    if (!mobileFilterBtn || !mobileFilterOverlay || !mobileFilterPanel) {
+        console.error('Mobile filter elements not found!');
+        return;
+    }
     
-    // Toggle mobile filter panel
-    if (mobileFilterBtn && mobileFilterOverlay) {
-        console.log('🔧 [MOBILE DEBUG] Adding click listener to filter button');
-        mobileFilterBtn.addEventListener('click', function() {
-            console.log('🔧 [MOBILE DEBUG] Filter button clicked!');
-            console.log('  - mobileFilterOverlay classes before:', mobileFilterOverlay.className);
-            console.log('  - mobileFilterPanel classes before:', mobileFilterPanel.className);
-            
-            // Toggle filter state
-            const isOpen = mobileFilterOverlay.classList.contains('hidden');
-            
-            if (isOpen) {
-                // Open filter
+    // Open mobile filter panel
+    function openMobileFilter() {
+        console.log('Opening mobile filter');
                 mobileFilterOverlay.classList.remove('hidden');
+        mobileFilterOverlay.classList.add('show');
+        mobileFilterPanel.classList.add('show');
                 mobileFilterPanel.classList.remove('-translate-x-full');
                 document.body.style.overflow = 'hidden';
-                
-                // Move icon to top-right
-                mobileFilterBtn.parentElement.classList.add('filter-open');
-                mobileFilterBtn.title = 'Close Filters';
-            } else {
-                // Close filter
-                closeMobileFilterPanel();
-            }
-            
-            console.log('  - mobileFilterOverlay classes after:', mobileFilterOverlay.className);
-            console.log('  - mobileFilterPanel classes after:', mobileFilterPanel.className);
-            console.log('  - body overflow:', document.body.style.overflow);
-        });
-    } else {
-        console.log('🔧 [MOBILE DEBUG] Filter button or overlay not found!');
     }
     
     // Close mobile filter panel
-    function closeMobileFilterPanel() {
-        console.log('🔧 [MOBILE DEBUG] Closing mobile filter panel');
-        console.log('  - mobileFilterPanel classes before:', mobileFilterPanel.className);
-        
+    function closeMobileFilter() {
+        console.log('Closing mobile filter');
+        mobileFilterPanel.classList.remove('show');
         mobileFilterPanel.classList.add('-translate-x-full');
         setTimeout(() => {
             mobileFilterOverlay.classList.add('hidden');
+            mobileFilterOverlay.classList.remove('show');
             document.body.style.overflow = '';
-            
-            // Reset icon to original position
-            mobileFilterBtn.parentElement.classList.remove('filter-open');
-            mobileFilterBtn.title = 'Open Filters';
-            
-            console.log('🔧 [MOBILE DEBUG] Panel closed after timeout');
-            console.log('  - mobileFilterOverlay classes after:', mobileFilterOverlay.className);
-            console.log('  - body overflow:', document.body.style.overflow);
         }, 300);
     }
     
+    // Mobile filter button click
+    mobileFilterBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log('Mobile filter button clicked!');
+        openMobileFilter();
+    });
+    
     // Close on overlay click
-    if (mobileFilterOverlay) {
-        console.log('🔧 [MOBILE DEBUG] Adding click listener to overlay');
         mobileFilterOverlay.addEventListener('click', function(e) {
-            console.log('🔧 [MOBILE DEBUG] Overlay clicked!');
-            console.log('  - e.target:', e.target);
-            console.log('  - mobileFilterOverlay:', mobileFilterOverlay);
-            console.log('  - e.target === mobileFilterOverlay:', e.target === mobileFilterOverlay);
-            
             if (e.target === mobileFilterOverlay) {
-                console.log('🔧 [MOBILE DEBUG] Closing via overlay click');
-                closeMobileFilterPanel();
-            }
-        });
-    } else {
-        console.log('🔧 [MOBILE DEBUG] Overlay not found!');
-    }
+            console.log('Overlay clicked');
+            closeMobileFilter();
+        }
+    });
+    
+    // Close on Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && mobileFilterOverlay.classList.contains('show')) {
+            console.log('Escape key pressed');
+            closeMobileFilter();
+        }
+    });
+    
+    // Set up close button (it's added dynamically)
+    setTimeout(() => {
+        const closeMobileFilters = document.getElementById('close-mobile-filters');
+        if (closeMobileFilters) {
+            closeMobileFilters.addEventListener('click', function(e) {
+                e.preventDefault();
+                console.log('Close button clicked');
+                closeMobileFilter();
+            });
+        }
+    }, 100);
     
     // Sync mobile filters with desktop filters
-    console.log('🔧 [MOBILE DEBUG] Syncing mobile filters with desktop');
     syncMobileFilters();
     
     // Mobile filter event listeners
-    console.log('🔧 [MOBILE DEBUG] Setting up mobile filter event listeners');
     setupMobileFilterListeners();
-    
-    console.log('🔧 [MOBILE DEBUG] Mobile filter initialization complete!');
 }
 
 // Sync mobile filters with desktop filters
 function syncMobileFilters() {
-    console.log('🔧 [MOBILE DEBUG] Starting filter sync...');
-    
     // Sync from desktop to mobile
     const desktopFilters = {
         name: 'restaurant-name-filter',
@@ -1218,23 +2069,13 @@ function syncMobileFilters() {
         featured: 'mobile-featured-only'
     };
     
-    console.log('🔧 [MOBILE DEBUG] Desktop filters:', desktopFilters);
-    console.log('🔧 [MOBILE DEBUG] Mobile filters:', mobileFilters);
-    
     Object.keys(desktopFilters).forEach(key => {
         const desktopEl = document.getElementById(desktopFilters[key]);
         const mobileEl = document.getElementById(mobileFilters[key]);
         
-        console.log(`🔧 [MOBILE DEBUG] Syncing ${key}:`);
-        console.log(`  - desktopEl (${desktopFilters[key]}):`, desktopEl);
-        console.log(`  - mobileEl (${mobileFilters[key]}):`, mobileEl);
-        
         if (desktopEl && mobileEl) {
-            console.log(`  - Setting up sync for ${key}`);
-            
             // Sync desktop to mobile
             desktopEl.addEventListener('input', function() {
-                console.log(`🔧 [MOBILE DEBUG] Desktop ${key} changed:`, this.value || this.checked);
                 if (mobileEl.type === 'checkbox') {
                     mobileEl.checked = this.checked;
                 } else {
@@ -1244,76 +2085,49 @@ function syncMobileFilters() {
             
             // Sync mobile to desktop
             mobileEl.addEventListener('input', function() {
-                console.log(`🔧 [MOBILE DEBUG] Mobile ${key} changed:`, this.value || this.checked);
                 if (desktopEl.type === 'checkbox') {
                     desktopEl.checked = this.checked;
         } else {
                     desktopEl.value = this.value;
                 }
             });
-        } else {
-            console.log(`  - Missing elements for ${key}`);
         }
     });
-    
-    console.log('🔧 [MOBILE DEBUG] Filter sync complete!');
 }
 
 // Setup mobile filter event listeners
 function setupMobileFilterListeners() {
-    console.log('🔧 [MOBILE DEBUG] Setting up mobile filter event listeners...');
-    
     // Mobile search button
     const mobileSearchBtn = document.getElementById('mobile-search-restaurants');
-    console.log('🔧 [MOBILE DEBUG] Mobile search button:', mobileSearchBtn);
     
     if (mobileSearchBtn) {
-        console.log('🔧 [MOBILE DEBUG] Adding click listener to mobile search button');
         mobileSearchBtn.addEventListener('click', function() {
-            console.log('🔧 [MOBILE DEBUG] Mobile search button clicked!');
-            
             // Trigger desktop search
             const desktopSearchBtn = document.getElementById('search-restaurants');
-            console.log('🔧 [MOBILE DEBUG] Desktop search button:', desktopSearchBtn);
             
             if (desktopSearchBtn) {
-                console.log('🔧 [MOBILE DEBUG] Triggering desktop search...');
                 desktopSearchBtn.click();
-            } else {
-                console.log('🔧 [MOBILE DEBUG] Desktop search button not found!');
             }
             
             // Close mobile panel
             const mobileFilterPanel = document.querySelector('.mobile-filter-panel');
             const mobileFilterOverlay = document.getElementById('mobile-filter-overlay');
-            console.log('🔧 [MOBILE DEBUG] Closing mobile panel...');
-            console.log('  - mobileFilterPanel:', mobileFilterPanel);
-            console.log('  - mobileFilterOverlay:', mobileFilterOverlay);
             
             if (mobileFilterPanel && mobileFilterOverlay) {
                 mobileFilterPanel.classList.add('-translate-x-full');
                 setTimeout(() => {
                     mobileFilterOverlay.classList.add('hidden');
                     document.body.style.overflow = '';
-                    console.log('🔧 [MOBILE DEBUG] Mobile panel closed after search');
                 }, 300);
-            } else {
-                console.log('🔧 [MOBILE DEBUG] Mobile panel elements not found for closing!');
             }
         });
-    } else {
-        console.log('🔧 [MOBILE DEBUG] Mobile search button not found!');
     }
     
     // Mobile clear button
     const mobileClearBtn = document.getElementById('mobile-clear-filters');
-    console.log('🔧 [MOBILE DEBUG] Mobile clear button:', mobileClearBtn);
     
     if (mobileClearBtn) {
-        console.log('🔧 [MOBILE DEBUG] Adding click listener to mobile clear button');
         mobileClearBtn.addEventListener('click', function() {
-            console.log('🔧 [MOBILE DEBUG] Mobile clear button clicked!');
-            
             // Clear mobile filters
             const mobileFilters = [
                 'mobile-restaurant-name-filter',
@@ -1328,32 +2142,20 @@ function setupMobileFilterListeners() {
                 if (element) {
                     if (element.type === 'checkbox') {
                         element.checked = false;
-                        console.log(`🔧 [MOBILE DEBUG] Cleared checkbox ${filterId}`);
         } else {
                         element.value = '';
-                        console.log(`🔧 [MOBILE DEBUG] Cleared input ${filterId}`);
                     }
-                } else {
-                    console.log(`🔧 [MOBILE DEBUG] Filter element ${filterId} not found!`);
                 }
             });
             
             // Trigger desktop clear
             const desktopClearBtn = document.getElementById('clear-filters');
-            console.log('🔧 [MOBILE DEBUG] Desktop clear button:', desktopClearBtn);
             
             if (desktopClearBtn) {
-                console.log('🔧 [MOBILE DEBUG] Triggering desktop clear...');
                 desktopClearBtn.click();
-            } else {
-                console.log('🔧 [MOBILE DEBUG] Desktop clear button not found!');
             }
         });
-    } else {
-        console.log('🔧 [MOBILE DEBUG] Mobile clear button not found!');
     }
-    
-    console.log('🔧 [MOBILE DEBUG] Mobile filter event listeners setup complete!');
 }
 
 // Handle tab click
@@ -1361,13 +2163,8 @@ function handleTabClick(e) {
     e.preventDefault();
     e.stopPropagation();
     
-    console.log('🔧 [MOBILE TABS] Tab clicked!', this.id);
-    console.log('🔧 [MOBILE TABS] Event type:', e.type);
-    console.log('🔧 [MOBILE TABS] Current target:', e.currentTarget);
-    
     // Only work on mobile devices
     if (window.innerWidth > 1023) {
-        console.log('🔧 [MOBILE TABS] Desktop detected - tab switching disabled');
         return;
     }
     
@@ -1386,12 +2183,6 @@ function handleTabClick(e) {
     const rightColumn = document.querySelector('.right-column1');
     const tabButtons = document.querySelectorAll('.mobile-tab-btn');
     
-    console.log('🔧 [MOBILE TABS] Tab type:', tabType);
-    console.log('🔧 [MOBILE TABS] VR content:', vrContent);
-    console.log('🔧 [MOBILE TABS] Map content:', mapContent);
-    console.log('🔧 [MOBILE TABS] Left column:', leftColumn);
-    console.log('🔧 [MOBILE TABS] Right column:', rightColumn);
-    
     // Update button states
     tabButtons.forEach(btn => {
         btn.classList.remove('active', 'border-yellow-400', 'bg-yellow-50');
@@ -1403,14 +2194,9 @@ function handleTabClick(e) {
     
     // Show/hide entire columns based on tab (mobile only)
     if (tabType === 'vr') {
-        console.log('🔧 [MOBILE TABS] Showing VR - hiding left column, showing right column');
-        
         // Hide left column (map)
         if (leftColumn) {
             leftColumn.style.setProperty('display', 'none', 'important');
-            console.log('🔧 [MOBILE TABS] Left column hidden');
-        } else {
-            console.log('🔧 [MOBILE TABS] Left column not found!');
         }
         
         // Show right column (VR)
@@ -1420,9 +2206,6 @@ function handleTabClick(e) {
             rightColumn.style.setProperty('opacity', '1', 'important');
             rightColumn.style.setProperty('width', '100%', 'important');
             rightColumn.style.setProperty('flex', '1', 'important');
-            console.log('🔧 [MOBILE TABS] Right column shown');
-        } else {
-            console.log('🔧 [MOBILE TABS] Right column not found!');
         }
         
         // Also show the VR content specifically
@@ -1432,14 +2215,9 @@ function handleTabClick(e) {
             vrContent.style.setProperty('opacity', '1', 'important');
             vrContent.style.setProperty('position', 'relative', 'important');
             vrContent.style.setProperty('z-index', '10', 'important');
-            console.log('🔧 [MOBILE TABS] VR content shown');
-        } else {
-            console.log('🔧 [MOBILE TABS] VR content not found!');
         }
         
     } else if (tabType === 'map') {
-        console.log('🔧 [MOBILE TABS] Showing Map - showing left column, hiding right column');
-        
         // Show left column (map)
         if (leftColumn) {
             leftColumn.style.setProperty('display', 'flex', 'important');
@@ -1447,17 +2225,11 @@ function handleTabClick(e) {
             leftColumn.style.setProperty('opacity', '1', 'important');
             leftColumn.style.setProperty('width', '100%', 'important');
             leftColumn.style.setProperty('flex', '1', 'important');
-            console.log('🔧 [MOBILE TABS] Left column shown');
-        } else {
-            console.log('🔧 [MOBILE TABS] Left column not found!');
         }
         
         // Hide right column (VR)
         if (rightColumn) {
             rightColumn.style.setProperty('display', 'none', 'important');
-            console.log('🔧 [MOBILE TABS] Right column hidden');
-        } else {
-            console.log('🔧 [MOBILE TABS] Right column not found!');
         }
         
         // Also hide the VR content specifically
@@ -1465,17 +2237,12 @@ function handleTabClick(e) {
             vrContent.style.setProperty('display', 'none', 'important');
             vrContent.style.setProperty('visibility', 'hidden', 'important');
             vrContent.style.setProperty('opacity', '0', 'important');
-            console.log('🔧 [MOBILE TABS] VR content hidden');
-        } else {
-            console.log('🔧 [MOBILE TABS] VR content not found!');
         }
     }
 }
 
 // Initialize mobile tab system
 function initializeMobileTabs() {
-    console.log('🔧 [MOBILE TABS] Initializing mobile tab system...');
-    
     // Wait a bit for DOM to be ready
     setTimeout(() => {
         const tabButtons = document.querySelectorAll('.mobile-tab-btn');
@@ -1484,21 +2251,12 @@ function initializeMobileTabs() {
         const leftColumn = document.querySelector('.left-column1');
         const rightColumn = document.querySelector('.right-column1');
         
-        console.log('🔧 [MOBILE TABS] Elements found:');
-        console.log('  - tabButtons:', tabButtons.length);
-        console.log('  - vrContent:', vrContent);
-        console.log('  - mapContent:', mapContent);
-        console.log('  - leftColumn:', leftColumn);
-        console.log('  - rightColumn:', rightColumn);
-        
         if (tabButtons.length === 0) {
-            console.error('🔧 [MOBILE TABS] No tab buttons found!');
             return;
         }
     
         // Set default view to Map on mobile only
         if (window.innerWidth <= 1023) {
-            console.log('🔧 [MOBILE TABS] Setting default Map view on mobile');
             
             // Show left column (map), hide right column (VR) on mobile
             if (leftColumn) {
@@ -1518,7 +2276,6 @@ function initializeMobileTabs() {
             }
         } else {
             // On desktop, ensure both columns are visible
-            console.log('🔧 [MOBILE TABS] Desktop detected - showing both columns');
             if (leftColumn) {
                 leftColumn.style.setProperty('display', 'flex', 'important');
                 leftColumn.style.setProperty('visibility', 'visible', 'important');
@@ -1557,14 +2314,10 @@ function initializeMobileTabs() {
             }
         
         // Add click event listeners to tab buttons
-        console.log('🔧 [MOBILE TABS] Found', tabButtons.length, 'tab buttons');
         
         // Test direct button access
         const vrButton = document.getElementById('mobile-tab-vr');
         const mapButton = document.getElementById('mobile-tab-map');
-        console.log('🔧 [MOBILE TABS] Direct button access:');
-        console.log('  - VR button:', vrButton);
-        console.log('  - Map button:', mapButton);
         
         tabButtons.forEach((button, index) => {
             console.log(`🔧 [MOBILE TABS] Button ${index}:`, button.id, button);
@@ -1635,6 +2388,7 @@ function initializeMobileTabs() {
 // Initialize location detection for distance filtering
 document.addEventListener('DOMContentLoaded', function() {
     const distanceFilter = document.getElementById('distance-filter');
+    const mobileDistanceFilter = document.getElementById('mobile-distance-filter');
     
     // Initialize mobile tab system with a small delay to ensure DOM is ready
     setTimeout(() => {
@@ -1756,13 +2510,41 @@ document.addEventListener('DOMContentLoaded', function() {
                     lat: position.coords.latitude,
                     lng: position.coords.longitude
                 };
-                distanceFilter.disabled = false;
-
+                
+                // Enable desktop distance filter
+                if (distanceFilter) {
+                    distanceFilter.disabled = false;
+                    console.log('✅ Desktop distance filter enabled');
+                }
+                
+                // Enable mobile distance filter
+                if (mobileDistanceFilter) {
+                    mobileDistanceFilter.disabled = false;
+                    console.log('✅ Mobile distance filter enabled');
+                }
             },
             function(error) {
-                distanceFilter.disabled = true;
+                console.log('❌ Geolocation error:', error);
+                
+                // Disable both distance filters on error
+                if (distanceFilter) {
+                    distanceFilter.disabled = true;
+                }
+                if (mobileDistanceFilter) {
+                    mobileDistanceFilter.disabled = true;
+                }
             }
         );
+    } else {
+        console.log('❌ Geolocation not supported');
+        
+        // Disable both distance filters if geolocation not supported
+        if (distanceFilter) {
+            distanceFilter.disabled = true;
+        }
+        if (mobileDistanceFilter) {
+            mobileDistanceFilter.disabled = true;
+        }
     }
 });
 
@@ -1774,8 +2556,14 @@ window.addEventListener('load', function() {
     }, 200);
 });
 
-// Localize script data
+// Syntax validation check
+if (typeof window !== 'undefined') {
+    console.log('✅ Single restaurant JavaScript loaded successfully');
+}
+</script>
+
 <?php
+// Localize script data
 wp_localize_script(
     'lebonresto-single-js',
     'lebonrestoSingle',
@@ -1799,18 +2587,27 @@ wp_localize_script(
             'kmAway' => __('%s km away', 'le-bon-resto'),
             'loadingRestaurants' => __('Loading restaurants...', 'le-bon-resto'),
             'restaurantsFound' => __('%s restaurants found', 'le-bon-resto'),
-            'centerOnCurrent' => __('Center on current restaurant', 'le-bon-resto'),
+            'centerOnCurrent' => __('Centrer sur le restaurant actuel', 'le-bon-resto'),
+            'googleReviews' => __('Avis Google', 'le-bon-resto'),
+            'loadingReviews' => __('Chargement des avis...', 'le-bon-resto'),
+            'noReviews' => __('Aucun avis disponible', 'le-bon-resto'),
+            'reviewsFrom' => __('Avis de %s', 'le-bon-resto'),
         )
     )
 );
+
+// Google Reviews are now loaded directly via PHP for the current restaurant
+// No additional JavaScript loading needed for reviews display
 ?>
-</script>
+
+<!-- DEBUG MARKER: Line reference for JavaScript error debugging -->
 
 <style>
+/* Clean Mobile Filter Panel CSS - No Duplicates */
 /* Main Layout Styles */
 .lebonresto-single-layout {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif !important;
-    background: linear-gradient(135deg, #f9fafb 0%, #e5e7eb 100%) !important;
+    background: linear-gradient(135deg, var(--bg-gray-50) 0%, var(--border-color) 100%) !important;
     min-height: 100vh !important;
 }
 
@@ -1830,8 +2627,8 @@ wp_localize_script(
 #restaurants-map {
     width: 100% !important;
     height: 65vh !important;
-    background-color: rgb(255, 255, 255) !important;
-    border-right: 3px solid #e5e7eb !important;
+    background-color: var(--bg-white) !important;
+    border-right: 3px solid var(--border-color) !important;
     position: relative !important;
     z-index: 1 !important;
 }
@@ -1839,15 +2636,15 @@ wp_localize_script(
 @media (max-width: 1023px) {
     #restaurants-map {
         border-right: none !important;
-        border-bottom: 3px solid rgb(255, 255, 255) !important;
+        border-bottom: 3px solid var(--bg-white) !important;
     }
 }
 
 /* Virtual Tour Section */
 .virtual-tour-section {
     height: 64vh !important;
-    border-bottom: 3px solid rgb(255, 255, 255) !important;
-    background: linear-gradient(135deg, rgb(255, 255, 255) 0%, rgb(255, 255, 255) 100%) !important;
+    border-bottom: 3px solid var(--bg-white) !important;
+    background: linear-gradient(135deg, var(--bg-white) 0%, var(--bg-white) 100%) !important;
     position: relative !important;
     overflow: hidden !important;
 }
@@ -1868,76 +2665,76 @@ wp_localize_script(
 
 /* Filter Form */
 .filter-form {
-    background: linear-gradient(135deg, #ffffff 0%, rgb(255, 255, 255) 100%) !important;
-    border-radius: 16px !important;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1) !important;
+    background: linear-gradient(135deg, var(--bg-white) 0%, var(--bg-white) 100%) !important;
+    border-radius: var(--radius-lg) !important;
+    box-shadow: var(--shadow-lg) !important;
     padding: 20px !important;
-    border: 2px solid rgba(251, 191, 36, 0.1) !important;
+    border: 2px solid rgba(254, 220, 0, 0.1) !important;
 }
 
 .filter-form input,
 .filter-form select {
     height: 48px !important;
-    border: 2px solid rgb(255, 255, 255) !important;
-    border-radius: 12px !important;
+    border: 2px solid var(--border-color) !important;
+    border-radius: var(--radius-lg) !important;
     font-size: 16px !important;
     padding: 12px 16px !important;
-    transition: all 0.3s ease !important;
-    background-color: #ffffff !important;
-    color: #1f2937 !important;
+    transition: var(--transition) !important;
+    background-color: #fdffb9 !important;
+    color: var(--text-primary) !important;
 }
 
 .filter-form input:focus,
 .filter-form select:focus {
-    border-color: #fedc00 !important;
-    box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.1) !important;
+    border-color: var(--primary-color) !important;
+    box-shadow: 0 0 0 3px rgba(254, 220, 0, 0.1) !important;
     outline: none !important;
     transform: translateY(-1px) !important;
 }
 
 .filter-form button {
     height: 48px !important;
-    border-radius: 12px !important;
+    border-radius: var(--radius-lg) !important;
     font-size: 16px !important;
     font-weight: 600 !important;
     padding: 14px 24px !important;
-    transition: all 0.3s ease !important;
+    transition: var(--transition) !important;
     border: none !important;
     cursor: pointer !important;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
+    box-shadow: var(--shadow-md) !important;
 }
 
 #search-restaurants {
-    background: linear-gradient(135deg, #fedc00 0%, #fedc00 100%) !important;
-    color: #1f2937 !important;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-color) 100%) !important;
+    color: var(--text-primary) !important;
     font-weight: 700 !important;
 }
 
 #search-restaurants:hover {
-    background: linear-gradient(135deg, #fedc00 0%, #fedc00 100%) !important;
+    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-dark) 100%) !important;
     transform: translateY(-2px) !important;
-    box-shadow: 0 6px 16px rgba(251, 191, 36, 0.4) !important;
+    box-shadow: 0 6px 16px rgba(254, 220, 0, 0.4) !important;
 }
 
 #clear-filters {
-    background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%) !important;
-    color: #374151 !important;
-    border: 2px solid rgb(255, 255, 255) !important;
+    background: linear-gradient(135deg, var(--bg-gray-100) 0%, var(--border-color) 100%) !important;
+    color: var(--text-secondary) !important;
+    border: 2px solid var(--bg-white) !important;
 }
 
 #clear-filters:hover {
-    background: linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%) !important;
+    background: linear-gradient(135deg, var(--border-color) 0%, var(--border-color) 100%) !important;
     transform: translateY(-1px) !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+    box-shadow: var(--shadow-lg) !important;
 }
 
 /* Restaurant Cards */
 .restaurant-card {
-    background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%) !important;
-    border-radius: 16px !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+    background: linear-gradient(135deg, var(--bg-white) 0%, var(--bg-gray-50) 100%) !important;
+    border-radius: var(--radius-lg) !important;
+    box-shadow: var(--shadow-md) !important;
     margin-bottom: 16px !important;
-    border: 2px solid rgb(255, 255, 255) !important;
+    border: 2px solid var(--bg-white) !important;
     transition: all 0.4s ease !important;
     cursor: pointer !important;
     position: relative !important;
@@ -1946,23 +2743,23 @@ wp_localize_script(
 }
 
 .restaurant-card:hover {
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15) !important;
+    box-shadow: var(--shadow-lg) !important;
     transform: translateY(-4px) scale(1.02) !important;
-    border-color: #fedc00 !important;
+    border-color: var(--primary-color) !important;
 }
 
 
 /* Loading Spinner */
 .loading-spinner {
-    border: 4px solid #f3f4f6 !important;
-    border-top: 4px solid #fedc00 !important;
-    border-right: 4px solid #fedc00 !important;
+    border: 4px solid var(--bg-gray-100) !important;
+    border-top: 4px solid var(--primary-color) !important;
+    border-right: 4px solid var(--primary-color) !important;
     border-radius: 50% !important;
     width: 32px !important;
     height: 32px !important;
     animation: spin 1.2s ease-in-out infinite !important;
     display: inline-block !important;
-    box-shadow: 0 2px 8px rgba(251, 191, 36, 0.3) !important;
+    box-shadow: 0 2px 8px rgba(254, 220, 0, 0.3) !important;
 }
 
 @keyframes spin {
@@ -1973,15 +2770,15 @@ wp_localize_script(
 /* Map Controls */
 #center-current-restaurant {
     padding: 12px 18px !important;
-    background: linear-gradient(135deg, #fedc00 0%, #fedc00 100%) !important;
-    color: #1f2937 !important;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-color) 100%) !important;
+    color: var(--text-primary) !important;
     border: none !important;
-    border-radius: 10px !important;
+    border-radius: var(--radius-md) !important;
     font-size: 14px !important;
     font-weight: 600 !important;
     cursor: pointer !important;
-    transition: all 0.3s ease !important;
-    box-shadow: 0 2px 8px rgba(251, 191, 36, 0.3) !important;
+    transition: var(--transition) !important;
+    box-shadow: 0 2px 8px rgba(254, 220, 0, 0.3) !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -1989,21 +2786,21 @@ wp_localize_script(
 }
 
 #center-current-restaurant:hover {
-    background: linear-gradient(135deg, #fedc00 0%, #fedc00 100%) !important;
+    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-dark) 100%) !important;
     transform: translateY(-2px) !important;
-    box-shadow: 0 4px 16px rgba(251, 191, 36, 0.4) !important;
+    box-shadow: 0 4px 16px rgba(254, 220, 0, 0.4) !important;
 }
 
 #map-results-count {
     background: rgba(255, 255, 255, 0.95) !important;
     backdrop-filter: blur(10px) !important;
     padding: 8px 16px !important;
-    border-radius: 10px !important;
+    border-radius: var(--radius-md) !important;
     font-size: 14px !important;
     font-weight: 600 !important;
-    color: #374151 !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
-    border: 2px solid rgba(251, 191, 36, 0.2) !important;
+    color: var(--text-secondary) !important;
+    box-shadow: var(--shadow-lg) !important;
+    border: 2px solid rgba(254, 220, 0, 0.2) !important;
 }
 
 /* Custom scrollbar */
@@ -2012,17 +2809,17 @@ wp_localize_script(
 }
 
 #restaurants-list::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 3px;
+    background: var(--bg-gray-100);
+    border-radius: var(--radius-sm);
 }
 
 #restaurants-list::-webkit-scrollbar-thumb {
-    background: #fedc00;
-    border-radius: 3px;
+    background: var(--primary-color);
+    border-radius: var(--radius-sm);
 }
 
 #restaurants-list::-webkit-scrollbar-thumb:hover {
-    background: #e6ac00;
+    background: var(--primary-dark);
 }
 
 .current-restaurant-marker {
@@ -2387,12 +3184,12 @@ button:focus {
 }
 
 /* Hide filter on mobile, tablet, and iPad - Show only on desktop */
-.filter-header {
+.filter-header1 {
     display: none !important;
 }
 
 @media (min-width: 1280px) {
-    .filter-header {
+    .filter-header1 {
         display: block !important;
     }
 }
@@ -2488,17 +3285,8 @@ button:focus {
     #restaurants-map[style*="display: none"] {
         display: block !important;
     }
-}
 
-/* Mobile Filter Styles */
-.mobile-filter-toggle {
-    position: fixed;
-    top: 60px;
-    right: 16px;
-    z-index: 50;
-}
-
-.mobile-filter-toggle button {
+.mobile-filter-toggle1 button {
     background: linear-gradient(135deg, #fedc00 0%, #fedc00 100%) !important;
     color: #1f2937 !important;
     padding: 12px !important;
@@ -2510,26 +3298,13 @@ button:focus {
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    width: 48px !important;
+    width: 120px !important;
     height: 48px !important;
     font-size: 18px !important;
     font-weight: bold !important;
 }
 
-/* Fallback filter icon using CSS */
-.mobile-filter-toggle button::before {
-    content: "🔽";
-    display: block;
-    font-size: 18px;
-    font-weight: bold;
-    color: #1f2937;
-}
-
-.mobile-filter-toggle button:hover::before {
-    color: #ffffff;
-}
-
-.mobile-filter-toggle button:hover {
+.mobile-filter-toggle1 button:hover {
     background: linear-gradient(135deg, #fedc00 0%, #fedc00 100%) !important;
     transform: scale(1.05) !important;
     box-shadow: 0 6px 16px rgba(251, 191, 36, 0.6) !important;
@@ -2552,61 +3327,346 @@ button:focus {
     display: none;
 }
 
+/* Mobile Filter Panel - Essential Styles Only */
 .mobile-filter-panel {
-    background: white;
-    height: 100%;
-    width: 320px;
-    align-content: center;
-    transform: translateX(-100%);
-    transition: transform 0.3s ease;
-    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
-    overflow-y: auto;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
 }
 
-.mobile-filter-panel::-webkit-scrollbar {
-    width: 4px;
-}
-
-.mobile-filter-panel::-webkit-scrollbar-track {
-    background: #f1f1f1;
-}
-
-.mobile-filter-panel::-webkit-scrollbar-thumb {
-    background: #fedc00;
-    border-radius: 2px;
+.mobile-filter-panel .space-y-4 > div {
+    margin-bottom: 20px !important;
 }
 
 .mobile-filter-panel input,
 .mobile-filter-panel select {
-    font-size: 14px !important;
-    padding: 8px 12px !important;
+    background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%) !important;
     border: 2px solid #e5e7eb !important;
-    border-radius: 8px !important;
-    transition: all 0.2s ease !important;
+    border-radius: 12px !important;
+    padding: 14px 16px !important;
+    font-size: 15px !important;
+    font-weight: 500 !important;
+    color: #1f2937 !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
 }
 
 .mobile-filter-panel input:focus,
 .mobile-filter-panel select:focus {
-    border-color: #fedc00 !important;
-    box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.1) !important;
     outline: none !important;
+    border-color: #fedc00 !important;
+    box-shadow: 0 0 0 4px rgba(254, 220, 0, 0.15), 0 4px 12px rgba(254, 220, 0, 0.1) !important;
+    background: #ffffff !important;
+    transform: translateY(-1px) !important;
 }
 
-.mobile-filter-panel button {
-    font-size: 14px !important;
-    padding: 12px 16px !important;
-    border-radius: 8px !important;
-    font-weight: 600 !important;
-    transition: all 0.2s ease !important;
-    border: none !important;
+.mobile-filter-panel input::placeholder {
+    color: #9ca3af !important;
+    font-weight: 400 !important;
+}
+
+.mobile-filter-panel select {
+    cursor: pointer !important;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e") !important;
+    background-position: right 12px center !important;
+    background-repeat: no-repeat !important;
+    background-size: 16px !important;
+    padding-right: 40px !important;
+}
+
+.mobile-filter-panel input:hover,
+.mobile-filter-panel select:hover {
+    border-color: #fbbf24 !important;
+    box-shadow: 0 2px 8px rgba(254, 220, 0, 0.1) !important;
+}
+
+.mobile-filter-panel input[type="checkbox"] {
+    width: 20px !important;
+    height: 20px !important;
+    accent-color: #fedc00 !important;
+    margin-right: 12px !important;
     cursor: pointer !important;
 }
 
-.mobile-filter-panel label {
-    font-size: 13px !important;
+.mobile-filter-panel .flex.items-center {
+    padding: 12px 0 !important;
+}
+
+.mobile-filter-panel .flex.items-center span {
+    font-size: 15px !important;
     font-weight: 500 !important;
     color: #374151 !important;
-    margin-bottom: 6px !important;
+}
+
+.mobile-filter-panel button {
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    border-radius: 12px !important;
+    font-size: 14px !important;
+    padding: 16px 20px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+}
+
+.mobile-filter-panel button:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15) !important;
+}
+
+.mobile-filter-panel button:active {
+    transform: translateY(0) !important;
+}
+
+.mobile-filter-panel button[style*="background-color: #fedc00"] {
+    background: linear-gradient(135deg, #fedc00 0%, #f59e0b 100%) !important;
+    color: #1f2937 !important;
+    border: none !important;
+}
+
+.mobile-filter-panel button[style*="background-color: #fedc00"]:hover {
+    background: linear-gradient(135deg, #f59e0b 0%, #fedc00 100%) !important;
+    box-shadow: 0 4px 16px rgba(254, 220, 0, 0.3) !important;
+}
+
+.mobile-filter-panel .bg-gray-200 {
+    background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%) !important;
+    color: #4b5563 !important;
+    border: 2px solid #d1d5db !important;
+}
+
+.mobile-filter-panel .bg-gray-200:hover {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+    color: white !important;
+    border-color: #ef4444 !important;
+}
+
+.mobile-filter-panel .flex.items-center.justify-between {
+    background: linear-gradient(135deg, #fedc00 0%, #f59e0b 100%) !important;
+    padding: 20px !important;
+    border-bottom: 2px solid rgba(0, 0, 0, 0.1) !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 10 !important;
+    display: flex;
+    gap: 170px;
+}
+
+.mobile-filter-panel h3 {
+    color: #1f2937 !important;
+    font-size: 18px !important;
+    font-weight: 700 !important;
+    margin: 0 !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+}
+
+#close-mobile-filters {
+    width: 44px !important;
+    height: 44px !important;
+    border-radius: 50% !important;
+    background: rgba(255, 255, 255, 0.2) !important;
+    border: 2px solid rgba(255, 255, 255, 0.3) !important;
+    color: #1f2937 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    backdrop-filter: blur(10px) !important;
+}
+
+#close-mobile-filters:hover {
+    background: rgba(255, 255, 255, 0.3) !important;
+    border-color: rgba(255, 255, 255, 0.5) !important;
+    transform: scale(1.1) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+}
+
+#close-mobile-filters:active {
+    transform: scale(0.95) !important;
+}
+
+#close-mobile-filters svg {
+    width: 24px !important;
+    height: 24px !important;
+    stroke: currentColor !important;
+    stroke-width: 2.5 !important;
+    fill: none !important;
+}
+
+.mobile-filter-panel .p-4 {
+    padding: 24px !important;
+    background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%) !important;
+}
+
+.mobile-filter-panel .space-y-4 > div {
+    animation: slideInUp 0.3s ease-out !important;
+    animation-fill-mode: both !important;
+}
+
+.mobile-filter-panel .space-y-4 > div:nth-child(1) { animation-delay: 0.1s !important; }
+.mobile-filter-panel .space-y-4 > div:nth-child(2) { animation-delay: 0.15s !important; }
+.mobile-filter-panel .space-y-4 > div:nth-child(3) { animation-delay: 0.2s !important; }
+.mobile-filter-panel .space-y-4 > div:nth-child(4) { animation-delay: 0.25s !important; }
+.mobile-filter-panel .space-y-4 > div:nth-child(5) { animation-delay: 0.3s !important; }
+.mobile-filter-panel .space-y-4 > div:nth-child(6) { animation-delay: 0.35s !important; }
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.mobile-filter-panel::-webkit-scrollbar {
+    width: 6px !important;
+}
+
+.mobile-filter-panel::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05) !important;
+    border-radius: 3px !important;
+}
+
+.mobile-filter-panel::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #fedc00 0%, #f59e0b 100%) !important;
+    border-radius: 3px !important;
+}
+
+.mobile-filter-panel::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #f59e0b 0%, #fedc00 100%) !important;
+}
+
+.mobile-filter-panel .space-y-4 > div {
+    margin-bottom: 20px !important;
+}
+
+.mobile-filter-panel input,
+.mobile-filter-panel select {
+    background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%) !important;
+    border: 2px solid #e5e7eb !important;
+    border-radius: 12px !important;
+    padding: 14px 16px !important;
+    font-size: 15px !important;
+    font-weight: 500 !important;
+    color: #1f2937 !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+}
+
+.mobile-filter-panel input:focus,
+.mobile-filter-panel select:focus {
+    outline: none !important;
+    border-color: #fedc00 !important;
+    box-shadow: 0 0 0 4px rgba(254, 220, 0, 0.15), 0 4px 12px rgba(254, 220, 0, 0.1) !important;
+    background: #ffffff !important;
+    transform: translateY(-1px) !important;
+}
+
+.mobile-filter-panel input::placeholder {
+    color: #9ca3af !important;
+    font-weight: 400 !important;
+}
+
+.mobile-filter-panel select {
+    cursor: pointer !important;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e") !important;
+    background-position: right 12px center !important;
+    background-repeat: no-repeat !important;
+    background-size: 16px !important;
+    padding-right: 40px !important;
+}
+
+.mobile-filter-panel input:hover,
+.mobile-filter-panel select:hover {
+    border-color: #fbbf24 !important;
+    box-shadow: 0 2px 8px rgba(254, 220, 0, 0.1) !important;
+}
+
+/* Checkbox styling */
+.mobile-filter-panel input[type="checkbox"] {
+    width: 20px !important;
+    height: 20px !important;
+    accent-color: #fedc00 !important;
+    margin-right: 12px !important;
+    cursor: pointer !important;
+}
+
+.mobile-filter-panel .flex.items-center {
+    padding: 12px 0 !important;
+}
+
+.mobile-filter-panel .flex.items-center span {
+    font-size: 15px !important;
+    font-weight: 500 !important;
+    color: #374151 !important;
+}
+
+/* Button styling */
+.mobile-filter-panel button {
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    border-radius: 12px !important;
+    font-size: 14px !important;
+    padding: 16px 20px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+}
+
+.mobile-filter-panel button:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15) !important;
+}
+
+.mobile-filter-panel button:active {
+    transform: translateY(0) !important;
+}
+
+/* Apply button specific styling */
+.mobile-filter-panel button[style*="background-color: #fedc00"] {
+    background: linear-gradient(135deg, #fedc00 0%, #f59e0b 100%) !important;
+    color: #1f2937 !important;
+    border: none !important;
+}
+
+.mobile-filter-panel button[style*="background-color: #fedc00"]:hover {
+    background: linear-gradient(135deg, #f59e0b 0%, #fedc00 100%) !important;
+    box-shadow: 0 4px 16px rgba(254, 220, 0, 0.3) !important;
+}
+
+/* Clear button specific styling */
+.mobile-filter-panel .bg-gray-200 {
+    background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%) !important;
+    color: #4b5563 !important;
+    border: 2px solid #d1d5db !important;
+}
+
+.mobile-filter-panel .bg-gray-200:hover {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+    color: white !important;
+    border-color: #ef4444 !important;
+}
+
+/* Mobile Filter Panel Header */
+.mobile-filter-panel .flex.items-center.justify-between {
+    background: linear-gradient(135deg, #fedc00 0%, #f59e0b 100%) !important;
+    padding: 20px !important;
+    border-bottom: 2px solid rgba(0, 0, 0, 0.1) !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 10 !important;
+    display: flex;
+    gap: 170px;
+}
+
+.mobile-filter-panel h3 {
+    color: #1f2937 !important;
+    font-size: 18px !important;
+    font-weight: 700 !important;
+    margin: 0 !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
 }
 
 /* Responsive improvements */
@@ -2638,7 +3698,7 @@ button:focus {
     }
     
     /* Hide desktop filter header on mobile */
-    .filter-header {
+    .filter-header1 {
         display: none !important;
     }
     
@@ -2844,7 +3904,6 @@ button:focus {
     transition: all 0.4s ease !important;
     overflow: hidden !important;
     height: auto !important;
-    min-height: 280px !important;
     width: 100% !important;
     min-width: auto !important;
     max-width: none !important;
@@ -2863,7 +3922,6 @@ button:focus {
 
 /* Card layout for single restaurant page */
 .restaurant-card .card-layout {
-    display: flex !important;
     flex-direction: column !important;
     height: 100% !important;
 }
@@ -2989,8 +4047,255 @@ button:focus {
     color: #059669 !important;
 }
 
+/* Two Column Layout Styles */
+.w-7\/10 {
+    width: 70% !important;
+}
+
+.w-3\/10 {
+    width: 30% !important;
+}
+
+/* Google Reviews Section */
+#google-reviews-container {
+    max-height: 60vh !important;
+    overflow-y: auto !important;
+    padding: 4px !important;
+}
+
+.review-item {
+    background: linear-gradient(135deg, var(--bg-white) 0%, var(--bg-gray-50) 100%) !important;
+    border: 2px solid var(--bg-white) !important;
+    border-radius: var(--radius-lg) !important;
+    padding: 16px !important;
+    margin-bottom: 16px !important;
+    transition: all 0.4s ease !important;
+    box-shadow: var(--shadow-md) !important;
+    position: relative !important;
+    overflow: hidden !important;
+    cursor: pointer !important;
+}
+
+.review-item:hover {
+    box-shadow: var(--shadow-lg) !important;
+    transform: translateY(-4px) scale(1.02) !important;
+    border-color: var(--primary-color) !important;
+}
+
+.review-item::before {
+    content: '' !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: 3px !important;
+    background: linear-gradient(90deg, var(--primary-color) 0%, var(--primary-dark) 100%) !important;
+    opacity: 0 !important;
+    transition: opacity 0.3s ease !important;
+}
+
+.review-item:hover::before {
+    opacity: 1 !important;
+}
+
+.review-header {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    margin-bottom: 12px !important;
+}
+
+.review-author-section {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+}
+
+.review-author-avatar {
+    width: 32px !important;
+    height: 32px !important;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%) !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    color: var(--text-primary) !important;
+    font-weight: 700 !important;
+    font-size: 14px !important;
+    box-shadow: 0 2px 8px rgba(254, 220, 0, 0.3) !important;
+}
+
+.review-author-info {
+    flex: 1 !important;
+}
+
+.review-author {
+    font-weight: 600 !important;
+    color: var(--text-primary) !important;
+    font-size: 14px !important;
+    margin-bottom: 2px !important;
+    line-height: 1.2 !important;
+}
+
+.review-restaurant {
+    color: var(--primary-color) !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+}
+
+.review-rating {
+    display: flex !important;
+    align-items: center !important;
+    gap: 2px !important;
+    margin-bottom: 12px !important;
+}
+
+.review-rating svg {
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1)) !important;
+}
+
+.review-content {
+    margin-bottom: 12px !important;
+}
+
+.review-text {
+    color: var(--text-secondary) !important;
+    font-size: 13px !important;
+    line-height: 1.6 !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 4 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    text-align: justify !important;
+}
+
+.review-footer {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding-top: 8px !important;
+    border-top: 1px solid var(--border-light) !important;
+}
+
+.review-date {
+    color: var(--text-muted) !important;
+    font-size: 11px !important;
+    font-weight: 500 !important;
+}
+
+.review-badge {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%) !important;
+    color: var(--text-primary) !important;
+    font-size: 9px !important;
+    font-weight: 700 !important;
+    padding: 2px 6px !important;
+    border-radius: 12px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    box-shadow: 0 1px 3px rgba(254, 220, 0, 0.3) !important;
+}
+
+/* Reviews container header */
+.reviews-header {
+    background: linear-gradient(135deg, var(--bg-white) 0%, var(--bg-gray-50) 100%) !important;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0 !important;
+    padding: 20px !important;
+    border-bottom: 2px solid var(--border-light) !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 10 !important;
+    backdrop-filter: blur(10px) !important;
+}
+
+.reviews-title {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    margin-bottom: 4px !important;
+}
+
+.reviews-title svg {
+    filter: drop-shadow(0 2px 4px rgba(254, 220, 0, 0.3)) !important;
+}
+
+.reviews-subtitle {
+    color: var(--text-muted) !important;
+    font-size: 12px !important;
+    font-weight: 500 !important;
+}
+
+/* Custom scrollbar for reviews */
+#google-reviews-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+#google-reviews-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+#google-reviews-container::-webkit-scrollbar-thumb {
+    background: #fedc00;
+    border-radius: 3px;
+}
+
+#google-reviews-container::-webkit-scrollbar-thumb:hover {
+    background: #e6c200;
+}
+
+/* Two Column Layout Container */
+.mobile-cards-section {
+    height: calc(100vh - 200px) !important;
+    overflow: hidden !important;
+}
+
+.mobile-cards-section > .flex {
+    height: 100% !important;
+}
+
+/* Left Column (Restaurant Cards) */
+.w-7\/10 {
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+/* Right Column (Reviews) */
+.w-3\/10 {
+    height: 100% !important;
+    max-height: 100% !important;
+}
+
+/* Ensure restaurants container takes remaining space */
+#restaurants-container {
+    flex: 1 !important;
+    overflow-y: auto !important;
+    min-height: 0 !important;
+}
+
 /* Mobile Responsive Fixes */
 @media (max-width: 768px) {
+    /* Stack columns vertically on mobile */
+    .mobile-cards-section .flex {
+        flex-direction: column !important;
+    }
+    
+    .w-7\/10, .w-3\/10 {
+        width: 100% !important;
+        height: auto !important;
+    }
+    
+    /* Hide reviews section on mobile to save space */
+    .w-3\/10 {
+        display: none !important;
+    }
+    
+    .mobile-cards-section {
+        height: auto !important;
+    }
+    
     #restaurants-list {
         padding: 8px !important;
         gap: 10px !important;
